@@ -1,7 +1,8 @@
 // UXA API 서버 — 모든 에이전트는 이 Worker를 거쳐서만 OpenAI를 부른다.
 //   GET  /health         살아 있는지, 비밀값이 등록됐는지 확인
 //   GET  /health/openai  비밀값 키로 OpenAI에 실제로 접속되는지 확인 (토큰 사용 없음, 키 값은 절대 내보내지 않음)
-//   POST /api/chat       { input, instructions?, max_output_tokens? } → { text, model, usage }
+//   POST /api/chat       { input, instructions?, max_output_tokens?, schema? } → { text, model, usage, incomplete }
+//                        schema(JSON Schema)를 주면 그 형식의 JSON 문자열로만 답한다
 
 const MAX_INPUT_CHARS = 20000;
 const MAX_OUTPUT_TOKENS = 4000;
@@ -53,6 +54,9 @@ async function chat(request, env, cors) {
       model: env.OPENAI_MODEL,
       input,
       ...(typeof body.instructions === "string" && { instructions: body.instructions }),
+      ...(body.schema && typeof body.schema === "object" && {
+        text: { format: { type: "json_schema", name: "result", schema: body.schema, strict: true } },
+      }),
       max_output_tokens: Math.min(Number(body.max_output_tokens) || 1000, MAX_OUTPUT_TOKENS),
       reasoning: { effort: "none" },
       store: false,
@@ -71,7 +75,7 @@ async function chat(request, env, cors) {
     .flatMap((item) => item.content || [])
     .filter((c) => c.type === "output_text")
     .map((c) => c.text).join("").trim();
-  return json({ text, model: data.model, usage: data.usage }, 200, cors);
+  return json({ text, model: data.model, usage: data.usage, incomplete: data.status === "incomplete" }, 200, cors);
 }
 
 // 사용할 모델 정보를 조회해 키가 살아 있는지 본다 (생성 요청이 아니라 비용이 들지 않는다)

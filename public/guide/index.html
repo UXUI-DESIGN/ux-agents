@@ -72,13 +72,14 @@
     .settings-top { display: flex; justify-content: space-between; align-items: center; }
     .close-btn { width: 32px; height: 32px; border: 0; border-radius: 8px; background: none; font-size: 20px; color: var(--text-sub); cursor: pointer; }
     .close-btn:hover { background: var(--bg-soft); }
-    .key-saved { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 14px; border-radius: 10px; background: var(--bg-soft); font-size: 14.5px; }
-    .key-saved code { font-family: ui-monospace, Consolas, monospace; letter-spacing: .02em; }
-    .key-row { display: flex; gap: 8px; }
-    .key-row .text-input { flex: 1; min-width: 0; font-family: ui-monospace, Consolas, monospace; }
-    .btn-danger:hover { border-color: var(--danger); color: var(--danger); }
-    .model-info { margin-top: 22px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; font-size: 13.5px; color: var(--text-sub); }
-    .model-info b { color: var(--text); font-family: ui-monospace, Consolas, monospace; }
+    .conn { margin-top: 20px; border: 1px solid var(--line); border-radius: 10px; font-size: 14px; }
+    .conn div { display: flex; justify-content: space-between; gap: 12px; padding: 11px 14px; }
+    .conn div + div { border-top: 1px solid var(--line); }
+    .conn dt { color: var(--text-sub); }
+    .conn dd { text-align: right; font-weight: 600; word-break: break-all; }
+    .conn code { font-family: ui-monospace, Consolas, monospace; font-size: 13px; }
+    .conn .on { color: var(--good); }
+    .conn .off { color: var(--danger); }
     .test-btn { width: 100%; margin-top: 16px; }
     .test-result { display: none; margin-top: 12px; padding: 12px 14px; border-radius: 10px; font-size: 14px; white-space: pre-line; }
     .test-result.show { display: block; }
@@ -178,6 +179,11 @@
     .tag { padding: 4px 10px; border-radius: 999px; background: var(--bg-soft); font-size: 12.5px; color: var(--text-sub); }
     .tag b { color: var(--text); font-weight: 600; }
     .demo-note { margin-top: 14px; padding: 10px 14px; border-radius: 10px; background: #fff8e6; color: #8a5a00; font-size: 13px; }
+    .demo-note.ai { background: var(--accent-soft); color: #3730a3; }
+    .gen-error { display: none; max-width: 420px; margin: 0 auto; padding: 48px 24px; text-align: center; }
+    .gen-error h2 { font-size: 18px; font-weight: 700; }
+    .gen-error p { margin-top: 8px; font-size: 14px; color: var(--text-sub); white-space: pre-line; }
+    .gen-error .row { display: flex; justify-content: center; gap: 8px; margin-top: 20px; }
 
     .toc { display: flex; gap: 4px; padding: 10px 24px; overflow-x: auto; border-bottom: 1px solid var(--line); }
     .toc a { padding: 6px 12px; border-radius: 999px; font-size: 13px; color: var(--text-sub); white-space: nowrap; }
@@ -318,29 +324,20 @@
   <dialog class="settings" id="settings" aria-labelledby="settingsTitle">
     <div class="settings-inner">
       <div class="settings-top">
-        <h2 class="panel-title" id="settingsTitle">AI 연결 설정</h2>
+        <h2 class="panel-title" id="settingsTitle">AI 연결 상태</h2>
         <button class="close-btn" type="button" id="closeSettings" aria-label="닫기">×</button>
       </div>
-      <p class="panel-desc">OpenAI API 키를 붙여 넣으면 이 브라우저에만 저장돼요.</p>
+      <p class="panel-desc">모든 에이전트는 UXA API 서버(Worker)를 거쳐 OpenAI를 불러요.</p>
 
-      <div class="field">
-        <span class="label">OpenAI API 키</span>
-        <div class="key-saved" id="keySaved" hidden>
-          <span>저장됨 <code id="keyMasked"></code></span>
-          <button class="btn btn-sm btn-danger" type="button" id="deleteKey">삭제</button>
-        </div>
-        <form class="key-row" id="keyForm" autocomplete="off">
-          <input class="text-input" id="keyInput" type="password" placeholder="sk-proj-…" spellcheck="false" autocomplete="off" aria-label="OpenAI API 키" />
-          <button class="btn" type="submit">저장</button>
-        </form>
-        <p class="error" id="keyError"></p>
-      </div>
-
-      <div class="model-info">사용 모델 <b>gpt-6-luna</b> · 입력 100만 토큰당 $0.10 / 출력 $0.50</div>
+      <dl class="conn">
+        <div><dt>API 서버</dt><dd><code id="apiBase"></code></dd></div>
+        <div><dt>OpenAI</dt><dd id="connStatus">확인 중…</dd></div>
+        <div><dt>모델</dt><dd><code id="connModel">gpt-6-luna</code></dd></div>
+      </dl>
       <button class="btn test-btn" type="button" id="testBtn">연결 테스트</button>
       <div class="test-result" id="testResult" role="status"></div>
 
-      <p class="security-note">키는 GitHub에 올라가지 않고 이 브라우저의 저장소(localStorage)에만 남아요. 지금은 브라우저가 OpenAI를 바로 부르는 테스트용 방식이니, 공용 PC에서는 쓰고 나서 꼭 삭제해 주세요.</p>
+      <p class="security-note">OpenAI 키는 Cloudflare Worker의 비밀값으로만 보관돼요. 이 페이지와 브라우저에는 키가 없어요.</p>
     </div>
   </dialog>
 
@@ -432,7 +429,15 @@
             </div>
           </div>
           <div class="loading" id="loadingState">
-            <div><div class="spinner"></div>질문을 설계하는 중이에요…</div>
+            <div><div class="spinner"></div>AI가 질문을 설계하는 중이에요…<br /><small>보통 10~30초 걸려요</small></div>
+          </div>
+          <div class="gen-error" id="errorState">
+            <h2>가이드를 만들지 못했어요</h2>
+            <p id="errorMsg"></p>
+            <div class="row">
+              <button class="btn" type="button" id="retryBtn">다시 시도</button>
+              <button class="btn" type="button" id="exampleBtn">예시 가이드 보기</button>
+            </div>
           </div>
           <article class="guide" id="guide"></article>
         </section>
@@ -579,13 +584,31 @@
       return ok;
     }
 
-    function render(d) {
+    // AI가 실패했을 때 보여 줄 예시 질문 (render가 받는 것과 같은 모양)
+    function exampleContent(d) {
+      const t = d.topic;
+      return {
+        source: "example",
+        rqs: d.rqs.length ? d.rqs : SUGGESTED_RQ[d.type](t),
+        warmup: [
+          { q: "간단히 자기소개 부탁드려요. 요즘 평일 하루는 어떻게 흘러가세요?", p: [["그중 가장 바쁜 시간대는 언제예요?", ""]] },
+          { q: `${josa(t, "과/와")} 관련해서 요즘 가장 자주 하시는 일은 뭔가요?`, p: [["예를 들면요?", ""]] },
+        ],
+        blocks: buildBlocks(d.type, t, d.remote),
+        closing: [
+          { q: "오늘 이야기 중에 가장 중요하다고 생각하시는 한 가지는 뭘까요?", p: [] },
+          { q: "제가 미처 여쭙지 못했지만, 꼭 하고 싶은 말씀이 있으세요?", p: [["감사 인사 → 리워드 지급 방법 안내 → 녹음 종료", ""]] },
+        ],
+      };
+    }
+
+    function render(d, c) {
       const t = d.topic;
       const f = FLOW[d.duration];
       const typeName = d.type === "explore" ? "탐색형" : "검증형";
       const suggested = d.rqs.length === 0;
-      const rqs = suggested ? SUGGESTED_RQ[d.type](t) : d.rqs;
-      const blocks = buildBlocks(d.type, t, d.remote);
+      const rqs = c.rqs;
+      const blocks = c.blocks;
 
       // 세션 흐름
       const steps = [
@@ -605,22 +628,19 @@
       const mainMin = f.blocks.reduce((a, b) => a + b, 0);
 
       // 블록별 질문
+      const qHtml = (code, x) => {
+        const probes = x.p.map(([p, why]) => `<li>${esc(p)}${why ? `<span class="why">· ${esc(why)}</span>` : ""}</li>`).join("");
+        return `<div class="q"><p class="q-main"><span class="qn">${code}</span>${esc(x.q)}</p>${probes ? `<ul class="probes">${probes}</ul>` : ""}</div>`;
+      };
       let qn = 0;
       const warmup = `
         <div class="block">
           <div class="block-head"><h4>워밍업</h4><span class="chip">라포 · 퍼널 시작</span><span class="time">${f.warmup}분</span></div>
-          <div class="q"><p class="q-main"><span class="qn">W1</span>간단히 자기소개 부탁드려요. 요즘 평일 하루는 어떻게 흘러가세요?</p>
-            <ul class="probes"><li>그중 가장 바쁜 시간대는 언제예요?</li></ul></div>
-          <div class="q"><p class="q-main"><span class="qn">W2</span>${esc(josa(t, "과/와"))} 관련해서 요즘 가장 자주 하시는 일은 뭔가요?</p>
-            <ul class="probes"><li>예를 들면요?</li></ul></div>
+          ${c.warmup.map((x, i) => qHtml(`W${i + 1}`, x)).join("")}
         </div>`;
       const blockHtml = blocks.map((b, i) => {
-        const rqCode = `RQ${Math.min(i + 1, rqs.length)}`;
-        const qs = b.qs.map((x) => {
-          qn++;
-          const probes = x.p.map(([p, why]) => `<li>${esc(p)}${why ? `<span class="why">· ${esc(why)}</span>` : ""}</li>`).join("");
-          return `<div class="q"><p class="q-main"><span class="qn">Q${qn}</span>${esc(x.q)}</p><ul class="probes">${probes}</ul></div>`;
-        }).join("");
+        const rqCode = `RQ${Math.min(b.rq || i + 1, rqs.length)}`;
+        const qs = b.qs.map((x) => qHtml(`Q${++qn}`, x)).join("");
         return `
           <div class="block">
             <div class="block-head"><h4>블록 ${"ABC"[i]} · ${esc(b.title)}</h4><span class="chip rq">${rqCode}</span><span class="chip">${esc(b.technique)}</span><span class="time">${f.blocks[i]}분</span></div>
@@ -632,9 +652,7 @@
       const closing = `
         <div class="block">
           <div class="block-head"><h4>클로징</h4><span class="chip">마무리</span><span class="time">${f.closing}분</span></div>
-          <div class="q"><p class="q-main"><span class="qn">C1</span>오늘 이야기 중에 가장 중요하다고 생각하시는 한 가지는 뭘까요?</p></div>
-          <div class="q"><p class="q-main"><span class="qn">C2</span>제가 미처 여쭙지 못했지만, 꼭 하고 싶은 말씀이 있으세요?</p>
-            <ul class="probes"><li>감사 인사 → 리워드 지급 방법 안내 → 녹음 종료</li></ul></div>
+          ${c.closing.map((x, i) => qHtml(`C${i + 1}`, x)).join("")}
         </div>`;
 
       // 체크리스트
@@ -708,7 +726,9 @@
             <span class="tag">방식 <b>${d.remote ? "원격(화상)" : "대면"}</b></span>
             <span class="tag">권장 인원 <b>세그먼트당 4~6명</b></span>
           </div>
-          <p class="demo-note">AI 연결 전이라 스킬 형식에 맞춘 예시 가이드를 보여 드려요. 주제·대상·성격·시간·방식은 입력값이 반영됩니다. 파일럿 후 v1.1로 다듬어 쓰세요.</p>
+          ${c.source === "ai"
+            ? `<p class="demo-note ai">AI(${esc(c.model)})가 사용자 인터뷰 스킬 원칙에 맞춰 만든 초안이에요. 유도·이중 질문이 없는지 직접 검수하고, 파일럿 후 v1.1로 다듬어 쓰세요.</p>`
+            : `<p class="demo-note">AI 생성에 실패해 스킬 형식에 맞춘 예시 가이드를 보여 드려요. 주제·대상·성격·시간·방식은 입력값이 반영됩니다.</p>`}
         </header>
         <nav class="toc" aria-label="가이드 목차">
           <a href="#sec-rq">연구 질문</a><a href="#sec-flow">세션 흐름</a><a href="#sec-q">질문</a><a href="#sec-check">체크리스트</a><a href="#sec-consent">동의 안내</a>
@@ -796,22 +816,132 @@
     function setState(state) {
       $("emptyState").style.display = state === "empty" ? "grid" : "none";
       $("loadingState").style.display = state === "loading" ? "grid" : "none";
+      $("errorState").style.display = state === "error" ? "block" : "none";
       $("guide").style.display = state === "done" ? "block" : "none";
+    }
+
+    // ── AI 생성: 질문(연구 질문·블록)만 AI가 만들고, 시간 배분·체크리스트·동의 문구는 스킬 규칙대로 고정 ──
+    const QUESTION = {
+      type: "object", additionalProperties: false, required: ["q", "probes"],
+      properties: {
+        q: { type: "string" },
+        probes: { type: "array", items: {
+          type: "object", additionalProperties: false, required: ["text", "why"],
+          properties: { text: { type: "string" }, why: { type: "string" } },
+        } },
+      },
+    };
+    const GUIDE_SCHEMA = {
+      type: "object", additionalProperties: false, required: ["rqs", "warmup", "blocks", "closing"],
+      properties: {
+        rqs: { type: "array", items: { type: "string" } },
+        warmup: { type: "array", items: QUESTION },
+        blocks: { type: "array", items: {
+          type: "object", additionalProperties: false,
+          required: ["title", "technique", "goal", "rq", "questions", "avoid_bad", "avoid_good"],
+          properties: {
+            title: { type: "string" }, technique: { type: "string" }, goal: { type: "string" },
+            rq: { type: "integer" }, questions: { type: "array", items: QUESTION },
+            avoid_bad: { type: "string" }, avoid_good: { type: "string" },
+          },
+        } },
+        closing: { type: "array", items: QUESTION },
+      },
+    };
+
+    // 사용자 인터뷰 스킬(user-interview.md)의 질문 설계 규칙을 요약한 지시문
+    const GUIDE_INSTRUCTIONS = `당신은 숙련된 UX 리서처입니다. 1:1 반구조화 사용자 인터뷰 가이드의 질문을 한국어로 설계합니다.
+
+설계 순서: 연구 질문(RQ) → 주제 블록 → 메인 질문 → 꼬리 질문. 퍼널 구조(워밍업 → 구체 경험 → 심층 → 마무리)를 지킵니다.
+
+질문 5원칙 (모든 메인·꼬리 질문에 적용):
+1. 개방형으로 묻는다. 예/아니오로 끝나는 질문 금지.
+2. "보통 어떻게 하세요?" 같은 일반화 대신 "가장 최근에 ~했던 때"처럼 과거의 구체적 사건을 묻는다.
+3. 유도하지 않는다. "불편하셨죠?" 금지 → "어떠셨나요?"
+4. 한 문장에 한 가지만 묻는다.
+5. "왜요?"라고 직접 묻지 않고 "어떤 점 때문에 그렇게 하셨어요?"로 우회한다.
+추가 금지: 솔루션 피칭("이런 기능 어때요?"), 미래 행동 예측("쓰시겠어요?").
+
+블록마다 심층 기법 하나를 중심으로 쓴다: 인지적 재연(단계별로 되짚기·판단 근거), 결정적 사건 기법(최악/최고의 한 번), 래더링(속성 → 결과 → 가치), 의사결정 재구성(고민한 후보·영향 요인).
+탐색형: 행동·맥락 재구성 → 페인 포인트·결정적 사건 → 니즈·가치(래더링).
+검증형: 가설을 드러내지 않고 관련 최근 경험 → 가설 점검과 반증 사례 탐색 → 의사결정·현재 대안.
+
+출력 규칙:
+- rqs: 연구 질문 2~3개. 사용자가 준 연구 질문이 있으면 그 문장을 그대로 같은 순서로 넣는다.
+- warmup: 넓고 편한 질문 2개(꼬리 질문 0~1개).
+- blocks: 정확히 3개. title은 12자 안팎, technique은 위 기법 이름, goal은 이 블록에서 얻을 것을 한 문장으로, rq는 연결된 RQ 번호(1부터).
+- 블록마다 메인 질문 2~3개, 메인 질문마다 꼬리 질문 2~3개. 꼬리 질문의 why는 노림수를 2~6자로(예: 트리거, 감정, 판단 근거, 가치, 반증 단서). 없으면 빈 문자열.
+- avoid_bad는 이 블록 주제로 초보자가 하기 쉬운 나쁜 질문, avoid_good은 그걸 고친 좋은 질문.
+- closing: 마무리 질문 2개.
+- 말투는 참가자에게 직접 말하는 부드러운 해요체. 참가자는 "○○님"으로 부른다.`;
+
+    function guidePrompt(d) {
+      return [
+        `연구 주제: ${d.topic}`,
+        d.background && `배경: ${d.background}`,
+        d.rqs.length ? `사용자가 정한 연구 질문:\n${d.rqs.map((q, i) => `${i + 1}. ${q}`).join("\n")}` : "연구 질문: 비어 있음 — 주제와 배경에 맞게 2~3개를 제안해 주세요.",
+        `인터뷰 대상: ${d.target}`,
+        `인터뷰 성격: ${d.type === "explore" ? "탐색형" : "검증형"}`,
+        `세션 시간: ${d.duration}분 (본 질문 블록 ${FLOW[d.duration].blocks.join("·")}분)`,
+        `진행 방식: ${d.remote ? "원격(화상) — 시연은 화면 공유로 요청" : "대면 — 시연은 참가자 기기로 요청"}`,
+      ].filter(Boolean).join("\n");
+    }
+
+    async function generateWithAI(d) {
+      const data = await callApi("/api/chat", {
+        instructions: GUIDE_INSTRUCTIONS,
+        input: guidePrompt(d),
+        schema: GUIDE_SCHEMA,
+        max_output_tokens: 4000,
+      });
+      if (data.incomplete) throw new Error("AI 답이 너무 길어 중간에 끊겼어요. 다시 시도해 주세요.");
+      let g;
+      try { g = JSON.parse(data.text); } catch { throw new Error("AI 답을 읽지 못했어요. 다시 시도해 주세요."); }
+      const toQ = (x) => ({ q: x.q, p: x.probes.map((p) => [p.text, p.why]) });
+      if (g.blocks.length < 3) throw new Error("AI가 질문 블록을 충분히 만들지 못했어요. 다시 시도해 주세요.");
+      return {
+        source: "ai",
+        model: data.model,
+        rqs: d.rqs.length ? d.rqs : g.rqs.slice(0, 3),
+        warmup: g.warmup.map(toQ),
+        blocks: g.blocks.slice(0, 3).map((b) => ({
+          title: b.title, technique: b.technique, goal: b.goal, rq: b.rq,
+          qs: b.questions.map(toQ), avoid: [b.avoid_bad, b.avoid_good],
+        })),
+        closing: g.closing.map(toQ),
+      };
+    }
+
+    let lastInput = null;
+    async function generate(d) {
+      lastInput = d;
+      $("generateBtn").disabled = true;
+      $("generateBtn").textContent = "생성 중…";
+      setState("loading");
+      if (window.matchMedia("(max-width: 960px)").matches) $("loadingState").scrollIntoView({ behavior: "smooth", block: "start" });
+      try {
+        render(d, await generateWithAI(d));
+        setState("done");
+        $("generateBtn").textContent = "가이드 다시 생성";
+      } catch (err) {
+        $("errorMsg").textContent = err.message;
+        setState("error");
+        $("generateBtn").textContent = "가이드 생성";
+      } finally {
+        $("generateBtn").disabled = false;
+      }
     }
 
     $("guideForm").addEventListener("submit", (e) => {
       e.preventDefault();
       const d = readForm();
-      if (!validate(d)) return;
-      $("generateBtn").disabled = true;
-      setState("loading");
-      if (window.matchMedia("(max-width: 960px)").matches) $("loadingState").scrollIntoView({ behavior: "smooth", block: "start" });
-      setTimeout(() => {
-        render(d);
-        setState("done");
-        $("generateBtn").disabled = false;
-        $("generateBtn").textContent = "가이드 다시 생성";
-      }, 900);
+      if (validate(d)) generate(d);
+    });
+    $("retryBtn").addEventListener("click", () => lastInput && generate(lastInput));
+    $("exampleBtn").addEventListener("click", () => {
+      if (!lastInput) return;
+      render(lastInput, exampleContent(lastInput));
+      setState("done");
     });
 
     ["topic", "target"].forEach((id) => $(id).addEventListener("input", () => {
@@ -827,28 +957,43 @@
       ["topic", "target"].forEach((id) => { $(id).classList.remove("invalid"); $(id + "Error").classList.remove("show"); });
     });
 
-    // ── OpenAI 연결 (테스트용: 브라우저에서 바로 호출. 다음 단계에서 Worker 경유로 바꾼다) ──
-    const OPENAI_MODEL = "gpt-6-luna";
-    const KEY_STORAGE = "uxa.openaiKey";
+    // ── UXA API 서버(Worker) 연결. OpenAI 키는 Worker 비밀값에만 있다 ──
+    const API_BASE = "https://uxa-api.kopeakai88.workers.dev";
 
-    function getKey() {
-      try { return localStorage.getItem(KEY_STORAGE) || ""; } catch { return ""; }
+    // 예전 방식으로 브라우저에 저장했던 키가 남아 있으면 지운다
+    try { localStorage.removeItem("uxa.openaiKey"); } catch {}
+
+    async function callApi(path, body) {
+      let res;
+      try {
+        res = await fetch(API_BASE + path, body
+          ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }
+          : undefined);
+      } catch {
+        throw new Error("API 서버에 연결하지 못했어요. 인터넷 연결을 확인해 주세요.");
+      }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `API 서버 오류 (${res.status})`);
+      return data;
     }
-    const maskKey = (key) => key.slice(0, 10) + "••••••••";
 
-    function refreshKeyUI() {
-      const key = getKey();
-      $("keySaved").hidden = !key;
-      $("keyForm").hidden = !!key;
-      $("keyMasked").textContent = key ? maskKey(key) : "";
-      $("statusDot").classList.toggle("on", !!key);
-      $("testBtn").disabled = !key;
-      $("openSettings").title = key ? "API 키 저장됨" : "API 키 미설정";
-    }
-
-    function showKeyError(msg) {
-      $("keyError").textContent = msg;
-      $("keyError").classList.toggle("show", !!msg);
+    async function refreshConnection() {
+      $("connStatus").textContent = "확인 중…";
+      $("connStatus").className = "";
+      try {
+        const data = await callApi("/health/openai");
+        const on = data.openai === "연결됨";
+        $("connStatus").textContent = on ? "연결됨" : `미연결 · ${data.reason || ""}`;
+        $("connStatus").className = on ? "on" : "off";
+        if (data.model) $("connModel").textContent = data.model;
+        $("statusDot").classList.toggle("on", on);
+        $("openSettings").title = on ? "AI 연결됨" : "AI 미연결";
+      } catch (err) {
+        $("connStatus").textContent = `미연결 · ${err.message}`;
+        $("connStatus").className = "off";
+        $("statusDot").classList.remove("on");
+        $("openSettings").title = "AI 미연결";
+      }
     }
 
     function showTest(kind, html) {
@@ -856,81 +1001,30 @@
       $("testResult").innerHTML = html;
     }
 
-    $("openSettings").addEventListener("click", () => { refreshKeyUI(); $("settings").showModal(); });
+    $("apiBase").textContent = API_BASE.replace("https://", "");
+    $("openSettings").addEventListener("click", () => { refreshConnection(); $("settings").showModal(); });
     $("closeSettings").addEventListener("click", () => $("settings").close());
     $("settings").addEventListener("click", (e) => { if (e.target === $("settings")) $("settings").close(); });
 
-    $("keyForm").addEventListener("submit", (e) => {
-      e.preventDefault();
-      const key = $("keyInput").value.trim();
-      $("keyInput").value = "";
-      if (!key.startsWith("sk-") || key.length < 20) { showKeyError("OpenAI API 키는 ‘sk-’로 시작해요. 다시 확인해 주세요."); return; }
-      try { localStorage.setItem(KEY_STORAGE, key); }
-      catch { showKeyError("이 브라우저에서는 저장할 수 없어요. 시크릿 모드인지 확인해 주세요."); return; }
-      showKeyError("");
-      $("testResult").className = "test-result";
-      refreshKeyUI();
-      showToast("키를 저장했어요");
-    });
-
-    $("deleteKey").addEventListener("click", () => {
-      try { localStorage.removeItem(KEY_STORAGE); } catch {}
-      $("testResult").className = "test-result";
-      refreshKeyUI();
-      $("keyInput").focus();
-      showToast("키를 삭제했어요");
-    });
-
-    // Responses API 응답에서 텍스트만 꺼낸다
-    const extractText = (data) => (data.output || [])
-      .filter((item) => item.type === "message")
-      .flatMap((item) => item.content || [])
-      .filter((c) => c.type === "output_text")
-      .map((c) => c.text).join("").trim();
-
-    function describeError(status, data) {
-      const msg = data?.error?.message || "";
-      if (status === 401) return "API 키가 올바르지 않아요. 키를 삭제하고 다시 붙여 넣어 주세요.";
-      if (status === 429) return /quota|billing/i.test(msg) ? "크레딧이 부족해요. OpenAI 결제(Billing) 설정을 확인해 주세요." : "요청이 너무 많아요. 잠시 후 다시 시도해 주세요.";
-      if (status === 404 || data?.error?.code === "model_not_found") return `이 키로는 ${OPENAI_MODEL} 모델을 쓸 수 없어요.`;
-      return `OpenAI 오류 (${status})${msg ? `: ${msg}` : ""}`;
-    }
-
     $("testBtn").addEventListener("click", async () => {
-      const key = getKey();
-      if (!key) return;
       $("testBtn").disabled = true;
       $("testBtn").textContent = "OpenAI에 묻는 중…";
       $("testResult").className = "test-result";
       const started = performance.now();
       try {
-        const res = await fetch("https://api.openai.com/v1/responses", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
-          body: JSON.stringify({
-            model: OPENAI_MODEL,
-            input: "연결 테스트예요. 한국어로 한 문장만, 짧게 인사해 주세요.",
-            reasoning: { effort: "none" },
-            max_output_tokens: 60,
-            store: false,
-          }),
-        });
-        const data = await res.json().catch(() => ({}));
+        const data = await callApi("/api/chat", { input: "연결 테스트예요. 한국어로 한 문장만, 짧게 인사해 주세요.", max_output_tokens: 60 });
         const ms = Math.round(performance.now() - started);
-        if (!res.ok) { showTest("fail", esc(describeError(res.status, data))); return; }
-        const text = extractText(data) || "(빈 응답)";
         const tokens = data.usage ? ` · 토큰 ${data.usage.input_tokens}+${data.usage.output_tokens}` : "";
-        showTest("ok", `연결 성공! OpenAI의 답:\n“${esc(text)}”<span class="meta">${esc(data.model || OPENAI_MODEL)} · ${ms}ms${tokens}</span>`);
-      } catch {
-        // OpenAI는 잘못된 키(401) 응답에 CORS 헤더를 붙이지 않아 브라우저에선 네트워크 오류로만 보인다
-        showTest("fail", "OpenAI에 연결하지 못했어요.\n· API 키가 올바른지 먼저 확인해 주세요. 키가 틀리면 브라우저에서는 이 메시지로만 보여요.\n· 인터넷 연결이나 광고 차단 확장 프로그램도 확인해 주세요.");
+        showTest("ok", `연결 성공! OpenAI의 답:\n“${esc(data.text || "(빈 응답)")}”<span class="meta">${esc(data.model)} · ${ms}ms${tokens}</span>`);
+      } catch (err) {
+        showTest("fail", esc(err.message));
       } finally {
-        $("testBtn").disabled = !getKey();
+        $("testBtn").disabled = false;
         $("testBtn").textContent = "연결 테스트";
       }
     });
 
-    refreshKeyUI();
+    refreshConnection();
   </script>
 </body>
 </html>
