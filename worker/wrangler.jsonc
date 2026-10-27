@@ -1,0 +1,14 @@
+// UXA API 서버 (Cloudflare Worker)
+// OpenAI 키는 여기 쓰지 않는다. `npx wrangler secret put OPENAI_API_KEY`로 비밀값에만 저장한다.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "uxa-api",
+  "main": "src/index.js",
+  "compatibility_date": "2026-10-01",
+  "observability": { "enabled": true },
+  "vars": {
+    // 이 Worker를 부를 수 있는 사이트 주소 (쉼표로 구분)
+    "ALLOWED_ORIGINS": "https://ux-agents.pages.dev,http://localhost:5173",
+    "OPENAI_MODEL": "gpt-6-luna"
+  }
+}
