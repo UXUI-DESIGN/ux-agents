@@ -9,7 +9,7 @@
 //   GET  /api/auth/me     Authorization: Bearer <token> → { user }
 //   /api/guides, /api/guides/:id  내 인터뷰 가이드 목록·저장·열기·덮어쓰기·이름 바꾸기·삭제 (guides.js)
 //   /api/sessions                 내 인터뷰 세션 목록·만들기 (sessions.js)
-//   /api/p/:token[/interviews]    참가자 링크로 세션 정보 보기·인터뷰 시작 (sessions.js)
+//   /api/p/:token[/interviews[/me]] 참가자 링크로 세션 정보 보기·동의하고 시작·다시 열기 (sessions.js)
 
 import { signup, login, logout, me } from "./auth.js";
 import { guides } from "./guides.js";
@@ -56,7 +56,7 @@ async function route(request, env, cors) {
   }
 
   const guidePath = url.pathname.match(/^\/api\/guides(?:\/([^/]+))?$/);
-  const participantPath = url.pathname.match(/^\/api\/p\/([^/]+)(?:\/(interviews))?$/);
+  const participantPath = url.pathname.match(/^\/api\/p\/([^/]+)(?:\/(interviews)(?:\/(me))?)?$/);
   if (url.pathname.startsWith("/api/auth/") || guidePath || participantPath || url.pathname === "/api/sessions") {
     if (!cors["Access-Control-Allow-Origin"]) return json({ error: "허용되지 않은 사이트에서 온 요청이에요." }, 403, cors);
     const reply = (data, status = 200) => json(data, status, cors);
@@ -68,7 +68,7 @@ async function route(request, env, cors) {
     };
     if (guidePath) return guides(request, env, reply, guidePath[1]);
     if (url.pathname === "/api/sessions") return sessions(request, env, reply);
-    if (participantPath) return participant(request, env, reply, participantPath[1], participantPath[2]);
+    if (participantPath) return participant(request, env, reply, participantPath[1], participantPath[2], participantPath[3]);
     const handler = routes[`${request.method} ${url.pathname}`];
     if (handler) return handler(request, env, reply);
   }
@@ -141,7 +141,7 @@ function corsHeaders(request, env) {
   return {
     "Access-Control-Allow-Origin": origin,
     "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Interview-Key",
     "Access-Control-Max-Age": "86400",
     Vary: "Origin",
   };

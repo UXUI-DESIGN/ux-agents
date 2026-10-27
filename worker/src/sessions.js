@@ -4,7 +4,9 @@
 //     POST /api/sessions                 세션 만들기 → { id, token }
 //   참가자(로그인 없음, 링크의 무작위 값으로만 접근):
 //     GET  /api/p/:token                 참가자에게 보여줄 세션 정보 (가이드 내용은 내보내지 않음)
-//     POST /api/p/:token/interviews      들어올 때마다 별도 인터뷰 기록을 만든다 → { interviewId }
+//     POST /api/p/:token/interviews      동의하고 시작 → P코드를 매겨 별도 인터뷰로 기록 → { interview, key }
+//     GET  /api/p/:token/interviews/me   X-Interview-Key로 자기 인터뷰 다시 열기 (새로고침해도 같은 참가자)
+//   닫힌 세션·없는 세션은 모두 '이 인터뷰는 종료되었습니다'
 
 import { currentUser, rateLimit } from "./auth.js";
 
@@ -87,28 +89,92 @@ async function createSession(request, env, json, user) {
 }
 
 // ── 참가자용 ──
-export async function participant(request, env, json, token, sub) {
-  if (!/^[A-Za-z0-9_-]{40,}$/.test(token)) return json(NOT_FOUND, 404);
-  const s = await env.DB.prepare("SELECT id, name, purpose, duration, collect, consent, status FROM interview_sessions WHERE link_token = ?")
-    .bind(token).first();
-  if (!s) return json(NOT_FOUND, 404);
+// 참가자 링크로 할 수 있는 일은 이 세션의 정보 보기·동의·자기 인터뷰 다시 열기뿐이다.
+// 리서처 계정·가이드 원문·다른 세션은 어떤 응답에도 담지 않는다.
 
+// 참가자가 고를 수 있는 답. 모두 '답하고 싶지 않음'을 둔다
+export const COLLECT_CHOICES = {
+  age_group: ["10대", "20대", "30대", "40대", "50대", "60대 이상"],
+  occupation: ["학생", "직장인(사무·전문직)", "직장인(서비스·현장직)", "자영업", "프리랜서", "주부", "구직 중", "기타"],
+  region: ["서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종", "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주", "해외"],
+  usage_period: ["사용해 본 적 없음", "1개월 미만", "1~6개월", "6개월~1년", "1~3년", "3년 이상"],
+  usage_frequency: ["거의 매일", "주 2~3회", "주 1회", "월 1~3회", "그보다 적게"],
+};
+const DECLINE = "답하고 싶지 않음";
+const CONSENT_KEYS = ["record", "anonymous", "withdraw"]; // 대화 기록 저장 · 익명 처리 · 철회 권리
+const ENDED = { error: "이 인터뷰는 종료되었습니다.", code: "ended" };
+
+export async function participant(request, env, json, token, sub, me) {
+  if (!/^[A-Za-z0-9_-]{40,}$/.test(token)) return json(ENDED, 404);
+  const s = await env.DB.prepare("SELECT id, name, purpose, duration, collect, consent, status, guide_snapshot FROM interview_sessions WHERE link_token = ?")
+    .bind(token).first();
+  if (!s || s.status !== "open") return json(ENDED, s ? 410 : 404);
+  const collectKeys = JSON.parse(s.collect);
+
+  // 세션 정보: 주제·목적·시간·동의 문구·받을 항목(선택지)만
   if (!sub && request.method === "GET") {
-    const collect = JSON.parse(s.collect).map((key) => ({ key, label: COLLECT_OPTIONS[key] }));
-    return json({ session: { name: s.name, purpose: s.purpose, duration: s.duration, collect, consent: s.consent, status: s.status } });
+    const snap = JSON.parse(s.guide_snapshot);
+    const topic = snap.source === "guide" ? snap.input?.topic || s.name : s.name;
+    const collect = collectKeys.map((key) => ({ key, label: COLLECT_OPTIONS[key], options: [...COLLECT_CHOICES[key], DECLINE] }));
+    // 세션 이름은 리서처 내부용이라 보내지 않는다
+    return json({ session: { topic, purpose: s.purpose, duration: s.duration, collect, consent: s.consent } });
   }
 
-  if (sub === "interviews" && request.method === "POST") {
-    if (s.status !== "open") return json({ error: "지금은 참여할 수 없는 세션이에요.", code: "closed" }, 409);
+  // 새로고침·다시 열기: 처음 시작할 때 받은 열쇠로 자기 인터뷰만 찾는다
+  if (sub === "interviews" && me && request.method === "GET") {
+    const key = request.headers.get("X-Interview-Key") || "";
+    if (!key) return json({ error: "인터뷰를 찾을 수 없어요.", code: "not_found" }, 404);
+    const row = await env.DB.prepare("SELECT code, status, consented_at FROM interviews WHERE key_hash = ? AND session_id = ?")
+      .bind(await sha256Hex(key), s.id).first();
+    if (!row) return json({ error: "인터뷰를 찾을 수 없어요.", code: "not_found" }, 404);
+    return json({ interview: { code: row.code, status: row.status, consentedAt: row.consented_at } });
+  }
+
+  // 인터뷰 시작: 동의 확인 → 이 세션의 다음 번호로 P코드를 매기고 동의 내용·시각을 저장
+  if (sub === "interviews" && !me && request.method === "POST") {
+    let body;
+    try { body = await request.json(); } catch { return json({ error: "JSON 본문이 필요해요." }, 400); }
+    const consents = body.consents || {};
+    if (!CONSENT_KEYS.every((k) => consents[k] === true)) return json({ error: "모든 항목에 동의해야 시작할 수 있어요.", code: "consent_required" }, 400);
+
+    const input = body.profile && typeof body.profile === "object" ? body.profile : {};
+    const profile = {};
+    for (const key of collectKeys) {
+      const v = input[key];
+      if (![...COLLECT_CHOICES[key], DECLINE].includes(v)) return json({ error: `${COLLECT_OPTIONS[key]}을(를) 골라 주세요.`, field: key }, 400);
+      profile[key] = v;
+    }
+
     const now = Math.floor(Date.now() / 1000);
     const limited = await rateLimit(request, env, json, "interview", "참여", now);
     if (limited) return limited;
+
     const interviewId = crypto.randomUUID();
-    await env.DB.prepare("INSERT INTO interviews (id, session_id, created_at) VALUES (?, ?, ?)").bind(interviewId, s.id, now).run();
-    return json({ interviewId }, 201);
+    const key = randomToken();
+    const consentRecord = JSON.stringify({ ...Object.fromEntries(CONSENT_KEYS.map((k) => [k, true])), text: s.consent });
+    // 번호 매기기와 저장을 한 문장으로: 동시에 들어와도 같은 번호가 나오지 않는다 (UNIQUE(session_id, seq))
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const row = await env.DB.prepare(
+          `INSERT INTO interviews (id, session_id, status, profile, created_at, seq, code, consents, consented_at, key_hash)
+           SELECT ?, ?, 'consented', ?, ?, n, 'P' || printf('%02d', n), ?, ?, ?
+             FROM (SELECT COALESCE(MAX(seq), 0) + 1 AS n FROM interviews WHERE session_id = ?)
+           RETURNING code`
+        ).bind(interviewId, s.id, JSON.stringify(profile), now, consentRecord, now, await sha256Hex(key), s.id).first();
+        return json({ interview: { code: row.code, status: "consented", consentedAt: now }, key }, 201);
+      } catch (err) {
+        if (!/UNIQUE/i.test(String(err))) throw err;
+      }
+    }
+    return json({ error: "잠시 후 다시 시도해 주세요." }, 503);
   }
 
   return json({ error: "없는 경로예요." }, 404);
+}
+
+async function sha256Hex(text) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+  return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 // 32바이트 무작위 값 (base64url, 43자) — 추측할 수 없는 참가자 링크
