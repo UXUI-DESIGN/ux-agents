@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>로그인 · UXA</title>
-  <meta name="description" content="UXA에 로그인합니다." />
+  <meta name="description" content="UXA에 로그인하고 저장한 리서치 작업을 이어서 하세요." />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
   <style>
     :root {
@@ -12,9 +12,12 @@
       --bg-soft: #f6f7fb;
       --text: #14161f;
       --text-sub: #5b6072;
+      --text-faint: #a3a7b7;
       --line: #e4e6ee;
       --accent: #4f46e5;
       --accent-soft: #eef0ff;
+      --danger: #d92d20;
+      --good: #12805c;
       --radius: 16px;
       --max: 1160px;
     }
@@ -28,6 +31,7 @@
       word-break: keep-all;
     }
     a { color: inherit; text-decoration: none; }
+    button, input { font: inherit; color: inherit; }
     .container { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
 
     /* 내비게이션 (랜딩과 동일) */
@@ -50,27 +54,48 @@
       font-size: 14px; font-weight: 500; color: var(--text-sub); white-space: nowrap;
     }
     .menu a:hover { background: var(--accent-soft); color: var(--accent); }
-    .menu a[aria-current="page"] { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
 
     /* 본문 */
-    main { flex: 1; padding: 100px 0; background: var(--bg-soft); }
-    .page-head { text-align: center; margin-bottom: 48px; }
-    .page-head .num {
-      display: inline-grid; place-items: center; width: 44px; height: 44px; margin-bottom: 16px;
-      border-radius: 50%; background: var(--accent); color: #fff; font-weight: 800; font-size: 18px;
+    main { flex: 1; padding: 72px 0 100px; background: var(--bg-soft); }
+    .auth-card { max-width: 440px; margin: 0 auto; padding: 36px 32px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); }
+    .auth-card h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.03em; }
+    .auth-card .sub { margin-top: 6px; font-size: 15px; color: var(--text-sub); }
+
+    .field { margin-top: 22px; }
+    .field > label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+    .input-wrap { position: relative; }
+    .text-input {
+      display: block; width: 100%; padding: 11px 14px;
+      border: 1px solid var(--line); border-radius: 10px; background: #fff;
+      font-size: 15px; transition: border-color .15s, box-shadow .15s;
     }
-    .page-head h1 { font-size: clamp(28px, 4vw, 40px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.3; }
-    .page-head p { margin-top: 12px; font-size: 17px; color: var(--text-sub); }
-    .notice {
-      max-width: 560px; margin: 0 auto; padding: 48px 32px; text-align: center;
-      background: #fff; border: 1px dashed var(--accent); border-radius: var(--radius);
+    .text-input::placeholder { color: var(--text-faint); }
+    .text-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .text-input.invalid { border-color: var(--danger); }
+    .text-input.valid { border-color: var(--good); }
+    .input-wrap .text-input { padding-right: 64px; }
+    .toggle-pw {
+      position: absolute; top: 50%; right: 8px; transform: translateY(-50%);
+      padding: 4px 8px; border: 0; border-radius: 6px; background: none;
+      font-size: 12.5px; font-weight: 600; color: var(--text-sub); cursor: pointer;
     }
-    .notice .badge {
-      display: inline-block; margin-bottom: 16px; padding: 6px 14px; border-radius: 999px;
-      background: var(--accent-soft); color: var(--accent); font-size: 13px; font-weight: 600;
+    .toggle-pw:hover { background: var(--bg-soft); color: var(--accent); }
+
+
+
+    .remember { display: flex; align-items: center; gap: 8px; margin-top: 18px; font-size: 14px; cursor: pointer; }
+    .remember input { width: 17px; height: 17px; accent-color: var(--accent); }
+    .remember small { color: var(--text-faint); }
+    .btn-primary {
+      display: block; width: 100%; margin-top: 24px; padding: 14px; border: 0; border-radius: 10px;
+      background: var(--accent); color: #fff; font-size: 16px; font-weight: 700; cursor: pointer;
     }
-    .notice h2 { font-size: 22px; font-weight: 700; }
-    .notice p { margin-top: 8px; color: var(--text-sub); font-size: 15px; }
+    .btn-primary:hover { background: #4338ca; }
+    .btn-primary:disabled { opacity: .6; cursor: progress; }
+    .form-error { display: none; margin-top: 16px; padding: 12px 14px; border-radius: 10px; background: #fff4f3; color: #7a271a; font-size: 14px; }
+    .form-error.show { display: block; }
+    .switch { margin-top: 20px; text-align: center; font-size: 14px; color: var(--text-sub); }
+    .switch a { color: var(--accent); font-weight: 700; }
 
     /* 푸터 (랜딩과 동일) */
     footer { padding: 40px 0; border-top: 1px solid var(--line); }
@@ -81,12 +106,12 @@
     footer .logo { font-size: 18px; color: var(--text); }
 
     @media (max-width: 640px) {
+      .container { padding: 0 16px; }
       .nav .container { flex-direction: column; align-items: flex-start; height: auto; padding-top: 12px; padding-bottom: 8px; gap: 6px; }
       .nav nav { width: 100%; }
       .menu a { padding: 8px 12px 8px 0; }
-      .menu a[aria-current="page"] { padding-left: 12px; }
-      main { padding: 72px 0; }
-      .notice { padding: 40px 24px; }
+      main { padding: 40px 0 72px; }
+      .auth-card { padding: 28px 20px; }
     }
   </style>
 </head>
@@ -109,15 +134,34 @@
 
   <main>
     <div class="container">
-      <div class="page-head">
+      <form class="auth-card" id="loginForm" novalidate>
         <h1>로그인</h1>
-        <p>이메일과 비밀번호로 로그인합니다.</p>
-      </div>
-      <div class="notice">
-        <span class="badge">Coming soon</span>
-        <h2>준비 중입니다</h2>
-        <p>로그인 기능은 곧 열려요. 아직 계정이 없다면 <a href="../signup/index.html" style="color:var(--accent);font-weight:700">회원가입</a>부터 해 주세요.</p>
-      </div>
+        <p class="sub" id="loginSub">저장한 리서치 작업을 이어서 하려면 로그인해 주세요.</p>
+
+        <div class="field">
+          <label for="email">이메일</label>
+          <input class="text-input" id="email" type="email" autocomplete="username" inputmode="email" maxlength="254"
+            placeholder="예) researcher@company.com" />
+        </div>
+
+        <div class="field">
+          <label for="password">비밀번호</label>
+          <div class="input-wrap">
+            <input class="text-input" id="password" type="password" autocomplete="current-password" maxlength="64"
+              placeholder="비밀번호" />
+            <button class="toggle-pw" type="button" data-target="password" aria-label="비밀번호 보기">보기</button>
+          </div>
+        </div>
+
+        <label class="remember">
+          <input type="checkbox" id="remember" />
+          <span>로그인 상태 유지 <small>· 30일 동안, 공용 PC에서는 끄세요</small></span>
+        </label>
+
+        <button class="btn-primary" type="submit" id="submitBtn">로그인</button>
+        <p class="form-error" id="formError" role="alert"></p>
+        <p class="switch">아직 계정이 없나요? <a href="/signup/" id="signupLink">회원가입</a></p>
+      </form>
     </div>
   </main>
 
@@ -128,5 +172,60 @@
     </div>
   </footer>
 
+  <script src="/js/auth.js"></script>
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    // 로그인 뒤 돌아갈 곳 (없으면 마이페이지). 이미 로그인했으면 바로 보낸다
+    const nextParam = new URLSearchParams(location.search).get("next");
+    const next = UXA.safeNext(nextParam);
+    if (UXA.getSession()) location.replace(next);
+    $("signupLink").href = UXA.signupUrl(next);
+    if (nextParam && next !== "/mypage/") $("loginSub").textContent = "이 화면은 로그인이 필요해요. 로그인하면 보던 화면으로 돌아가요.";
+
+    function showError(msg) {
+      $("formError").textContent = msg;
+      $("formError").classList.add("show");
+    }
+
+    $("password").nextElementSibling.addEventListener("click", (e) => {
+      const show = $("password").type === "password";
+      $("password").type = show ? "text" : "password";
+      e.currentTarget.textContent = show ? "숨기기" : "보기";
+    });
+
+    $("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      $("formError").classList.remove("show");
+      const email = $("email").value.trim();
+      const password = $("password").value;
+      if (!email || !password) { showError("이메일과 비밀번호를 입력해 주세요."); (email ? $("password") : $("email")).focus(); return; }
+
+      $("submitBtn").disabled = true;
+      $("submitBtn").textContent = "로그인하는 중…";
+      try {
+        const res = await fetch(`${UXA.API_BASE}/api/auth/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password, remember: $("remember").checked }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok) {
+          UXA.setSession(data, data.remember);
+          location.href = next;
+          return;
+        }
+        // 이메일과 비밀번호 중 무엇이 틀렸는지는 구분하지 않는다
+        showError(data.code === "invalid_credentials" ? "이메일 또는 비밀번호를 확인해 주세요." : data.error || `로그인하지 못했어요. (${res.status})`);
+        $("password").value = "";
+        $("password").focus();
+      } catch {
+        showError("서버에 연결하지 못했어요. 인터넷 연결을 확인해 주세요.");
+      } finally {
+        $("submitBtn").disabled = false;
+        $("submitBtn").textContent = "로그인";
+      }
+    });
+  </script>
 </body>
 </html>

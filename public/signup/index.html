@@ -212,7 +212,7 @@
 
         <button class="btn-primary" type="submit" id="submitBtn">가입하기</button>
         <p class="form-error" id="formError" role="alert"></p>
-        <p class="switch">이미 계정이 있나요? <a href="../login/index.html">로그인</a></p>
+        <p class="switch">이미 계정이 있나요? <a href="/login/" id="loginLink">로그인</a></p>
       </form>
     </div>
   </main>
@@ -224,10 +224,15 @@
     </div>
   </footer>
 
+  <script src="/js/auth.js"></script>
   <script>
-    const API_BASE = "https://uxa-api.kopeakai88.workers.dev";
-    const SESSION_KEY = "uxa.session";
     const $ = (id) => document.getElementById(id);
+
+    // 로그인 뒤 돌아갈 곳 (없으면 마이페이지). 이미 로그인했으면 바로 보낸다
+    const next = UXA.safeNext(new URLSearchParams(location.search).get("next"));
+    if (UXA.getSession()) location.replace(next);
+    const loginHref = UXA.loginUrl(next);
+    $("loginLink").href = loginHref;
 
     // Worker(auth.js)의 비밀번호 규칙과 같다
     const RULES = {
@@ -325,7 +330,7 @@
       $("submitBtn").disabled = true;
       $("submitBtn").textContent = "가입하는 중…";
       try {
-        const res = await fetch(`${API_BASE}/api/auth/signup`, {
+        const res = await fetch(`${UXA.API_BASE}/api/auth/signup`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -337,12 +342,12 @@
         });
         const data = await res.json().catch(() => ({}));
         if (res.ok) {
-          try { localStorage.setItem(SESSION_KEY, data.token); } catch {}
-          location.href = "../mypage/index.html";
+          UXA.setSession(data, true);
+          location.href = next;
           return;
         }
         if (data.code === "email_exists") {
-          setMsg("emailMsg", "error", `이미 가입된 이메일입니다. 로그인해 주세요. <a href="../login/index.html">로그인하기</a>`);
+          setMsg("emailMsg", "error", `이미 가입된 이메일입니다. 로그인해 주세요. <a href="${loginHref}">로그인하기</a>`);
           mark($("email"), "invalid");
           $("email").focus();
         } else if (data.field && $(data.field + "Msg")) {

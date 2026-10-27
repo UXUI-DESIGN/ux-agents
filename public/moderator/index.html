@@ -70,6 +70,11 @@
       background: var(--accent-soft); color: var(--accent); font-size: 13px; font-weight: 600;
     }
     .notice h2 { font-size: 22px; font-weight: 700; }
+    .notice .start {
+      display: inline-block; margin-top: 20px; padding: 12px 22px; border-radius: 10px;
+      background: var(--accent); color: #fff; font-size: 15px; font-weight: 700;
+    }
+    .notice .start:hover { background: #4338ca; }
     .notice p { margin-top: 8px; color: var(--text-sub); font-size: 15px; }
 
     /* 푸터 (랜딩과 동일) */
@@ -118,6 +123,7 @@
         <span class="badge">Coming soon</span>
         <h2>준비 중입니다</h2>
         <p>이 에이전트는 현재 개발 중이에요. 곧 만나보실 수 있습니다.</p>
+        <a class="start" href="/moderator/new/">세션 만들기</a>
       </div>
     </div>
   </main>
@@ -129,5 +135,6 @@
     </div>
   </footer>
 
+  <script src="/js/auth.js"></script>
 </body>
 </html>

@@ -219,6 +219,9 @@
     .script + .script-label { margin-top: 20px; }
     .script-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 14px; font-weight: 700; }
     .btn-sm { padding: 5px 10px; font-size: 12.5px; border-radius: 8px; }
+    .btn-save { border-color: var(--accent); background: var(--accent); color: #fff; }
+    .btn-save:hover { background: #4338ca; color: #fff; }
+    .btn-save:disabled { opacity: .7; cursor: default; }
     .script .fill { color: var(--accent); font-weight: 600; }
 
     .toast {
@@ -397,6 +400,7 @@
 
   <div class="toast" id="toast" role="status"></div>
 
+  <script src="/js/auth.js"></script>
   <script>
     const $ = (id) => document.getElementById(id);
     const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -659,6 +663,7 @@
               <h2>${esc(t)}</h2>
             </div>
             <div class="actions">
+              <button class="btn btn-sm btn-save" type="button" id="saveBtn">저장</button>
               <button class="btn btn-sm" type="button" data-copy="all">전체 복사</button>
               <button class="btn btn-sm" type="button" onclick="window.print()">인쇄</button>
             </div>
@@ -742,6 +747,8 @@
       $("guide").querySelectorAll("[data-copy]").forEach((btn) => {
         btn.addEventListener("click", () => copy(texts[btn.dataset.copy]));
       });
+      current = { d, c };
+      $("saveBtn").addEventListener("click", saveGuide);
     }
 
     async function copy(text) {
@@ -899,6 +906,63 @@
       $("target").value = "최근 3개월 안에 온라인 장보기를 해 본 20~30대 1인 가구";
       ["topic", "target"].forEach((id) => { $(id).classList.remove("invalid"); $(id + "Error").classList.remove("show"); });
     });
+
+    // ── 가이드 저장: 만드는 건 로그인 없이, 저장할 때만 로그인 ──
+    // 로그인하러 다녀오는 동안 만든 가이드를 잃지 않게 이 탭의 sessionStorage에 잠시 맡겨 둔다
+    const PENDING_KEY = "uxa.pendingGuide";
+    let current = null;
+
+    async function saveGuide() {
+      if (!current) return;
+      if (!UXA.getSession()) return goLoginToSave();
+      const btn = $("saveBtn");
+      btn.disabled = true;
+      btn.textContent = "저장 중…";
+      try {
+        const { res, data } = await UXA.api("/api/guides", {
+          method: "POST",
+          body: { title: current.d.topic, input: current.d, content: current.c },
+        });
+        if (res.status === 401) { UXA.clearSession(); return goLoginToSave(); }
+        if (!res.ok) throw new Error(data.error || `저장하지 못했어요. (${res.status})`);
+        btn.textContent = "저장됨 ✓";
+        showToast("가이드를 저장했어요. 마이페이지에서 볼 수 있어요.");
+      } catch (err) {
+        btn.disabled = false;
+        btn.textContent = "저장";
+        showToast(err.message.startsWith("저장") ? err.message : "서버에 연결하지 못해 저장하지 못했어요.");
+      }
+    }
+
+    function goLoginToSave() {
+      try { sessionStorage.setItem(PENDING_KEY, JSON.stringify(current)); } catch {}
+      location.href = UXA.loginUrl("/guide/?resume=save");
+    }
+
+    function fillForm(d) {
+      $("topic").value = d.topic;
+      $("background").value = d.background;
+      $("rq").value = d.rqs.join("\n");
+      $("target").value = d.target;
+      document.querySelector(`input[name=type][value=${d.type}]`).checked = true;
+      document.querySelector(`input[name=duration][value="${d.duration}"]`).checked = true;
+      document.querySelector(`input[name=mode][value=${d.remote ? "remote" : "offline"}]`).checked = true;
+    }
+
+    // 로그인하고 돌아왔으면 맡겨 둔 가이드를 다시 그리고 바로 저장한다
+    (() => {
+      let pending = null;
+      try { pending = JSON.parse(sessionStorage.getItem(PENDING_KEY) || "null"); sessionStorage.removeItem(PENDING_KEY); } catch {}
+      if (!pending || !pending.d || !pending.c) return;
+      fillForm(pending.d);
+      lastInput = pending.d;
+      render(pending.d, pending.c);
+      setState("done");
+      $("generateBtn").textContent = "가이드 다시 생성";
+      const resume = new URLSearchParams(location.search).get("resume");
+      history.replaceState(null, "", location.pathname);
+      if (resume === "save" && UXA.getSession()) saveGuide();
+    })();
 
     // ── UXA API 서버(Worker) 연결. OpenAI 키는 Worker 비밀값에만 있다 ──
     const API_BASE = "https://uxa-api.kopeakai88.workers.dev";

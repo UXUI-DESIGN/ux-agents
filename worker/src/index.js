@@ -3,10 +3,14 @@
 //   GET  /health/openai  비밀값 키로 OpenAI에 실제로 접속되는지 확인 (토큰 사용 없음, 키 값은 절대 내보내지 않음)
 //   POST /api/chat       { input, instructions?, max_output_tokens?, schema? } → { text, model, usage, incomplete }
 //                        schema(JSON Schema)를 주면 그 형식의 JSON 문자열로만 답한다
-//   POST /api/auth/signup { email, password, name, agree } → { token, user }
+//   POST /api/auth/signup { email, password, name, agree } → { token, user, remember }
+//   POST /api/auth/login  { email, password, remember } → { token, user, remember }
+//   POST /api/auth/logout Authorization: Bearer <token> → { ok }
 //   GET  /api/auth/me     Authorization: Bearer <token> → { user }
+//   POST /api/guides      Authorization: Bearer <token>, { title, input, content } → { id }
 
-import { signup, me } from "./auth.js";
+import { signup, login, logout, me } from "./auth.js";
+import { saveGuide } from "./guides.js";
 
 const MAX_INPUT_CHARS = 20000;
 const MAX_OUTPUT_TOKENS = 4000;
@@ -48,11 +52,18 @@ async function route(request, env, cors) {
     return chat(request, env, cors);
   }
 
-  if (url.pathname.startsWith("/api/auth/")) {
+  if (url.pathname.startsWith("/api/auth/") || url.pathname === "/api/guides") {
     if (!cors["Access-Control-Allow-Origin"]) return json({ error: "허용되지 않은 사이트에서 온 요청이에요." }, 403, cors);
     const reply = (data, status = 200) => json(data, status, cors);
-    if (url.pathname === "/api/auth/signup" && request.method === "POST") return signup(request, env, reply);
-    if (url.pathname === "/api/auth/me" && request.method === "GET") return me(request, env, reply);
+    const routes = {
+      "POST /api/auth/signup": signup,
+      "POST /api/auth/login": login,
+      "POST /api/auth/logout": logout,
+      "GET /api/auth/me": me,
+      "POST /api/guides": saveGuide,
+    };
+    const handler = routes[`${request.method} ${url.pathname}`];
+    if (handler) return handler(request, env, reply);
   }
 
   return json({ error: "없는 경로예요." }, 404, cors);
