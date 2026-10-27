@@ -219,6 +219,26 @@
     .script + .script-label { margin-top: 20px; }
     .script-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 14px; font-weight: 700; }
     .btn-sm { padding: 5px 10px; font-size: 12.5px; border-radius: 8px; }
+    .editable { border-radius: 4px; outline: none; cursor: text; transition: background .15s, box-shadow .15s; }
+    .editable:hover { background: var(--accent-soft); }
+    .editable:focus { background: #fff; box-shadow: 0 0 0 2px var(--accent); }
+    .q-main .editable { flex: 1; }
+    .edit-hint { margin-top: 10px; font-size: 13px; color: var(--text-sub); }
+    .edit-hint b { color: var(--accent); font-weight: 600; }
+    .saved-as { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: #ecfdf3; color: var(--good); font-size: 12px; font-weight: 600; }
+    .saved-as:empty { display: none; }
+
+    .save-dialog { width: min(440px, calc(100vw - 32px)); margin: auto; padding: 0; border: 0; border-radius: var(--radius); box-shadow: 0 20px 60px rgba(20, 22, 31, .2); }
+    .save-dialog::backdrop { background: rgba(20, 22, 31, .4); }
+    .save-dialog form { padding: 28px 24px 22px; }
+    .save-dialog h2 { font-size: 19px; font-weight: 700; }
+    .save-dialog .desc { margin-top: 4px; font-size: 14px; color: var(--text-sub); }
+    .save-dialog label { display: block; margin: 20px 0 8px; font-size: 14px; font-weight: 600; }
+    .save-dialog .save-note { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: var(--accent-soft); color: #3730a3; font-size: 13px; }
+    .save-dialog .save-note:empty { display: none; }
+    .save-dialog .row { display: flex; justify-content: flex-end; gap: 8px; margin-top: 22px; }
+    .btn-accent { border-color: var(--accent); background: var(--accent); color: #fff; }
+    .btn-accent:hover { background: #4338ca; color: #fff; }
     .btn-save { border-color: var(--accent); background: var(--accent); color: #fff; }
     .btn-save:hover { background: #4338ca; color: #fff; }
     .btn-save:disabled { opacity: .7; cursor: default; }
@@ -400,6 +420,23 @@
 
   <div class="toast" id="toast" role="status"></div>
 
+  <dialog class="save-dialog" id="saveDialog" aria-labelledby="saveDialogTitle">
+    <form id="saveForm" novalidate>
+      <h2 id="saveDialogTitle">마이페이지에 저장</h2>
+      <p class="desc">저장한 가이드는 마이페이지에서 다시 열어 고칠 수 있어요.</p>
+      <label for="saveTitle">가이드 제목</label>
+      <input class="text-input" id="saveTitle" type="text" maxlength="100" autocomplete="off" />
+      <p class="error" id="saveTitleError">제목을 적어 주세요.</p>
+      <p class="save-note" id="saveNote"></p>
+      <div class="row">
+        <button class="btn" type="button" id="saveCancel">취소</button>
+        <button class="btn" type="submit" value="new" id="saveAsNew" hidden>새로 저장</button>
+        <button class="btn btn-accent" type="submit" value="overwrite" id="saveOverwrite" hidden>덮어쓰기</button>
+        <button class="btn btn-accent" type="submit" value="new" id="saveNew">저장</button>
+      </div>
+    </form>
+  </dialog>
+
   <script src="/js/auth.js"></script>
   <script>
     const $ = (id) => document.getElementById(id);
@@ -575,23 +612,25 @@
       const mainMin = f.blocks.reduce((a, b) => a + b, 0);
 
       // 블록별 질문
-      const qHtml = (code, x) => {
-        const probes = x.p.map(([p, why]) => `<li>${esc(p)}${why ? `<span class="why">· ${esc(why)}</span>` : ""}</li>`).join("");
-        return `<div class="q"><p class="q-main"><span class="qn">${code}</span>${esc(x.q)}</p>${probes ? `<ul class="probes">${probes}</ul>` : ""}</div>`;
+      // data-edit는 content 안의 위치. 저장할 때 화면에서 고친 글을 그 자리에 되돌려 넣는다
+      const ed = (path, text) => `<span class="editable" contenteditable="plaintext-only" spellcheck="false" data-edit="${path}">${esc(text)}</span>`;
+      const qHtml = (code, x, path) => {
+        const probes = x.p.map(([p, why], j) => `<li>${ed(`${path}.p.${j}.0`, p)}${why ? `<span class="why">· ${esc(why)}</span>` : ""}</li>`).join("");
+        return `<div class="q"><p class="q-main"><span class="qn">${code}</span>${ed(`${path}.q`, x.q)}</p>${probes ? `<ul class="probes">${probes}</ul>` : ""}</div>`;
       };
       let qn = 0;
       const warmup = `
         <div class="block">
           <div class="block-head"><h4>워밍업</h4><span class="chip">라포 · 퍼널 시작</span><span class="time">${f.warmup}분</span></div>
-          ${c.warmup.map((x, i) => qHtml(`W${i + 1}`, x)).join("")}
+          ${c.warmup.map((x, i) => qHtml(`W${i + 1}`, x, `warmup.${i}`)).join("")}
         </div>`;
       const blockHtml = blocks.map((b, i) => {
         const rqCode = `RQ${Math.min(b.rq || i + 1, rqs.length)}`;
-        const qs = b.qs.map((x) => qHtml(`Q${++qn}`, x)).join("");
+        const qs = b.qs.map((x, j) => qHtml(`Q${++qn}`, x, `blocks.${i}.qs.${j}`)).join("");
         return `
           <div class="block">
-            <div class="block-head"><h4>블록 ${"ABC"[i]} · ${esc(b.title)}</h4><span class="chip rq">${rqCode}</span><span class="chip">${esc(b.technique)}</span><span class="time">${f.blocks[i]}분</span></div>
-            <p class="block-goal">${esc(b.goal)}</p>
+            <div class="block-head"><h4>블록 ${"ABC"[i]} · ${ed(`blocks.${i}.title`, b.title)}</h4><span class="chip rq">${rqCode}</span><span class="chip">${esc(b.technique)}</span><span class="time">${f.blocks[i]}분</span></div>
+            <p class="block-goal">${ed(`blocks.${i}.goal`, b.goal)}</p>
             ${qs}
             <p class="avoid"><b>피할 질문</b> “${esc(b.avoid[0])}” → <span class="ok">이렇게</span> “${esc(b.avoid[1])}”</p>
           </div>`;
@@ -599,7 +638,7 @@
       const closing = `
         <div class="block">
           <div class="block-head"><h4>클로징</h4><span class="chip">마무리</span><span class="time">${f.closing}분</span></div>
-          ${c.closing.map((x, i) => qHtml(`C${i + 1}`, x)).join("")}
+          ${c.closing.map((x, i) => qHtml(`C${i + 1}`, x, `closing.${i}`)).join("")}
         </div>`;
 
       // 체크리스트
@@ -659,11 +698,11 @@
         <header class="guide-head">
           <div class="top">
             <div>
-              <p class="eyebrow">${typeName} · 반구조화 인터뷰 가이드 v1.0</p>
+              <p class="eyebrow">${typeName} · 반구조화 인터뷰 가이드 v1.0<span class="saved-as" id="savedAs"></span></p>
               <h2>${esc(t)}</h2>
             </div>
             <div class="actions">
-              <button class="btn btn-sm btn-save" type="button" id="saveBtn">저장</button>
+              <button class="btn btn-sm btn-save" type="button" id="saveBtn">마이페이지에 저장</button>
               <button class="btn btn-sm" type="button" data-copy="all">전체 복사</button>
               <button class="btn btn-sm" type="button" onclick="window.print()">인쇄</button>
             </div>
@@ -677,6 +716,7 @@
           ${c.source === "ai"
             ? `<p class="demo-note ai">AI(${esc(c.model)})가 사용자 인터뷰 스킬 원칙에 맞춰 만든 초안이에요. 유도·이중 질문이 없는지 직접 검수하고, 파일럿 후 v1.1로 다듬어 쓰세요.</p>`
             : `<p class="demo-note">AI 생성에 실패해 스킬 형식에 맞춘 예시 가이드를 보여 드려요. 주제·대상·성격·시간·방식은 입력값이 반영됩니다.</p>`}
+          <p class="edit-hint"><b>바로 고치기</b> 연구 질문·블록 제목·질문·꼬리 질문을 눌러 고칠 수 있어요. 고친 내용 그대로 저장돼요.</p>
         </header>
         <nav class="toc" aria-label="가이드 목차">
           <a href="#sec-rq">연구 질문</a><a href="#sec-flow">세션 흐름</a><a href="#sec-q">질문</a><a href="#sec-check">체크리스트</a><a href="#sec-consent">동의 안내</a>
@@ -684,7 +724,7 @@
 
         <section class="sec" id="sec-rq">
           <div class="sec-head"><span class="n">01</span><h3>연구 질문</h3>${suggested ? '<span class="ai-chip">AI 제안</span>' : ""}</div>
-          <ul class="rq-list">${rqs.map((q, i) => `<li><span class="code">RQ${i + 1}</span><span>${esc(q)}</span></li>`).join("")}</ul>
+          <ul class="rq-list">${rqs.map((q, i) => `<li><span class="code">RQ${i + 1}</span>${ed(`rqs.${i}`, q)}</li>`).join("")}</ul>
           ${rqs.length > 3 ? `<p class="warn">연구 질문이 ${rqs.length}개예요. “다 물어보기”는 실패의 지름길 — 2~3개로 줄이는 걸 권해요.</p>` : ""}
           ${d.background ? `<p class="pre-note">배경: ${esc(d.background)}</p>` : ""}
         </section>
@@ -730,10 +770,10 @@
         </section>`;
 
       // 복사용 평문
-      const plain = [
+      const plain = () => [
         `# ${t} — ${typeName} 인터뷰 가이드 v1.0`,
         `대상: ${d.target} / ${d.duration}분 / ${d.remote ? "원격" : "대면"}`,
-        "", "## 연구 질문", ...rqs.map((q, i) => `RQ${i + 1}. ${q}`),
+        "", "## 연구 질문", ...collectContent().rqs.map((q, i) => `RQ${i + 1}. ${q}`),
         "", "## 세션 흐름", ...steps.map((s) => `- ${s.name} ${s.min}분`),
         "", "## 질문",
         ...[...$("guide").querySelectorAll(".block")].flatMap((b) => [
@@ -745,10 +785,17 @@
       ].join("\n");
       const texts = { all: plain, script, form: consentForm };
       $("guide").querySelectorAll("[data-copy]").forEach((btn) => {
-        btn.addEventListener("click", () => copy(texts[btn.dataset.copy]));
+        btn.addEventListener("click", () => copy(typeof texts[btn.dataset.copy] === "function" ? texts[btn.dataset.copy]() : texts[btn.dataset.copy]));
       });
       current = { d, c };
-      $("saveBtn").addEventListener("click", saveGuide);
+      $("saveBtn").addEventListener("click", openSaveDialog);
+      $("guide").querySelectorAll("[data-edit]").forEach((el) => {
+        el.addEventListener("input", markUnsaved);
+        // 한 줄짜리라 Enter는 줄바꿈 대신 고치기 끝내기
+        el.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); el.blur(); } });
+        el.addEventListener("blur", () => { if (!el.textContent.trim()) el.textContent = valueAt(current.c, el.dataset.edit); });
+      });
+      updateSavedAs();
     }
 
     async function copy(text) {
@@ -907,61 +954,151 @@
       ["topic", "target"].forEach((id) => { $(id).classList.remove("invalid"); $(id + "Error").classList.remove("show"); });
     });
 
-    // ── 가이드 저장: 만드는 건 로그인 없이, 저장할 때만 로그인 ──
-    // 로그인하러 다녀오는 동안 만든 가이드를 잃지 않게 이 탭의 sessionStorage에 잠시 맡겨 둔다
+    // ── 마이페이지에 저장: 만드는 건 로그인 없이, 저장할 때만 로그인 ──
+    // 로그인하러 다녀오는 동안 만든 가이드(고친 내용 포함)를 잃지 않게 이 탭의 sessionStorage에 잠시 맡겨 둔다
     const PENDING_KEY = "uxa.pendingGuide";
-    let current = null;
+    let current = null; // { d: 입력값, c: 화면에 그린 내용 }
+    let editing = null; // { id, title } 마이페이지에서 불러왔거나 방금 저장한 가이드
 
-    async function saveGuide() {
+    const valueAt = (obj, path) => path.split(".").reduce((o, k) => o?.[k], obj) ?? "";
+
+    // 화면에서 고친 글을 반영한 content
+    function collectContent() {
+      const c = structuredClone(current.c);
+      $("guide").querySelectorAll("[data-edit]").forEach((el) => {
+        const keys = el.dataset.edit.split(".");
+        const parent = keys.slice(0, -1).reduce((o, k) => o[k], c);
+        const text = el.textContent.replace(/\s+/g, " ").trim();
+        if (text) parent[keys.at(-1)] = text;
+      });
+      return c;
+    }
+
+    function markUnsaved() {
+      $("saveBtn").disabled = false;
+      $("saveBtn").textContent = "마이페이지에 저장";
+    }
+
+    function updateSavedAs() {
+      if ($("savedAs")) $("savedAs").textContent = editing ? `저장됨 · ${editing.title}` : "";
+    }
+
+    function openSaveDialog() {
       if (!current) return;
-      if (!UXA.getSession()) return goLoginToSave();
+      $("saveTitle").value = editing?.title || current.d.topic;
+      $("saveTitleError").classList.remove("show");
+      $("saveTitle").classList.remove("invalid");
+      $("saveOverwrite").hidden = !editing;
+      $("saveAsNew").hidden = !editing;
+      $("saveNew").hidden = !!editing;
+      $("saveNote").textContent = UXA.getSession() ? "" : "저장하려면 로그인이 필요해요. 로그인하면 지금 화면 그대로 이어서 저장해요.";
+      $("saveDialog").showModal();
+      $("saveTitle").select();
+    }
+
+    $("saveCancel").addEventListener("click", () => $("saveDialog").close());
+    $("saveDialog").addEventListener("click", (e) => { if (e.target === $("saveDialog")) $("saveDialog").close(); });
+    $("saveForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const title = $("saveTitle").value.trim();
+      if (!title) {
+        $("saveTitleError").classList.add("show");
+        $("saveTitle").classList.add("invalid");
+        $("saveTitle").focus();
+        return;
+      }
+      $("saveDialog").close();
+      persist(e.submitter?.value === "overwrite" ? "overwrite" : "new", title);
+    });
+
+    async function persist(mode, title) {
+      const content = collectContent();
+      if (!UXA.getSession()) return goLoginToSave(mode, title, content);
       const btn = $("saveBtn");
       btn.disabled = true;
       btn.textContent = "저장 중…";
       try {
-        const { res, data } = await UXA.api("/api/guides", {
-          method: "POST",
-          body: { title: current.d.topic, input: current.d, content: current.c },
-        });
-        if (res.status === 401) { UXA.clearSession(); return goLoginToSave(); }
+        const body = { title, input: current.d, content };
+        let { res, data } = mode === "overwrite" && editing
+          ? await UXA.api(`/api/guides/${editing.id}`, { method: "PUT", body })
+          : await UXA.api("/api/guides", { method: "POST", body });
+        if (res.status === 401) { UXA.clearSession(); return goLoginToSave(mode, title, content); }
+        // 덮어쓸 원래 가이드가 그새 지워졌으면 새로 저장한다
+        let note = "";
+        if (res.status === 404 && mode === "overwrite") {
+          ({ res, data } = await UXA.api("/api/guides", { method: "POST", body }));
+          note = "원래 가이드를 찾을 수 없어 새로 저장했어요. ";
+        }
         if (!res.ok) throw new Error(data.error || `저장하지 못했어요. (${res.status})`);
+        editing = { id: data.id, title: data.title };
+        current.c = content;
+        history.replaceState(null, "", `/guide/?id=${editing.id}`);
+        updateSavedAs();
         btn.textContent = "저장됨 ✓";
-        showToast("가이드를 저장했어요. 마이페이지에서 볼 수 있어요.");
+        showToast(`${note}마이페이지에 저장했어요.`);
       } catch (err) {
         btn.disabled = false;
-        btn.textContent = "저장";
-        showToast(err.message.startsWith("저장") ? err.message : "서버에 연결하지 못해 저장하지 못했어요.");
+        btn.textContent = "마이페이지에 저장";
+        showToast(err instanceof TypeError ? "서버에 연결하지 못해 저장하지 못했어요." : err.message);
       }
     }
 
-    function goLoginToSave() {
-      try { sessionStorage.setItem(PENDING_KEY, JSON.stringify(current)); } catch {}
+    function goLoginToSave(mode, title, content) {
+      try { sessionStorage.setItem(PENDING_KEY, JSON.stringify({ d: current.d, c: content, title, mode, editing })); } catch {}
       location.href = UXA.loginUrl("/guide/?resume=save");
     }
 
     function fillForm(d) {
       $("topic").value = d.topic;
-      $("background").value = d.background;
-      $("rq").value = d.rqs.join("\n");
+      $("background").value = d.background || "";
+      $("rq").value = (d.rqs || []).join("\n");
       $("target").value = d.target;
-      document.querySelector(`input[name=type][value=${d.type}]`).checked = true;
-      document.querySelector(`input[name=duration][value="${d.duration}"]`).checked = true;
+      document.querySelector(`input[name=type][value=${d.type === "validate" ? "validate" : "explore"}]`).checked = true;
+      document.querySelector(`input[name=duration][value="${d.duration === 45 ? 45 : 60}"]`).checked = true;
       document.querySelector(`input[name=mode][value=${d.remote ? "remote" : "offline"}]`).checked = true;
     }
 
-    // 로그인하고 돌아왔으면 맡겨 둔 가이드를 다시 그리고 바로 저장한다
-    (() => {
-      let pending = null;
-      try { pending = JSON.parse(sessionStorage.getItem(PENDING_KEY) || "null"); sessionStorage.removeItem(PENDING_KEY); } catch {}
-      if (!pending || !pending.d || !pending.c) return;
-      fillForm(pending.d);
-      lastInput = pending.d;
-      render(pending.d, pending.c);
+    function showGuide(d, c) {
+      fillForm(d);
+      lastInput = d;
+      render(d, c);
       setState("done");
       $("generateBtn").textContent = "가이드 다시 생성";
-      const resume = new URLSearchParams(location.search).get("resume");
-      history.replaceState(null, "", location.pathname);
-      if (resume === "save" && UXA.getSession()) saveGuide();
+    }
+
+    (async () => {
+      const params = new URLSearchParams(location.search);
+
+      // 로그인하고 돌아왔으면 맡겨 둔 가이드를 다시 그리고 바로 저장한다
+      let pending = null;
+      try { pending = JSON.parse(sessionStorage.getItem(PENDING_KEY) || "null"); sessionStorage.removeItem(PENDING_KEY); } catch {}
+      if (pending?.d && pending?.c) {
+        editing = pending.editing || null;
+        showGuide(pending.d, pending.c);
+        history.replaceState(null, "", editing ? `/guide/?id=${editing.id}` : location.pathname);
+        if (params.get("resume") === "save" && UXA.getSession()) persist(pending.mode || "new", pending.title || pending.d.topic);
+        return;
+      }
+
+      // 마이페이지에서 연 가이드 (/guide/?id=…): 내 가이드만 열린다
+      const id = params.get("id");
+      if (!id) return;
+      if (!UXA.requireLogin()) return;
+      setState("loading");
+      try {
+        const { res, data } = await UXA.api(`/api/guides/${encodeURIComponent(id)}`);
+        if (res.status === 401) { UXA.clearSession(); location.replace(UXA.loginUrl()); return; }
+        if (!res.ok) throw new Error(res.status === 404 ? "가이드를 찾을 수 없어요. 지워졌거나 내 가이드가 아니에요." : data.error || `가이드를 불러오지 못했어요. (${res.status})`);
+        editing = { id: data.guide.id, title: data.guide.title };
+        showGuide(data.guide.input, data.guide.content);
+        $("saveBtn").textContent = "저장됨 ✓";
+        $("saveBtn").disabled = false;
+        showToast(`‘${data.guide.title}’을(를) 불러왔어요. 고친 뒤 다시 저장할 수 있어요.`);
+      } catch (err) {
+        history.replaceState(null, "", location.pathname);
+        setState("empty");
+        showToast(err instanceof TypeError ? "서버에 연결하지 못했어요." : err.message);
+      }
     })();
 
     // ── UXA API 서버(Worker) 연결. OpenAI 키는 Worker 비밀값에만 있다 ──

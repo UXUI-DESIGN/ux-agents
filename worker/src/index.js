@@ -7,10 +7,10 @@
 //   POST /api/auth/login  { email, password, remember } → { token, user, remember }
 //   POST /api/auth/logout Authorization: Bearer <token> → { ok }
 //   GET  /api/auth/me     Authorization: Bearer <token> → { user }
-//   POST /api/guides      Authorization: Bearer <token>, { title, input, content } → { id }
+//   /api/guides, /api/guides/:id  내 인터뷰 가이드 목록·저장·열기·덮어쓰기·이름 바꾸기·삭제 (guides.js)
 
 import { signup, login, logout, me } from "./auth.js";
-import { saveGuide } from "./guides.js";
+import { guides } from "./guides.js";
 
 const MAX_INPUT_CHARS = 20000;
 const MAX_OUTPUT_TOKENS = 4000;
@@ -52,7 +52,8 @@ async function route(request, env, cors) {
     return chat(request, env, cors);
   }
 
-  if (url.pathname.startsWith("/api/auth/") || url.pathname === "/api/guides") {
+  const guidePath = url.pathname.match(/^\/api\/guides(?:\/([^/]+))?$/);
+  if (url.pathname.startsWith("/api/auth/") || guidePath) {
     if (!cors["Access-Control-Allow-Origin"]) return json({ error: "허용되지 않은 사이트에서 온 요청이에요." }, 403, cors);
     const reply = (data, status = 200) => json(data, status, cors);
     const routes = {
@@ -60,8 +61,8 @@ async function route(request, env, cors) {
       "POST /api/auth/login": login,
       "POST /api/auth/logout": logout,
       "GET /api/auth/me": me,
-      "POST /api/guides": saveGuide,
     };
+    if (guidePath) return guides(request, env, reply, guidePath[1]);
     const handler = routes[`${request.method} ${url.pathname}`];
     if (handler) return handler(request, env, reply);
   }
@@ -133,7 +134,7 @@ function corsHeaders(request, env) {
   if (!origin || !allowed.includes(origin)) return {};
   return {
     "Access-Control-Allow-Origin": origin,
-    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization",
     "Access-Control-Max-Age": "86400",
     Vary: "Origin",
