@@ -9,11 +9,15 @@
 //   GET  /api/auth/me     Authorization: Bearer <token> → { user }
 //   /api/guides, /api/guides/:id  내 인터뷰 가이드 목록·저장·열기·덮어쓰기·이름 바꾸기·삭제 (guides.js)
 //   /api/sessions                 내 인터뷰 세션 목록·만들기 (sessions.js)
-//   /api/p/:token[/interviews[/me]] 참가자 링크로 세션 정보 보기·동의하고 시작·다시 열기 (sessions.js)
+//   /api/sessions/:id[/close|/interviews/:iid|/messages/:mid/note|redactions|/debrief/...]  세션 상세·링크 닫기·전사·메모·마스킹·디브리핑
+//   GET  /api/debriefs            내 확정 디브리핑 (debrief.js)
+//   /api/p/:token[/interviews[/me[/messages|pause|resume|end|withdraw]]] 참가자 링크: 세션 정보·동의하고 시작·다시 열기·AI 모더레이터 대화
 
 import { signup, login, logout, me } from "./auth.js";
 import { guides } from "./guides.js";
 import { sessions, participant } from "./sessions.js";
+import { sessionDetail } from "./sessionDetail.js";
+import { myDebriefs } from "./debrief.js";
 
 const MAX_INPUT_CHARS = 20000;
 const MAX_OUTPUT_TOKENS = 4000;
@@ -56,8 +60,9 @@ async function route(request, env, cors) {
   }
 
   const guidePath = url.pathname.match(/^\/api\/guides(?:\/([^/]+))?$/);
-  const participantPath = url.pathname.match(/^\/api\/p\/([^/]+)(?:\/(interviews)(?:\/(me))?)?$/);
-  if (url.pathname.startsWith("/api/auth/") || guidePath || participantPath || url.pathname === "/api/sessions") {
+  const participantPath = url.pathname.match(/^\/api\/p\/([^/]+)(?:\/(interviews)(?:\/(me)(?:\/(messages|pause|resume|end|withdraw))?)?)?$/);
+  const detailPath = url.pathname.match(/^\/api\/sessions\/([0-9a-f-]{36})(?:\/(close|interviews|messages|debrief)(?:\/([^/]+)(?:\/(note|redactions))?)?)?$/);
+  if (url.pathname.startsWith("/api/auth/") || guidePath || participantPath || detailPath || url.pathname === "/api/sessions" || url.pathname === "/api/debriefs") {
     if (!cors["Access-Control-Allow-Origin"]) return json({ error: "허용되지 않은 사이트에서 온 요청이에요." }, 403, cors);
     const reply = (data, status = 200) => json(data, status, cors);
     const routes = {
@@ -68,7 +73,9 @@ async function route(request, env, cors) {
     };
     if (guidePath) return guides(request, env, reply, guidePath[1]);
     if (url.pathname === "/api/sessions") return sessions(request, env, reply);
-    if (participantPath) return participant(request, env, reply, participantPath[1], participantPath[2], participantPath[3]);
+    if (detailPath) return sessionDetail(request, env, reply, ...detailPath.slice(1));
+    if (url.pathname === "/api/debriefs" && request.method === "GET") return myDebriefs(request, env, reply);
+    if (participantPath) return participant(request, env, reply, participantPath[1], participantPath[2], participantPath[3], participantPath[4]);
     const handler = routes[`${request.method} ${url.pathname}`];
     if (handler) return handler(request, env, reply);
   }

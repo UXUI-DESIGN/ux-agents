@@ -1,14 +1,16 @@
 // 인터뷰 세션 (AI 인터뷰 모더레이터)
 //   리서처(로그인): 모든 조회를 WHERE user_id = 로그인한 사용자 로 묶는다. 남의 세션·가이드는 404.
-//     GET  /api/sessions                 내 세션 목록 (참가자 수 포함)
+//     GET  /api/sessions                 내 세션 목록 (참가자 수, 진행 중·완료·중간 종료·철회 수)
 //     POST /api/sessions                 세션 만들기 → { id, token }
 //   참가자(로그인 없음, 링크의 무작위 값으로만 접근):
 //     GET  /api/p/:token                 참가자에게 보여줄 세션 정보 (가이드 내용은 내보내지 않음)
 //     POST /api/p/:token/interviews      동의하고 시작 → P코드를 매겨 별도 인터뷰로 기록 → { interview, key }
 //     GET  /api/p/:token/interviews/me   X-Interview-Key로 자기 인터뷰 다시 열기 (새로고침해도 같은 참가자)
+//     /api/p/:token/interviews/me/{messages|pause|resume|end|withdraw}  AI 모더레이터와 대화 (moderator.js)
 //   닫힌 세션·없는 세션은 모두 '이 인터뷰는 종료되었습니다'
 
 import { currentUser, rateLimit } from "./auth.js";
+import { moderate, stagesOf, timing } from "./moderator.js";
 
 // 참가자에게 받을 수 있는 항목. 개인을 특정하지 않는 것만 둔다 (이름·연락처는 없다)
 export const COLLECT_OPTIONS = {
@@ -30,7 +32,11 @@ export async function sessions(request, env, json) {
   if (request.method === "GET") {
     const { results } = await env.DB.prepare(
       `SELECT s.id, s.name, s.guide_title, s.duration, s.expected_participants, s.link_token AS token, s.status, s.created_at,
-              (SELECT COUNT(*) FROM interviews i WHERE i.session_id = s.id) AS participants
+              (SELECT COUNT(*) FROM interviews i WHERE i.session_id = s.id AND i.status != 'withdrawn') AS participants,
+              (SELECT COUNT(*) FROM interviews i WHERE i.session_id = s.id AND i.status IN ('consented', 'in_progress')) AS in_progress,
+              (SELECT COUNT(*) FROM interviews i WHERE i.session_id = s.id AND i.status = 'completed') AS completed,
+              (SELECT COUNT(*) FROM interviews i WHERE i.session_id = s.id AND i.status = 'stopped') AS stopped,
+              (SELECT COUNT(*) FROM interviews i WHERE i.session_id = s.id AND i.status = 'withdrawn') AS withdrawn
          FROM interview_sessions s WHERE s.user_id = ? ORDER BY s.created_at DESC`
     ).bind(user.id).all();
     return json({ sessions: results });
@@ -104,7 +110,7 @@ const DECLINE = "답하고 싶지 않음";
 const CONSENT_KEYS = ["record", "anonymous", "withdraw"]; // 대화 기록 저장 · 익명 처리 · 철회 권리
 const ENDED = { error: "이 인터뷰는 종료되었습니다.", code: "ended" };
 
-export async function participant(request, env, json, token, sub, me) {
+export async function participant(request, env, json, token, sub, me, action) {
   if (!/^[A-Za-z0-9_-]{40,}$/.test(token)) return json(ENDED, 404);
   const s = await env.DB.prepare("SELECT id, name, purpose, duration, collect, consent, status, guide_snapshot FROM interview_sessions WHERE link_token = ?")
     .bind(token).first();
@@ -120,14 +126,18 @@ export async function participant(request, env, json, token, sub, me) {
     return json({ session: { topic, purpose: s.purpose, duration: s.duration, collect, consent: s.consent } });
   }
 
-  // 새로고침·다시 열기: 처음 시작할 때 받은 열쇠로 자기 인터뷰만 찾는다
-  if (sub === "interviews" && me && request.method === "GET") {
+  // 새로고침·다시 열기·대화: 처음 시작할 때 받은 열쇠로 자기 인터뷰만 찾는다
+  if (sub === "interviews" && me) {
     const key = request.headers.get("X-Interview-Key") || "";
     if (!key) return json({ error: "인터뷰를 찾을 수 없어요.", code: "not_found" }, 404);
-    const row = await env.DB.prepare("SELECT code, status, consented_at FROM interviews WHERE key_hash = ? AND session_id = ?")
-      .bind(await sha256Hex(key), s.id).first();
+    const row = await env.DB.prepare(
+      "SELECT id, code, status, consented_at, profile, stage, paused_at, paused_total, finished_at FROM interviews WHERE key_hash = ? AND session_id = ?"
+    ).bind(await sha256Hex(key), s.id).first();
     if (!row) return json({ error: "인터뷰를 찾을 수 없어요.", code: "not_found" }, 404);
-    return json({ interview: { code: row.code, status: row.status, consentedAt: row.consented_at } });
+    if (action) return moderate(request, env, json, s, row, action);
+    if (request.method !== "GET") return json({ error: "없는 경로예요." }, 404);
+    const now = Math.floor(Date.now() / 1000);
+    return json({ interview: { code: row.code, status: row.status, consentedAt: row.consented_at, stage: row.stage, totalStages: stagesOf(JSON.parse(s.guide_snapshot)).length, ...timing(row, s.duration, now) } });
   }
 
   // 인터뷰 시작: 동의 확인 → 이 세션의 다음 번호로 P코드를 매기고 동의 내용·시각을 저장

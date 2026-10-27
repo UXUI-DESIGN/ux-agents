@@ -112,6 +112,11 @@
     .guide .info { flex: 1 1 320px; }
     .session .stats { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 6px; font-size: 13px; color: var(--text-sub); }
     .session .stats b { color: var(--text); font-weight: 700; }
+    .session .breakdown { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+    .session .st { padding: 0 8px; border-radius: 999px; background: var(--bg-soft); border: 1px solid var(--line); font-size: 12px; color: var(--text-sub); }
+    .session .st.ing { border-color: #c7d2fe; background: var(--accent-soft); color: var(--accent); }
+    .session .st.done { border-color: #abefc6; background: #ecfdf3; color: var(--good); }
+    .session .st.wd { color: var(--text-faint); }
 
     .empty {
       padding: 56px 24px; text-align: center; background: #fff;
@@ -199,6 +204,7 @@
         <div class="tabs" role="tablist" aria-label="내 작업">
           <button class="tab" role="tab" id="tab-guides" aria-controls="panel-guides" aria-selected="true">내 인터뷰 가이드<span class="count" id="guideCount" hidden></span></button>
           <button class="tab" role="tab" id="tab-sessions" aria-controls="panel-sessions" aria-selected="false" tabindex="-1">내 인터뷰 세션<span class="count" id="sessionCount" hidden></span></button>
+          <button class="tab" role="tab" id="tab-debriefs" aria-controls="panel-debriefs" aria-selected="false" tabindex="-1">내 디브리핑<span class="count" id="debriefCount" hidden></span></button>
         </div>
 
         <section class="panel" id="panel-guides" role="tabpanel" aria-labelledby="tab-guides">
@@ -256,6 +262,29 @@
             <a class="btn btn-accent" href="/moderator/">AI 인터뷰 모더레이터로 가기</a>
           </div>
         </section>
+
+        <section class="panel" id="panel-debriefs" role="tabpanel" aria-labelledby="tab-debriefs" hidden>
+          <div id="debriefsLoading" aria-busy="true"><div class="skeleton"></div></div>
+          <div class="load-error" id="debriefsError" hidden>
+            <p id="debriefsErrorMsg">디브리핑을 불러오지 못했어요.</p>
+            <button class="btn" type="button" id="debriefsRetry">다시 시도</button>
+          </div>
+          <div id="debriefsList" hidden>
+            <div class="list-head"><span id="debriefsSummary"></span></div>
+            <ul class="guides" id="debriefs"></ul>
+          </div>
+          <div class="empty" id="debriefsEmpty" hidden>
+            <svg viewBox="0 0 56 56" fill="none" aria-hidden="true">
+              <rect x="10" y="8" width="30" height="40" rx="5" stroke="currentColor" stroke-width="2.5" />
+              <path d="M17 19h16M17 26h16M17 33h10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+              <circle cx="41" cy="40" r="9" fill="var(--accent-soft)" stroke="currentColor" stroke-width="2.5" />
+              <path d="M37 40l3 3 5-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <h2>아직 확정한 디브리핑이 없어요</h2>
+            <p>세션 상세에서 '디브리핑 초안 만들기'로 초안을 받고, 고친 뒤 '확정'을 누르면 여기에 모여요.</p>
+            <a class="btn btn-accent" href="#sessions" id="toSessions">내 인터뷰 세션으로</a>
+          </div>
+        </section>
       </div>
     </div>
   </main>
@@ -294,6 +323,7 @@
   </dialog>
 
   <script src="/js/auth.js"></script>
+  <script src="/js/debrief.js"></script>
   <script>
     const $ = (id) => document.getElementById(id);
     const TYPE_NAME = { explore: "탐색형", validate: "검증형" };
@@ -312,7 +342,7 @@
     UXA.api("/api/auth/me").then(({ res, data }) => { if (res.ok) { $("userName").textContent = data.user.name; $("userEmail").textContent = data.user.email; } }).catch(() => {});
 
     // ── 탭 ──
-    const tabs = [$("tab-guides"), $("tab-sessions")];
+    const tabs = [$("tab-guides"), $("tab-sessions"), $("tab-debriefs")];
     function selectTab(tab, focus) {
       tabs.forEach((t) => {
         const on = t === tab;
@@ -321,7 +351,7 @@
         $(t.getAttribute("aria-controls")).hidden = !on;
       });
       if (focus) tab.focus();
-      history.replaceState(null, "", tab.id === "tab-sessions" ? "#sessions" : location.pathname);
+      history.replaceState(null, "", tab.id === "tab-guides" ? location.pathname : `#${tab.id.slice(4)}`);
     }
     tabs.forEach((t, i) => {
       t.addEventListener("click", () => selectTab(t));
@@ -330,6 +360,7 @@
       });
     });
     if (location.hash === "#sessions") selectTab($("tab-sessions"));
+    if (location.hash === "#debriefs") selectTab($("tab-debriefs"));
 
     // ── 내 인터뷰 가이드 ──
     const fmtDate = (sec) => {
@@ -423,20 +454,29 @@
         li.className = "guide session";
         li.innerHTML = `
           <div class="info">
-            <span class="title"></span>
+            <a class="title"></a>
             <div class="stats">
               <span>가이드 · <b class="g"></b></span>
               <span class="date"></span>
               <span>참가자 <b class="n"></b></span>
+              <span class="breakdown"></span>
             </div>
           </div>
           <div class="actions">
-            <button class="btn btn-accent copy" type="button">링크 복사</button>
+            <a class="btn btn-accent open">세션 보기</a>
+            <button class="btn copy" type="button">링크 복사</button>
           </div>`;
+        const detail = `/mypage/session/?id=${encodeURIComponent(s.id)}`;
         li.querySelector(".title").textContent = s.name;
+        li.querySelector(".title").href = detail;
+        li.querySelector(".open").href = detail;
         li.querySelector(".g").textContent = s.guide_title;
         li.querySelector(".date").textContent = `${fmtDate(s.created_at)} 만듦`;
         li.querySelector(".n").textContent = s.expected_participants ? `${s.participants} / ${s.expected_participants}명` : `${s.participants}명`;
+        // 진행 중 · 완료 · 철회 (기록을 남기고 중간에 마친 참가자가 있으면 완료 옆에 따로)
+        const parts = [["진행 중", s.in_progress, "ing"], ["완료", s.completed, "done"], ["중간 종료", s.stopped, "stop"], ["철회", s.withdrawn, "wd"]]
+          .filter(([label, n]) => label !== "중간 종료" || n > 0);
+        li.querySelector(".breakdown").replaceChildren(...parts.map(([label, n, cls]) => Object.assign(document.createElement("span"), { className: `st ${cls}`, textContent: `${label} ${n || 0}` })));
         li.querySelector(".copy").addEventListener("click", () => copyLink(sessionLink(s.token)));
         return li;
       }));
@@ -458,6 +498,72 @@
     }
     $("sessionsRetry").addEventListener("click", loadSessions);
     if (UXA.getSession()) loadSessions();
+
+    // ── 내 디브리핑 (확정한 것만) ──
+    let debriefs = [];
+    function showDebriefs(state) {
+      $("debriefsLoading").hidden = state !== "loading";
+      $("debriefsError").hidden = state !== "error";
+      $("debriefsEmpty").hidden = state !== "empty";
+      $("debriefsList").hidden = state !== "list";
+    }
+    function renderDebriefs() {
+      $("debriefCount").hidden = false;
+      $("debriefCount").textContent = debriefs.length;
+      if (!debriefs.length) return showDebriefs("empty");
+      $("debriefsSummary").textContent = `확정한 디브리핑 ${debriefs.length}개 · 최근 확정한 순`;
+      $("debriefs").replaceChildren(...debriefs.map((d) => {
+        const li = document.createElement("li");
+        li.className = "guide session";
+        li.innerHTML = `
+          <div class="info">
+            <a class="title"></a>
+            <div class="stats">
+              <span>주제 · <b class="t"></b></span>
+              <span class="date"></span>
+              <span class="based"></span>
+            </div>
+            <p class="lead" style="margin-top:8px;font-size:14px;color:var(--text-sub)"></p>
+          </div>
+          <div class="actions">
+            <a class="btn btn-accent open">세션에서 보기</a>
+            <button class="btn dl" type="button">마크다운 다운로드</button>
+          </div>`;
+        const href = `/mypage/session/?id=${encodeURIComponent(d.session_id)}`;
+        li.querySelector(".title").textContent = d.session_name;
+        li.querySelector(".title").href = href;
+        li.querySelector(".open").href = href;
+        li.querySelector(".t").textContent = d.topic;
+        li.querySelector(".date").textContent = `${fmtDate(d.finalized_at)} 확정`;
+        li.querySelector(".based").textContent = d.meta?.participants?.length ? `${d.meta.participants.join(", ")} 기준` : "";
+        const first = d.content.insights?.[0]?.text;
+        li.querySelector(".lead").textContent = first ? `💡 ${first}` : "";
+        li.querySelector(".dl").addEventListener("click", () => {
+          UXA_DEBRIEF.download(UXA_DEBRIEF.fileName(d.session_name, false), UXA_DEBRIEF.toMarkdown(d.content, {
+            sessionName: d.session_name, topic: d.topic, meta: d.meta, finalizedAt: d.finalized_at, isDraft: false,
+          }));
+          showToast("디브리핑을 내려받았어요.");
+        });
+        return li;
+      }));
+      showDebriefs("list");
+    }
+    async function loadDebriefs() {
+      showDebriefs("loading");
+      try {
+        const { res, data } = await UXA.api("/api/debriefs");
+        if (res.status === 401) { UXA.clearSession(); location.replace(UXA.loginUrl()); return; }
+        if (!res.ok) throw new Error(data.error);
+        debriefs = data.debriefs;
+        renderDebriefs();
+      } catch (err) {
+        $("debriefsErrorMsg").textContent = err instanceof TypeError ? "서버에 연결하지 못했어요. 인터넷 연결을 확인해 주세요." : err.message || "디브리핑을 불러오지 못했어요.";
+        showDebriefs("error");
+      }
+    }
+    $("debriefsRetry").addEventListener("click", loadDebriefs);
+    $("toSessions").addEventListener("click", (e) => { e.preventDefault(); selectTab($("tab-sessions"), true); });
+    if (UXA.getSession()) loadDebriefs();
 
     async function copyLink(link) {
       try { await navigator.clipboard.writeText(link); showToast("참가자 링크를 복사했어요."); }

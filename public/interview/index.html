@@ -31,7 +31,7 @@
       word-break: keep-all;
       overflow-wrap: anywhere;
     }
-    button, input { font: inherit; color: inherit; }
+    button, input, textarea { font: inherit; color: inherit; }
     [hidden] { display: none !important; }
 
     /* 참가자 화면: 로고만. 로그인·마이페이지·에이전트 메뉴는 두지 않는다 */
@@ -110,6 +110,81 @@
     .code-card .notes { list-style: none; display: grid; gap: 8px; margin-top: 22px; text-align: left; font-size: 14.5px; color: var(--text-sub); }
     .code-card .notes li { padding: 12px 14px; border-radius: 12px; background: var(--bg-soft); }
     .loading { padding: 64px 24px; text-align: center; color: var(--text-sub); }
+    .code-card .go { display: block; width: 100%; min-height: 52px; margin-top: 22px; border: 0; border-radius: 14px; background: var(--accent); color: #fff; font-size: 16px; font-weight: 800; cursor: pointer; }
+
+    /* ── 채팅 ── */
+    body.chatting { overflow: hidden; }
+    body.chatting .top { display: none; }
+    body.chatting main { max-width: none; padding: 0; }
+    .chat { display: flex; flex-direction: column; height: 100vh; height: 100dvh; background: var(--bg-soft); }
+    .chat-head { flex: none; background: #fff; border-bottom: 1px solid var(--line); }
+    .chat-head .in { max-width: 720px; margin: 0 auto; padding: 10px 14px 8px; }
+    .chat-head .row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .chat-head .who { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: 14px; }
+    .chat-head .who .logo { font-size: 16px; }
+    .chat-head .who .pcode { padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-weight: 700; font-size: 12.5px; }
+    .chat-head .tools { display: flex; gap: 6px; }
+    .tool-btn { min-height: 36px; padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; background: #fff; font-size: 13.5px; font-weight: 600; color: var(--text-sub); cursor: pointer; white-space: nowrap; }
+    .tool-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .progress { display: flex; align-items: center; gap: 10px; margin-top: 8px; font-size: 12.5px; color: var(--text-sub); }
+    .progress .bar { flex: 1; height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
+    .progress .bar i { display: block; height: 100%; width: 0; border-radius: 3px; background: var(--accent); transition: width .4s; }
+    .progress b { color: var(--text); font-weight: 700; font-variant-numeric: tabular-nums; }
+    .progress .time.low b { color: #b42318; }
+
+    .chat-log { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    .chat-log .in { max-width: 720px; margin: 0 auto; padding: 16px 14px 8px; display: flex; flex-direction: column; gap: 10px; }
+    .msg { display: flex; flex-direction: column; max-width: 86%; }
+    .msg.moderator { align-self: flex-start; }
+    .msg.participant { align-self: flex-end; }
+    .bubble { padding: 11px 14px; border-radius: 18px; font-size: 15.5px; line-height: 1.55; white-space: pre-wrap; }
+    .moderator .bubble { background: #fff; border: 1px solid var(--line); border-bottom-left-radius: 6px; }
+    .participant .bubble { background: var(--accent); color: #fff; border-bottom-right-radius: 6px; }
+    .msg .who-label { margin: 0 6px 3px; font-size: 11.5px; color: var(--text-faint); }
+    .participant .who-label { text-align: right; }
+    .sys { align-self: center; padding: 6px 12px; border-radius: 999px; background: #e9ebf3; font-size: 12.5px; color: var(--text-sub); text-align: center; }
+    .typing .bubble { display: inline-flex; gap: 5px; align-items: center; padding: 14px 16px; }
+    .typing .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-faint); animation: blink 1.2s infinite; }
+    .typing .dot:nth-child(2) { animation-delay: .2s; } .typing .dot:nth-child(3) { animation-delay: .4s; }
+    @keyframes blink { 0%, 80%, 100% { opacity: .3; } 40% { opacity: 1; } }
+    .msg.error .bubble { background: #fff4f3; border-color: #f5c2bc; color: #7a271a; }
+    .msg.error button { margin-top: 6px; align-self: flex-start; padding: 4px 10px; border: 1px solid #f5c2bc; border-radius: 999px; background: #fff; font-size: 13px; color: #b42318; cursor: pointer; }
+
+    .composer { flex: none; background: #fff; border-top: 1px solid var(--line); padding: 8px 10px calc(8px + env(safe-area-inset-bottom)); }
+    .composer .in { max-width: 720px; margin: 0 auto; display: flex; gap: 8px; align-items: flex-end; }
+    .composer textarea {
+      flex: 1; min-height: 46px; max-height: 40vh; padding: 12px 14px; resize: none;
+      border: 1px solid var(--line); border-radius: 22px; background: var(--bg-soft); font-size: 16px; line-height: 1.4;
+    }
+    .composer textarea:focus { outline: none; border-color: var(--accent); background: #fff; }
+    .composer textarea:disabled { opacity: .6; }
+    .send { flex: none; width: 46px; height: 46px; border: 0; border-radius: 50%; background: var(--accent); color: #fff; cursor: pointer; display: grid; place-items: center; }
+    .send:disabled { background: #c7c9d6; cursor: not-allowed; }
+    .send svg { width: 22px; height: 22px; }
+    .composer .hint { max-width: 720px; margin: 4px auto 0; padding: 0 6px; font-size: 11.5px; color: var(--text-faint); text-align: right; }
+
+    .overlay { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 20px; background: rgba(20, 22, 31, .55); backdrop-filter: blur(3px); }
+    .overlay .box { width: min(360px, 100%); padding: 28px 22px; border-radius: 18px; background: #fff; text-align: center; }
+    .overlay .big { font-size: 40px; }
+    .overlay h2 { margin-top: 8px; font-size: 19px; }
+    .overlay p { margin-top: 6px; font-size: 14.5px; color: var(--text-sub); }
+    .overlay button { display: block; width: 100%; min-height: 50px; margin-top: 18px; border: 0; border-radius: 14px; background: var(--accent); color: #fff; font-size: 16px; font-weight: 800; cursor: pointer; }
+    .overlay .ghost { background: none; color: var(--text-sub); font-weight: 600; min-height: 40px; margin-top: 6px; }
+    .msg.excluded .bubble { opacity: .55; }
+    .msg .tag { margin: 3px 6px 0; font-size: 11.5px; color: var(--text-faint); }
+    .participant .tag { text-align: right; }
+    .quit-box { text-align: left !important; }
+    .quit-box h2, .quit-box > p { text-align: center; }
+    .quit-opts { display: grid; gap: 8px; margin-top: 16px; }
+    .quit-opt { display: flex; gap: 10px; align-items: flex-start; padding: 13px 14px; border: 1px solid var(--line); border-radius: 12px; cursor: pointer; font-size: 15px; }
+    .quit-opt:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+    .quit-opt.danger:has(input:checked) { border-color: #d92d20; background: #fff4f3; }
+    .quit-opt input { flex: none; width: 20px; height: 20px; margin-top: 2px; accent-color: var(--accent); }
+    .quit-opt.danger input { accent-color: #d92d20; }
+    .quit-opt small { display: block; font-size: 13px; color: var(--text-sub); }
+    .overlay button.danger { background: #d92d20; }
+    .overlay button:disabled { background: #c7c9d6; cursor: not-allowed; }
+    .done-card { margin: 10px 14px; padding: 18px; border-radius: 16px; background: #ecfdf3; color: #05603a; text-align: center; font-size: 15px; }
 
     @media (min-width: 720px) {
       main { padding-top: 40px; }
@@ -130,6 +205,12 @@
       <span class="big" aria-hidden="true">🔒</span>
       <h1>이 인터뷰는 종료되었습니다</h1>
       <p>참여해 주시려고 들러 주셔서 감사합니다.</p>
+    </section>
+
+    <section class="card center" id="withdrawn" hidden>
+      <span class="big" aria-hidden="true">🗑️</span>
+      <h1>참여를 철회했어요</h1>
+      <p>대화와 동의 기록을 모두 삭제했어요. 시간 내 주셔서 감사합니다.</p>
     </section>
 
     <!-- 안내와 동의 -->
@@ -195,9 +276,61 @@
       <h1 id="codeTail">으로 기록됩니다</h1>
       <ul class="notes">
         <li>이름 대신 이 코드로만 기록돼요. 리서처도 코드로만 알아볼 수 있어요.</li>
-        <li>AI 모더레이터와의 대화 화면은 곧 열려요. 이 링크로 다시 들어오면 이 인터뷰로 이어서 돌아와요.</li>
+        <li>이 링크로 다시 들어오면 이 인터뷰로 이어서 돌아와요. 중간에 쉬어도 괜찮아요.</li>
       </ul>
+      <button class="go" type="button" id="goChat">AI 모더레이터와 대화 시작</button>
     </section>
+
+    <!-- 대화 -->
+    <section class="chat" id="chat" hidden>
+      <header class="chat-head">
+        <div class="in">
+          <div class="row">
+            <div class="who"><span class="logo">UX<span style="color:var(--accent)">A</span></span><span class="pcode" id="chatCode"></span><span>AI 모더레이터</span></div>
+            <div class="tools">
+              <button class="tool-btn" type="button" id="pauseBtn">잠시 쉬기</button>
+              <button class="tool-btn" type="button" id="quitBtn">그만하기</button>
+            </div>
+          </div>
+          <div class="progress" aria-live="polite">
+            <span>진행 <b id="stageText">1/5</b> 블록</span>
+            <span class="bar" aria-hidden="true"><i id="stageBar"></i></span>
+            <span class="time" id="timeWrap">남은 시간 <b id="timeText">--:--</b></span>
+          </div>
+        </div>
+      </header>
+      <div class="chat-log" id="chatLog"><div class="in" id="chatIn" aria-live="polite"></div></div>
+      <form class="composer" id="composer">
+        <div class="in">
+          <textarea id="input" rows="1" placeholder="편하게 말씀해 주세요…" aria-label="답변 입력" maxlength="2000"></textarea>
+          <button class="send" type="submit" id="sendBtn" aria-label="보내기" disabled>
+            <svg viewBox="0 0 24 24" fill="none"><path d="M4 12 20 4l-4 16-4-7-8-1Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+        <p class="hint">Enter는 줄바꿈 · 보내기는 버튼</p>
+      </form>
+    </section>
+
+    <div class="overlay" id="pauseOverlay" hidden>
+      <div class="box">
+        <div class="big" aria-hidden="true">☕</div>
+        <h2>잠시 쉬는 중이에요</h2>
+        <p>시간은 멈춰 있어요. 준비되면 이어서 할게요.</p>
+        <button type="button" id="resumeBtn">이어서 하기</button>
+      </div>
+    </div>
+    <div class="overlay" id="quitOverlay" hidden role="dialog" aria-modal="true" aria-labelledby="quitTitle">
+      <form class="box quit-box" id="quitForm">
+        <h2 id="quitTitle">그만하시겠어요?</h2>
+        <p>어떻게 마칠지 골라 주세요. 어느 쪽이든 불이익은 없어요.</p>
+        <div class="quit-opts">
+          <label class="quit-opt" id="optEnd"><input type="radio" name="quit" value="end" /><span>여기까지 기록을 남기고 종료<small>지금까지 나눈 이야기는 리서치에 쓰여요.</small></span></label>
+          <label class="quit-opt danger"><input type="radio" name="quit" value="withdraw" /><span>참여를 철회하고 내 기록 삭제<small>대화와 동의 기록을 모두 지워요. 되돌릴 수 없어요.</small></span></label>
+        </div>
+        <button type="submit" id="quitConfirm" disabled>골라 주세요</button>
+        <button type="button" class="ghost" id="quitBack">대화로 돌아가기</button>
+      </form>
+    </div>
   </main>
 
   <script>
@@ -207,7 +340,10 @@
     const $ = (id) => document.getElementById(id);
     const token = location.hash.slice(1);
     const KEY_STORE = `uxa.interview:${token}`; // 이 기기에서 시작한 인터뷰의 열쇠 (새로고침해도 같은 참가자로)
-    const show = (id) => ["loading", "ended", "intro", "started"].forEach((x) => { $(x).hidden = x !== id; });
+    const show = (id) => {
+      ["loading", "ended", "intro", "started", "chat", "withdrawn"].forEach((x) => { $(x).hidden = x !== id; });
+      document.body.classList.toggle("chatting", id === "chat");
+    };
     let session = null;
 
     const getKey = () => { try { return localStorage.getItem(KEY_STORE); } catch { return null; } };
@@ -219,7 +355,9 @@
       return { res, data: await res.json().catch(() => ({})) };
     }
 
-    function showStarted(interview) {
+    let interview = null;
+    function showStarted(iv) {
+      interview = iv;
       $("code").textContent = interview.code;
       // 마지막 숫자를 읽었을 때 받침이 있으면(영·삼·육) '으로', 없거나 ㄹ이면 '로' — P03으로, P01로
       $("codeTail").textContent = `${/[036]$/.test(interview.code) ? "으로" : "로"} 기록됩니다`;
@@ -238,7 +376,11 @@
         const key = getKey();
         if (key) {
           const me = await api("/interviews/me", { headers: { "X-Interview-Key": key } });
-          if (me.res.ok) return showStarted(me.data.interview);
+          if (me.res.ok) {
+            interview = me.data.interview;
+            // 이미 대화를 시작했으면 바로 대화로, 아니면 코드 안내부터
+            return interview.status === "consented" ? showStarted(interview) : openChat();
+          }
           if (me.res.status === 404) dropKey();
           else if (!me.res.ok) return show("ended");
         }
@@ -317,6 +459,237 @@
         $("startBtn").textContent = "인터뷰 시작";
         $("startHint").className = "start-hint error";
         $("startHint").textContent = err instanceof TypeError ? "연결이 불안정해요. 다시 눌러 주세요." : err.message;
+      }
+    });
+
+    // ── AI 모더레이터와 대화 ──
+    const keyHeaders = () => ({ "X-Interview-Key": getKey() || "" });
+    let remainingSec = 0, paused = false, ticker = null, sending = false;
+
+    $("goChat").addEventListener("click", openChat);
+
+    let opening = false;
+    async function openChat() {
+      if (opening) return; // 두 번 눌러도 한 번만 연다
+      opening = true;
+      $("goChat").disabled = true;
+      $("chatCode").textContent = interview.code;
+      document.title = `${interview.code} · 인터뷰 참여 · UXA`;
+      show("chat");
+      $("chatIn").replaceChildren();
+      try {
+        const { res, data } = await api("/interviews/me/messages", { headers: keyHeaders() });
+        if (res.status === 404 || res.status === 410) return show("ended");
+        if (!res.ok) throw new Error(data.error);
+        applyState(data);
+        data.messages.forEach((m) => addMessage(m.role, m.content, m));
+        if (data.status === "completed" || data.status === "stopped") return finishChat(data.status);
+        if (paused) showPause(true);
+        // 첫 인사 전이거나, 참가자 말 뒤에 답이 끊겼으면(새로고침·연결 끊김) 그 자리에서 이어서
+        if (!data.messages.length || data.messages.at(-1).role === "participant") await requestModerator("");
+        else enableInput(true);
+      } catch {
+        addMessage("error", "대화를 불러오지 못했어요. 연결을 확인하고 다시 열어 주세요.");
+      } finally {
+        opening = false;
+      }
+      scrollToEnd();
+    }
+
+    function applyState(d) {
+      if (typeof d.stage === "number") {
+        const total = d.totalStages || 1;
+        $("stageText").textContent = `${Math.min(d.stage + 1, total)}/${total}`;
+        $("stageBar").style.width = `${Math.round(((d.stage + 1) / total) * 100)}%`;
+      }
+      if (typeof d.remainingSec === "number") remainingSec = d.remainingSec;
+      if (typeof d.paused === "boolean") paused = d.paused;
+      renderTime();
+      clearInterval(ticker);
+      ticker = setInterval(() => { if (!paused && remainingSec > 0) { remainingSec--; renderTime(); } }, 1000);
+    }
+
+    function renderTime() {
+      const m = Math.floor(remainingSec / 60), s = remainingSec % 60;
+      $("timeText").textContent = remainingSec > 0 ? `${m}:${String(s).padStart(2, "0")}` : "마무리 중";
+      $("timeWrap").classList.toggle("low", remainingSec > 0 && remainingSec <= 5 * 60);
+    }
+
+    function addMessage(role, text, meta = {}) {
+      const el = document.createElement("div");
+      if (meta.id) el.dataset.id = meta.id;
+      if (role === "sys") { el.className = "sys"; el.textContent = text; }
+      else {
+        el.className = `msg ${role}`;
+        if (role !== "error") el.innerHTML = `<span class="who-label">${role === "moderator" ? "AI 모더레이터" : interview.code}</span>`;
+        const b = document.createElement("div");
+        b.className = "bubble";
+        b.textContent = text;
+        el.append(b);
+        if (meta.excluded) markExcluded(el);
+      }
+      $("chatIn").append(el);
+      scrollToEnd();
+      return el;
+    }
+
+    function markExcluded(el) {
+      if (el.classList.contains("excluded")) return;
+      el.classList.add("excluded");
+      el.append(Object.assign(document.createElement("span"), { className: "tag", textContent: "분석 제외" }));
+    }
+
+    function showTyping(on) {
+      let t = $("chatIn").querySelector(".typing");
+      if (on && !t) {
+        t = document.createElement("div");
+        t.className = "msg moderator typing";
+        t.innerHTML = '<span class="who-label">AI 모더레이터가 쓰는 중</span><div class="bubble"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>';
+        $("chatIn").append(t);
+        scrollToEnd();
+      } else if (!on && t) t.remove();
+    }
+
+    const scrollToEnd = () => requestAnimationFrame(() => { $("chatLog").scrollTop = $("chatLog").scrollHeight; });
+
+    function enableInput(on) {
+      $("input").disabled = !on;
+      $("sendBtn").disabled = !on || !$("input").value.trim();
+      if (on && matchMedia("(min-width: 720px)").matches) $("input").focus();
+    }
+
+    // text: 참가자가 보낸 말 (빈 문자열이면 첫 인사 또는 이어서), bubble: 화면에 먼저 그린 참가자 말풍선
+    async function requestModerator(text, bubble) {
+      sending = true;
+      enableInput(false);
+      showTyping(true);
+      try {
+        const { res, data } = await api("/interviews/me/messages", {
+          method: "POST", headers: { "Content-Type": "application/json", ...keyHeaders() }, body: JSON.stringify(text ? { text } : {}),
+        });
+        showTyping(false);
+        if (res.status === 404 || res.status === 410) return show("ended");
+        if (data.participantId && bubble) bubble.dataset.id = data.participantId;
+        if (!res.ok) {
+          // 참가자 말이 저장되지 않았으면 말풍선을 거두고 입력칸에 되돌려 다시 보내게 한다
+          if (data.code === "record_failed" && !data.participantId && bubble) {
+            bubble.remove();
+            input.value = text;
+            input.dispatchEvent(new Event("input"));
+            addMessage("error", "기록에 잠시 문제가 있어요. 다시 보내주세요.");
+            enableInput(true);
+            return;
+          }
+          // 참가자 말은 저장됐고 답만 못 받았으면, 다시 시도는 '이어서'
+          throw Object.assign(new Error(data.code === "record_failed" ? "기록에 잠시 문제가 있어요. 다시 시도해 주세요." : data.error || "답을 받지 못했어요."), { saved: !!data.participantId });
+        }
+        applyState(data);
+        if (data.excludedFrom) $("chatIn").querySelectorAll(".msg[data-id]").forEach((m) => { if (Number(m.dataset.id) >= data.excludedFrom) markExcluded(m); });
+        addMessage("moderator", data.message.content, data.message);
+        if (data.status === "completed" || data.status === "stopped") return finishChat(data.status);
+        enableInput(true);
+      } catch (err) {
+        showTyping(false);
+        const offline = err instanceof TypeError;
+        const el = addMessage("error", offline ? "연결이 끊겼어요. 다시 시도해 주세요." : err.message);
+        const retry = Object.assign(document.createElement("button"), { type: "button", textContent: "다시 시도" });
+        // 같은 말을 다시 보내도 서버가 두 번 저장하지 않는다. 저장된 게 확실하면 '이어서'로
+        retry.addEventListener("click", () => { el.remove(); requestModerator(err.saved ? "" : text, bubble); });
+        el.append(retry);
+        enableInput(true);
+      } finally {
+        sending = false;
+      }
+    }
+
+    let finished = false;
+    function finishChat(status) {
+      if (finished) return;
+      finished = true;
+      clearInterval(ticker);
+      enableInput(false);
+      $("input").placeholder = "인터뷰를 마쳤어요";
+      $("pauseBtn").hidden = true;
+      $("quitBtn").textContent = "참여 철회";
+      const d = document.createElement("div");
+      d.className = "done-card";
+      d.textContent = status === "stopped"
+        ? "여기까지 기록을 남기고 마쳤어요. 참여해 주셔서 감사합니다. 🙏 이 창은 닫으셔도 돼요."
+        : "인터뷰를 마쳤어요. 참여해 주셔서 감사합니다. 🙏 이 창은 닫으셔도 돼요.";
+      $("chatLog").append(d);
+      scrollToEnd();
+    }
+
+    // 입력창: 쓰는 만큼 늘어나고, Enter는 줄바꿈 (보내기는 버튼 / Ctrl+Enter)
+    const input = $("input");
+    input.addEventListener("input", () => {
+      input.style.height = "auto";
+      input.style.height = Math.min(input.scrollHeight, innerHeight * 0.4) + "px";
+      $("sendBtn").disabled = sending || !input.value.trim();
+    });
+    input.addEventListener("keydown", (e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); $("composer").requestSubmit(); } });
+    $("composer").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const text = input.value.trim();
+      if (!text || sending) return;
+      const bubble = addMessage("participant", text);
+      input.value = "";
+      input.style.height = "auto";
+      requestModerator(text, bubble);
+    });
+
+    // 잠시 쉬기 / 이어서 하기 — 시간이 멈춘다
+    function showPause(on) { $("pauseOverlay").hidden = !on; paused = on; }
+    $("pauseBtn").addEventListener("click", async () => {
+      showPause(true);
+      try { const { data } = await api("/interviews/me/pause", { method: "POST", headers: keyHeaders() }); applyState(data); } catch {}
+    });
+    $("resumeBtn").addEventListener("click", async () => {
+      try { const { data } = await api("/interviews/me/resume", { method: "POST", headers: keyHeaders() }); applyState(data); } catch {}
+      showPause(false);
+      enableInput(!sending);
+    });
+
+    // 그만하기: ① 기록을 남기고 종료 ② 참여 철회(내 기록 삭제). 마친 뒤에는 ②만
+    const QUIT_LABEL = { end: "기록을 남기고 종료", withdraw: "철회하고 기록 삭제" };
+    $("quitBtn").addEventListener("click", () => {
+      $("quitForm").reset();
+      $("optEnd").hidden = finished;
+      if (finished) document.querySelector("input[name=quit][value=withdraw]").checked = true;
+      updateQuit();
+      $("quitOverlay").hidden = false;
+    });
+    $("quitBack").addEventListener("click", () => { $("quitOverlay").hidden = true; });
+    $("quitForm").addEventListener("change", updateQuit);
+    function updateQuit() {
+      const v = document.querySelector("input[name=quit]:checked")?.value;
+      $("quitConfirm").disabled = !v;
+      $("quitConfirm").textContent = v ? QUIT_LABEL[v] : "골라 주세요";
+      $("quitConfirm").classList.toggle("danger", v === "withdraw");
+    }
+    $("quitForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const v = document.querySelector("input[name=quit]:checked")?.value;
+      if (!v) return;
+      $("quitConfirm").disabled = true;
+      $("quitConfirm").textContent = "처리하는 중…";
+      try {
+        const { res, data } = await api(`/interviews/me/${v}`, { method: "POST", headers: keyHeaders() });
+        if (!res.ok) throw new Error(data.error || "처리하지 못했어요.");
+        $("quitOverlay").hidden = true;
+        if (v === "withdraw") {
+          dropKey();
+          clearInterval(ticker);
+          document.title = "인터뷰 참여 · UXA";
+          show("withdrawn");
+          window.scrollTo({ top: 0 });
+        } else {
+          if (data.message) addMessage("moderator", data.message.content);
+          finishChat("stopped");
+        }
+      } catch (err) {
+        $("quitConfirm").textContent = err instanceof TypeError ? "연결이 끊겼어요. 다시 눌러 주세요." : err.message;
+        $("quitConfirm").disabled = false;
       }
     });
   </script>

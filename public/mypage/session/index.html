@@ -1,0 +1,972 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>세션 상세 · UXA</title>
+  <meta name="robots" content="noindex" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-soft: #f6f7fb;
+      --text: #14161f;
+      --text-sub: #5b6072;
+      --text-faint: #a3a7b7;
+      --line: #e4e6ee;
+      --accent: #4f46e5;
+      --accent-soft: #eef0ff;
+      --danger: #d92d20;
+      --good: #12805c;
+      --warn-bg: #fff8e6;
+      --warn: #8a5a00;
+      --radius: 16px;
+      --max: 1160px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      display: flex; flex-direction: column; min-height: 100vh;
+      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      word-break: keep-all;
+    }
+    a { color: inherit; text-decoration: none; }
+    button, input, textarea { font: inherit; color: inherit; }
+    [hidden] { display: none !important; }
+    .container { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+
+    /* 내비게이션 (랜딩과 동일) */
+    .nav {
+      position: sticky; top: 0; z-index: 10;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--line);
+    }
+    .nav .container {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 24px; height: 64px;
+    }
+    .logo { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
+    .logo span { color: var(--accent); }
+    .nav nav { min-width: 0; }
+    .menu { display: flex; gap: 4px; list-style: none; overflow-x: auto; }
+    .menu a {
+      display: block; padding: 8px 14px; border-radius: 999px;
+      font-size: 14px; font-weight: 500; color: var(--text-sub); white-space: nowrap;
+    }
+    .menu a:hover { background: var(--accent-soft); color: var(--accent); }
+
+    /* 본문 */
+    main { flex: 1; padding: 40px 0 100px; background: var(--bg-soft); }
+    .wrap { max-width: 1080px; margin: 0 auto; }
+    .back { display: inline-flex; gap: 6px; font-size: 14px; font-weight: 600; color: var(--text-sub); }
+    .back:hover { color: var(--accent); }
+    .card { margin-top: 16px; padding: 24px 26px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); }
+    .card h2 { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; }
+    .muted { color: var(--text-sub); }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 9px 14px; border: 1px solid var(--line); border-radius: 10px; background: #fff;
+      font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: background .15s, border-color .15s;
+    }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn:disabled { opacity: .55; cursor: not-allowed; }
+    .btn-accent { border-color: var(--accent); background: var(--accent); color: #fff; }
+    .btn-accent:hover { background: #4338ca; color: #fff; }
+    .btn-danger { border-color: var(--danger); background: var(--danger); color: #fff; }
+    .btn-danger:hover { background: #b42318; border-color: #b42318; color: #fff; }
+    .btn-sm { padding: 6px 11px; font-size: 13px; border-radius: 8px; }
+
+    .chip { display: inline-block; padding: 1px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; background: var(--bg-soft); border: 1px solid var(--line); color: var(--text-sub); white-space: nowrap; }
+    .chip.open, .chip.ing { border-color: #c7d2fe; background: var(--accent-soft); color: var(--accent); }
+    .chip.done { border-color: #abefc6; background: #ecfdf3; color: var(--good); }
+    .chip.stop { border-color: #fedf89; background: var(--warn-bg); color: var(--warn); }
+    .chip.wd, .chip.closed { color: var(--text-faint); }
+
+    /* 세션 정보 */
+    .info-top { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 20px; align-items: flex-start; }
+    .info-top h1 { margin-top: 6px; font-size: 25px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.35; overflow-wrap: anywhere; }
+    .facts { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin-top: 16px; font-size: 14.5px; }
+    .facts dt { color: var(--text-sub); }
+    .facts dd { overflow-wrap: anywhere; }
+    .facts a { color: var(--accent); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+    .link-row { display: flex; gap: 8px; margin-top: 18px; }
+    .link-row input { flex: 1; min-width: 0; padding: 9px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg-soft); font-family: ui-monospace, Consolas, monospace; font-size: 13px; }
+    .closed-note { margin-top: 10px; padding: 9px 12px; border-radius: 10px; background: var(--bg-soft); font-size: 13.5px; color: var(--text-sub); }
+
+    /* 참가자 */
+    .list-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; }
+    .summary { font-size: 14px; color: var(--text-sub); }
+    table.people { width: 100%; margin-top: 14px; border-collapse: collapse; font-size: 14px; }
+    .people th { padding: 8px 10px; text-align: left; font-size: 12.5px; font-weight: 600; color: var(--text-faint); border-bottom: 1px solid var(--line); white-space: nowrap; }
+    .people td { padding: 11px 10px; border-bottom: 1px solid var(--line); vertical-align: middle; font-variant-numeric: tabular-nums; }
+    .people tr:last-child td { border-bottom: 0; }
+    .people tr.sel td { background: var(--accent-soft); }
+    .people .code { font-weight: 800; }
+    .people .wd td { color: var(--text-faint); }
+    .people .go { text-align: right; }
+    .empty { padding: 32px 16px; text-align: center; font-size: 14.5px; color: var(--text-sub); }
+
+    /* 전사 */
+    .tr-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; align-items: flex-start; }
+    .tr-head h2 { font-size: 20px; }
+    .tr-meta { margin-top: 4px; display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 13.5px; color: var(--text-sub); }
+    .mask-note { margin-top: 14px; padding: 11px 14px; border-radius: 12px; background: var(--warn-bg); color: var(--warn); font-size: 13.5px; }
+    .mask-note b { font-weight: 700; }
+    .cols { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 0 16px; margin-top: 18px; padding: 0 2px 6px; font-size: 12.5px; font-weight: 600; color: var(--text-faint); border-bottom: 1px solid var(--line); }
+    .row { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 10px 16px; padding: 14px 2px; border-bottom: 1px solid var(--line); }
+    .row.excluded { opacity: .5; }
+    .utter .who { display: flex; gap: 8px; align-items: baseline; font-size: 12.5px; color: var(--text-sub); }
+    .utter .who b { font-size: 13px; color: var(--text); }
+    .utter.participant .who b { color: var(--accent); }
+    .utter .t { font-variant-numeric: tabular-nums; color: var(--text-faint); }
+    .utter .text { margin-top: 4px; font-size: 15px; white-space: pre-wrap; overflow-wrap: anywhere; }
+    .utter.moderator .text { color: var(--text-sub); }
+    .pii { display: inline; padding: 0 4px; border: 0; border-radius: 5px; font-size: inherit; cursor: pointer; }
+    .pii.on { background: #fde68a; color: #713f12; font-weight: 700; font-family: ui-monospace, Consolas, monospace; font-size: .86em; }
+    .pii.on.manual { background: #fecaca; color: #7f1d1d; }
+    .pii.off { background: none; color: inherit; outline: 1.5px dashed #f59e0b; outline-offset: 1px; }
+    .notes { display: grid; gap: 6px; }
+    .notes label { display: grid; grid-template-columns: 34px 1fr; gap: 6px; align-items: start; font-size: 12.5px; color: var(--text-sub); }
+    .notes label span { padding-top: 7px; font-weight: 600; }
+    .notes textarea { width: 100%; min-height: 36px; padding: 7px 10px; resize: vertical; border: 1px solid var(--line); border-radius: 8px; background: var(--bg-soft); font-size: 13.5px; line-height: 1.5; }
+    .notes textarea:focus { outline: none; border-color: var(--accent); background: #fff; }
+    .notes .saved { justify-self: end; font-size: 11.5px; color: var(--text-faint); min-height: 1em; }
+    .ex-group { margin: 10px 0; border: 1px dashed var(--line); border-radius: 12px; }
+    .ex-group > button { display: flex; width: 100%; justify-content: space-between; gap: 10px; padding: 11px 14px; border: 0; background: none; font-size: 13.5px; color: var(--text-sub); cursor: pointer; text-align: left; }
+    .ex-group > button b { color: var(--text); }
+    .ex-group .ex-body { padding: 0 12px 4px; }
+    .mask-btn { position: absolute; z-index: 30; padding: 6px 12px; border: 0; border-radius: 999px; background: var(--text); color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 6px 20px rgba(20, 22, 31, .25); }
+
+    /* 디브리핑 */
+    .db-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; align-items: center; }
+    .db-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .draft-banner { display: flex; align-items: center; gap: 12px; margin-top: 16px; padding: 14px 16px; border: 2px dashed #f59e0b; border-radius: 14px; background: var(--warn-bg); color: var(--warn); }
+    .draft-banner .big { font-size: 22px; font-weight: 900; letter-spacing: .02em; }
+    .draft-banner p { font-size: 13.5px; }
+    .final-banner { margin-top: 16px; padding: 12px 16px; border-radius: 14px; background: #ecfdf3; color: #05603a; font-size: 14px; font-weight: 600; }
+    .db-sources { margin-top: 10px; font-size: 13.5px; color: var(--text-sub); }
+    .db-sec { margin-top: 22px; }
+    .db-sec h3 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+    .db-sec h3 small { margin-left: 6px; font-weight: 500; color: var(--text-faint); }
+    .db-item { position: relative; padding: 12px 40px 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+    .db-item + .db-item { margin-top: 8px; }
+    .db-item.low { border-color: #f59e0b; background: #fffbeb; }
+    .db-item textarea, .db-item input[type=text] { width: 100%; padding: 6px 8px; border: 1px solid transparent; border-radius: 8px; background: transparent; font-size: 14.5px; line-height: 1.5; resize: vertical; }
+    .db-item textarea:hover, .db-item input[type=text]:hover { border-color: var(--line); }
+    .db-item textarea:focus, .db-item input[type=text]:focus { outline: none; border-color: var(--accent); background: #fff; }
+    .db-item .meta { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; margin-top: 6px; font-size: 12.5px; color: var(--text-sub); }
+    .db-item select { padding: 3px 6px; border: 1px solid var(--line); border-radius: 8px; background: #fff; font: inherit; font-size: 12.5px; }
+    .ref { padding: 1px 7px; border: 1px solid var(--line); border-radius: 999px; background: var(--bg-soft); font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; color: var(--text-sub); cursor: pointer; }
+    .ref:hover { border-color: var(--accent); color: var(--accent); }
+    .warn-tag { padding: 1px 8px; border-radius: 999px; background: #fde68a; color: #713f12; font-size: 11.5px; font-weight: 700; }
+    .db-item .del { position: absolute; top: 8px; right: 8px; width: 26px; height: 26px; border: 0; border-radius: 8px; background: none; color: var(--text-faint); font-size: 16px; cursor: pointer; }
+    .db-item .del:hover { background: #fff4f3; color: var(--danger); }
+    .db-item.quote textarea { font-size: 15px; }
+    .add-row { margin-top: 8px; }
+    .db-empty { padding: 28px 16px; text-align: center; font-size: 14.5px; color: var(--text-sub); border: 1px dashed var(--line); border-radius: 12px; margin-top: 14px; }
+    .row.flash { animation: flash 1.6s ease-out; }
+    @keyframes flash { 0%, 30% { background: #fef3c7; } 100% { background: transparent; } }
+
+    .gate { padding: 56px 24px; text-align: center; }
+    .gate h1 { font-size: 21px; }
+    .gate p { margin-top: 6px; color: var(--text-sub); }
+    .gate .btn { margin-top: 18px; }
+    .loading { padding: 48px; text-align: center; color: var(--text-sub); }
+
+    dialog { width: min(420px, calc(100vw - 32px)); margin: auto; padding: 0; border: 0; border-radius: var(--radius); box-shadow: 0 20px 60px rgba(20, 22, 31, .2); }
+    dialog::backdrop { background: rgba(20, 22, 31, .4); }
+    dialog form { padding: 26px 24px 22px; }
+    dialog h2 { font-size: 18px; font-weight: 700; }
+    dialog p { margin-top: 6px; font-size: 14.5px; color: var(--text-sub); }
+    dialog .row-btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 22px; }
+
+    .toast {
+      position: fixed; left: 50%; bottom: 32px; z-index: 40; transform: translate(-50%, 20px);
+      padding: 10px 18px; border-radius: 999px; background: var(--text); color: #fff; font-size: 14px;
+      opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    /* 푸터 (랜딩과 동일) */
+    footer { padding: 40px 0; border-top: 1px solid var(--line); }
+    footer .container {
+      display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px;
+      font-size: 14px; color: var(--text-sub);
+    }
+    footer .logo { font-size: 18px; color: var(--text); }
+
+    @media (max-width: 760px) {
+      .container { padding: 0 16px; }
+      .card { padding: 20px 16px; }
+      .cols { display: none; }
+      .row { grid-template-columns: 1fr; }
+      .link-row { flex-direction: column; }
+      table.people thead { display: none; }
+      table.people, .people tbody, .people tr, .people td { display: block; width: 100%; }
+      .people tr { display: grid; grid-template-columns: auto 1fr auto; gap: 2px 10px; padding: 12px 4px; border-bottom: 1px solid var(--line); }
+      .people td { padding: 0; border: 0; }
+      .people td[data-k="code"] { grid-row: span 2; align-self: center; font-size: 16px; }
+      .people td[data-k="times"], .people td[data-k="dur"], .people td[data-k="n"] { grid-column: 2; font-size: 12.5px; color: var(--text-sub); }
+      .people td.go { grid-column: 3; grid-row: 1 / span 3; align-self: center; }
+    }
+    @media (max-width: 640px) {
+      .nav .container { flex-direction: column; align-items: flex-start; height: auto; padding-top: 12px; padding-bottom: 8px; gap: 6px; }
+      .nav nav { width: 100%; }
+      .menu a { padding: 8px 12px 8px 0; }
+      main { padding: 28px 0 72px; }
+    }
+  </style>
+</head>
+<body data-auth="required">
+
+  <header class="nav">
+    <div class="container">
+      <a href="../../index.html" class="logo">UX<span>A</span></a>
+      <nav aria-label="에이전트 메뉴">
+        <ul class="menu">
+          <li><a href="../../guide/index.html">인터뷰 가이드</a></li>
+          <li><a href="../../moderator/index.html">인터뷰 모더레이터</a></li>
+          <li><a href="../../persona/index.html">페르소나</a></li>
+          <li><a href="../../journey/index.html">저니맵</a></li>
+          <li><a href="../../scenario/index.html">시나리오 보드</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="wrap">
+        <a class="back" href="/mypage/#sessions">← 내 인터뷰 세션</a>
+
+        <div class="card loading" id="loading">세션을 불러오는 중…</div>
+
+        <section class="card gate" id="denied" hidden>
+          <h1>볼 수 없는 세션입니다</h1>
+          <p>주소가 잘못됐거나, 다른 계정에서 만든 세션이에요.</p>
+          <a class="btn" href="/mypage/#sessions">내 인터뷰 세션으로</a>
+        </section>
+
+        <div id="content" hidden>
+          <!-- 세션 정보 -->
+          <section class="card" aria-labelledby="sName">
+            <div class="info-top">
+              <div>
+                <span class="chip" id="sStatus"></span>
+                <h1 id="sName"></h1>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn" type="button" id="exportAll">세션 전체 내보내기 (.md)</button>
+                <button class="btn" type="button" id="closeBtn">링크 닫기</button>
+              </div>
+            </div>
+            <dl class="facts">
+              <dt>연구 주제</dt><dd id="sTopic"></dd>
+              <dt>사용한 가이드</dt><dd id="sGuide"></dd>
+              <dt>세션 시간</dt><dd id="sDuration"></dd>
+              <dt>만든 날짜</dt><dd id="sCreated"></dd>
+            </dl>
+            <div class="link-row">
+              <input type="text" id="linkInput" readonly aria-label="참가자 링크" />
+              <button class="btn btn-accent" type="button" id="copyBtn">참가자 링크 복사</button>
+            </div>
+            <p class="closed-note" id="closedNote" hidden></p>
+          </section>
+
+          <!-- 참가자 -->
+          <section class="card" aria-labelledby="pTitle">
+            <div class="list-head">
+              <h2 id="pTitle">참가자</h2>
+              <span class="summary" id="pSummary"></span>
+            </div>
+            <table class="people" id="people">
+              <thead><tr><th>코드</th><th>상태</th><th>시작 · 종료</th><th>소요</th><th>발화</th><th></th></tr></thead>
+              <tbody id="peopleBody"></tbody>
+            </table>
+            <p class="empty" id="noPeople" hidden>아직 참가자가 없어요. 참가자 링크를 보내 보세요.</p>
+          </section>
+
+          <!-- 디브리핑 -->
+          <section class="card" id="debrief" aria-labelledby="dbTitle">
+            <div class="db-head">
+              <h2 id="dbTitle">디브리핑</h2>
+              <div class="db-actions">
+                <button class="btn" type="button" id="dbExport" hidden>마크다운 내보내기</button>
+                <button class="btn" type="button" id="dbFinalize" hidden>확정</button>
+                <button class="btn btn-accent" type="button" id="dbGenerate">디브리핑 초안 만들기</button>
+              </div>
+            </div>
+            <p class="db-sources" id="dbSources"></p>
+            <div id="dbBody"></div>
+          </section>
+
+          <!-- 전사 -->
+          <section class="card" id="transcript" hidden aria-labelledby="tTitle">
+            <div class="tr-head">
+              <div>
+                <h2 id="tTitle"></h2>
+                <div class="tr-meta" id="tMeta"></div>
+              </div>
+              <button class="btn" type="button" id="exportOne"></button>
+            </div>
+            <p class="mask-note" id="maskNote"></p>
+            <div class="cols"><span>발화</span><span>리서처 메모 · 관찰 / 해석</span></div>
+            <div id="rows"></div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <span class="logo">UXA · UX Agents</span>
+      <span>만든 사람 [내 이름] · © 2026</span>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast" role="status"></div>
+  <button class="mask-btn" type="button" id="maskBtn" hidden>선택한 부분 가리기</button>
+
+  <dialog id="regenDialog" aria-labelledby="regenTitle">
+    <form method="dialog">
+      <h2 id="regenTitle">초안을 새로 만들까요?</h2>
+      <p>지금 고치던 초안은 새 초안으로 바뀌어요. 이미 확정한 디브리핑은 그대로 남아요.</p>
+      <div class="row-btns">
+        <button class="btn" value="cancel">취소</button>
+        <button class="btn btn-accent" value="go">새로 만들기</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="closeDialog" aria-labelledby="closeTitle">
+    <form method="dialog">
+      <h2 id="closeTitle">참가자 링크를 닫을까요?</h2>
+      <p>닫으면 새 참가자를 받지 않고, 진행 중인 참가자도 더 이어서 하지 못해요. 지금까지의 기록은 그대로 남아요.</p>
+      <div class="row-btns">
+        <button class="btn" value="cancel">취소</button>
+        <button class="btn btn-danger" value="close">링크 닫기</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="/js/auth.js"></script>
+  <script src="/js/debrief.js"></script>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const sessionId = new URLSearchParams(location.search).get("id") || "";
+    const STATUS = {
+      consented: ["진행 중", "ing"], in_progress: ["진행 중", "ing"], completed: ["완료", "done"],
+      stopped: ["중간 종료", "stop"], withdrawn: ["철회", "wd"],
+    };
+    let session = null, people = [], current = null; // current: { interview, messages }
+
+    const pad2 = (n) => String(n).padStart(2, "0");
+    const codeOf = (p) => p.code || `P${pad2(p.seq)}`;
+    const intOf = (p) => `INT-${pad2(p.seq)}`;
+    const fmtDate = (sec) => { const d = new Date(sec * 1000); return `${d.getFullYear()}.${pad2(d.getMonth() + 1)}.${pad2(d.getDate())}`; };
+    const fmtTime = (sec) => { const d = new Date(sec * 1000); return `${pad2(d.getMonth() + 1)}.${pad2(d.getDate())} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`; };
+    const fmtDur = (sec) => (sec == null ? "—" : sec < 60 ? `${sec}초` : `${Math.round(sec / 60)}분`);
+    const offset = (sec, start) => { const x = Math.max(0, sec - start); return `${pad2(Math.floor(x / 60))}:${pad2(x % 60)}`; };
+
+    function show(state) {
+      $("loading").hidden = state !== "loading";
+      $("denied").hidden = state !== "denied";
+      $("content").hidden = state !== "content";
+    }
+
+    // ── 불러오기 (모두 Worker를 거친다. 남의 세션이면 404) ──
+    async function load() {
+      if (!UXA.getSession()) return;
+      if (!/^[0-9a-f-]{36}$/.test(sessionId)) return show("denied");
+      try {
+        const { res, data } = await UXA.api(`/api/sessions/${sessionId}`);
+        if (res.status === 401) { UXA.clearSession(); location.replace(UXA.loginUrl()); return; }
+        if (!res.ok) return show("denied");
+        session = data.session;
+        people = data.participants;
+        renderSession();
+        renderPeople();
+        show("content");
+        loadDebrief();
+        const want = new URLSearchParams(location.search).get("p");
+        const pick = people.find((p) => p.id === want);
+        if (pick) openTranscript(pick.id);
+      } catch {
+        $("loading").textContent = "서버에 연결하지 못했어요. 새로고침해 주세요.";
+      }
+    }
+    load();
+
+    function renderSession() {
+      document.title = `${session.name} · 세션 상세 · UXA`;
+      const open = session.status === "open";
+      $("sStatus").textContent = open ? "참가자 모집 중" : "링크 닫힘";
+      $("sStatus").className = `chip ${open ? "open" : "closed"}`;
+      $("sName").textContent = session.name;
+      $("sTopic").textContent = session.topic;
+      $("sGuide").replaceChildren();
+      if (session.guide_id && session.guide_exists) {
+        $("sGuide").append(Object.assign(document.createElement("a"), { href: `/guide/?id=${encodeURIComponent(session.guide_id)}`, textContent: session.guide_title }));
+      } else {
+        $("sGuide").textContent = session.guide_id ? `${session.guide_title} (원본 가이드는 삭제됨)` : session.guide_title;
+      }
+      $("sDuration").textContent = `${session.duration}분${session.expected ? ` · 예상 참가자 ${session.expected}명` : ""}`;
+      $("sCreated").textContent = fmtDate(session.created_at);
+      $("linkInput").value = `${location.origin}/interview/#${session.token}`;
+      $("closeBtn").disabled = !open;
+      $("closeBtn").textContent = open ? "링크 닫기" : "링크 닫힘";
+      $("closedNote").hidden = open;
+      if (!open) $("closedNote").textContent = `${session.closed_at ? fmtTime(session.closed_at) + "에 " : ""}링크를 닫았어요. 이 링크로는 새 참가자가 들어올 수 없어요.`;
+    }
+
+    function renderPeople() {
+      const count = (k) => people.filter((p) => STATUS[p.status]?.[1] === k).length;
+      const active = people.filter((p) => p.status !== "withdrawn").length;
+      $("pSummary").textContent = `참가자 ${active}명 · 진행 중 ${count("ing")} · 완료 ${count("done")}${count("stop") ? ` · 중간 종료 ${count("stop")}` : ""} · 철회 ${count("wd")}`;
+      $("noPeople").hidden = people.length > 0;
+      $("people").hidden = people.length === 0;
+      $("peopleBody").replaceChildren(...people.map((p) => {
+        const tr = document.createElement("tr");
+        const [label, cls] = STATUS[p.status] || [p.status, ""];
+        if (p.status === "withdrawn") {
+          // 철회: 코드와 '철회'만
+          tr.className = "wd";
+          tr.innerHTML = `<td class="code" data-k="code"></td><td data-k="st"><span class="chip wd">철회</span></td><td data-k="times"></td><td data-k="dur"></td><td data-k="n"></td><td class="go"></td>`;
+          tr.querySelector(".code").textContent = codeOf(p);
+          return tr;
+        }
+        tr.innerHTML = `<td class="code" data-k="code"></td><td data-k="st"><span class="chip ${cls}"></span></td><td data-k="times"></td><td data-k="dur"></td><td data-k="n"></td><td class="go"><button class="btn btn-sm" type="button">전사 보기</button></td>`;
+        tr.querySelector(".code").textContent = codeOf(p);
+        tr.querySelector(".chip").textContent = label;
+        tr.querySelector('[data-k="times"]').textContent = `${p.started_at ? fmtTime(p.started_at) : "—"} ~ ${p.finished_at ? fmtTime(p.finished_at) : STATUS[p.status]?.[1] === "ing" ? "진행 중" : "—"}`;
+        tr.querySelector('[data-k="dur"]').textContent = fmtDur(p.duration_sec);
+        tr.querySelector('[data-k="n"]').textContent = `발화 ${p.messages}개`;
+        tr.dataset.id = p.id;
+        tr.querySelector("button").addEventListener("click", () => openTranscript(p.id));
+        return tr;
+      }));
+    }
+
+    // ── 링크 복사·닫기 ──
+    $("copyBtn").addEventListener("click", () => copy($("linkInput").value, "참가자 링크를 복사했어요"));
+    $("closeBtn").addEventListener("click", () => $("closeDialog").showModal());
+    $("closeDialog").addEventListener("close", async () => {
+      if ($("closeDialog").returnValue !== "close") return;
+      const { res, data } = await UXA.api(`/api/sessions/${sessionId}/close`, { method: "POST" }).catch(() => ({ res: { ok: false }, data: {} }));
+      if (!res.ok) return toast(data.error || "링크를 닫지 못했어요.");
+      session = data.session;
+      renderSession();
+      toast("링크를 닫았어요");
+    });
+
+    // ── 전사 ──
+    async function fetchTranscript(id) {
+      const { res, data } = await UXA.api(`/api/sessions/${sessionId}/interviews/${encodeURIComponent(id)}`);
+      if (!res.ok) throw new Error(data.error || "전사를 불러오지 못했어요.");
+      return data;
+    }
+
+    async function openTranscript(id) {
+      document.querySelectorAll("#peopleBody tr").forEach((tr) => tr.classList.toggle("sel", tr.dataset.id === id));
+      $("transcript").hidden = false;
+      $("rows").innerHTML = `<p class="empty">전사를 불러오는 중… 처음 열 때는 개인정보를 찾느라 조금 걸려요.</p>`;
+      $("transcript").scrollIntoView({ behavior: "smooth", block: "start" });
+      history.replaceState(null, "", `?id=${sessionId}&p=${id}`);
+      try {
+        current = await fetchTranscript(id);
+        renderTranscript();
+      } catch (err) {
+        $("rows").innerHTML = "";
+        $("rows").append(Object.assign(document.createElement("p"), { className: "empty", textContent: err.message }));
+      }
+    }
+
+    function renderTranscript() {
+      const iv = current.interview, msgs = current.messages;
+      const [label] = STATUS[iv.status] || [iv.status];
+      $("tTitle").textContent = `${intOf(iv)}_${codeOf(iv)} 전사`;
+      const profile = Object.values(iv.profile || {}).filter(Boolean);
+      $("tMeta").replaceChildren(...[
+        label, iv.started_at && `시작 ${fmtTime(iv.started_at)}`, iv.finished_at && `종료 ${fmtTime(iv.finished_at)}`,
+        `소요 ${fmtDur(iv.duration_sec)}`, `발화 ${msgs.length}개`, profile.length && `고른 답: ${profile.join(" · ")}`,
+      ].filter(Boolean).map((t) => Object.assign(document.createElement("span"), { textContent: t })));
+      $("exportOne").textContent = `기록 노트 내보내기 (${intOf(iv)}_${codeOf(iv)}.md)`;
+      updateMaskNote();
+
+      // 연속된 분석 제외 발화는 하나로 묶어 기본은 접어 둔다
+      const rows = $("rows");
+      rows.replaceChildren();
+      if (!msgs.length) { rows.innerHTML = `<p class="empty">아직 대화가 없어요.</p>`; return; }
+      let group = null;
+      for (const m of msgs) {
+        const row = renderRow(m, iv.started_at || msgs[0].created_at);
+        if (m.excluded) {
+          if (!group) {
+            group = document.createElement("div");
+            group.className = "ex-group";
+            group.innerHTML = `<button type="button" aria-expanded="false"><span><b>분석 제외 구간</b> · 참가자 요청 · 발화 <span class="n">0</span>개</span><span class="tog">펼치기</span></button><div class="ex-body" hidden></div>`;
+            const btn = group.querySelector("button"), body = group.querySelector(".ex-body");
+            btn.addEventListener("click", () => {
+              const open = body.hidden;
+              body.hidden = !open;
+              btn.setAttribute("aria-expanded", open);
+              btn.querySelector(".tog").textContent = open ? "접기" : "펼치기";
+            });
+            rows.append(group);
+          }
+          group.querySelector(".ex-body").append(row);
+          group.querySelector(".n").textContent = group.querySelectorAll(".row").length;
+        } else {
+          group = null;
+          rows.append(row);
+        }
+      }
+    }
+
+    function renderRow(m, start) {
+      const row = document.createElement("div");
+      row.className = `row${m.excluded ? " excluded" : ""}`;
+      row.dataset.id = m.id;
+      const who = m.role === "participant" ? codeOf(current.interview) : "모더레이터";
+      row.innerHTML = `
+        <div class="utter ${m.role}">
+          <div class="who"><b></b><span class="t"></span></div>
+          <div class="text"></div>
+        </div>
+        <div class="notes">
+          <label><span>관찰</span><textarea rows="1" data-k="observation" placeholder="행동·표정·말투 등 본 것"></textarea></label>
+          <label><span>해석</span><textarea rows="1" data-k="interpretation" placeholder="리서처의 해석·가설"></textarea></label>
+          <span class="saved"></span>
+        </div>`;
+      row.querySelector(".who b").textContent = who;
+      row.querySelector(".t").textContent = offset(m.created_at, start);
+      renderText(row.querySelector(".text"), m);
+      row.querySelectorAll("textarea").forEach((ta) => {
+        ta.value = m[ta.dataset.k] || "";
+        autosize(ta);
+        ta.addEventListener("input", () => { autosize(ta); queueNote(m, row); });
+      });
+      return row;
+    }
+
+    function autosize(ta) { ta.style.height = "auto"; ta.style.height = Math.max(36, ta.scrollHeight + 2) + "px"; }
+
+    // ── 메모 저장 (입력을 멈추면 저장) ──
+    const noteTimers = new Map();
+    function queueNote(m, row) {
+      const saved = row.querySelector(".saved");
+      saved.textContent = "저장 중…";
+      clearTimeout(noteTimers.get(m.id));
+      noteTimers.set(m.id, setTimeout(async () => {
+        const body = { observation: row.querySelector('[data-k="observation"]').value, interpretation: row.querySelector('[data-k="interpretation"]').value };
+        const { res } = await UXA.api(`/api/sessions/${sessionId}/messages/${m.id}/note`, { method: "PUT", body }).catch(() => ({ res: { ok: false } }));
+        if (res.ok) { m.observation = body.observation; m.interpretation = body.interpretation; saved.textContent = "저장됨"; }
+        else saved.textContent = "저장하지 못했어요. 다시 입력해 주세요.";
+      }, 700));
+    }
+
+    // ── 마스킹 ──
+    // 가린 곳: [REDACTED·종류] (누르면 풀기), 푼 곳: 점선 테두리 (누르면 다시 가리기), 글자를 선택하면 '더 가리기'
+    function renderText(el, m) {
+      el.replaceChildren();
+      let at = 0;
+      // 가리지 않은 글자 조각: data-s에 원문 시작 위치를 적어 두어, 드래그한 곳을 원문 위치로 바꿀 수 있게
+      const plain = (s, e) => {
+        if (e <= s) return;
+        const span = Object.assign(document.createElement("span"), { className: "plain", textContent: m.content.slice(s, e) });
+        span.dataset.s = s;
+        el.append(span);
+      };
+      m.pii.forEach((sp, i) => {
+        plain(at, sp.s);
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = `pii ${sp.on ? "on" : "off"}${sp.src === "manual" ? " manual" : ""}`;
+        b.textContent = sp.on ? `[REDACTED·${sp.kind}]` : m.content.slice(sp.s, sp.e);
+        b.title = sp.on ? `${sp.src === "manual" ? "직접 가린" : "자동으로 가린"} ${sp.kind} — 누르면 풀어요` : "가림을 푼 곳 — 누르면 다시 가려요";
+        b.addEventListener("click", () => {
+          // 직접 가린 곳을 풀면 구간 자체를 없앤다
+          if (sp.src === "manual" && sp.on) m.pii.splice(i, 1);
+          else sp.on = !sp.on;
+          saveSpans(m, el);
+        });
+        el.append(b);
+        at = sp.e;
+      });
+      plain(at, m.content.length);
+    }
+
+    async function saveSpans(m, el) {
+      renderText(el, m);
+      updateMaskNote();
+      const { res, data } = await UXA.api(`/api/sessions/${sessionId}/messages/${m.id}/redactions`, { method: "PUT", body: { spans: m.pii } }).catch(() => ({ res: { ok: false }, data: {} }));
+      if (!res.ok) toast(data.error || "마스킹을 저장하지 못했어요.");
+    }
+
+    function updateMaskNote() {
+      const all = current.messages.flatMap((m) => m.pii);
+      const auto = all.filter((x) => x.src === "auto" && x.on).length, manual = all.filter((x) => x.src === "manual").length, off = all.filter((x) => !x.on).length;
+      $("maskNote").innerHTML = "";
+      $("maskNote").append(
+        Object.assign(document.createElement("b"), { textContent: `개인정보 자동 가림 ${auto}곳` }),
+        ` · 직접 가림 ${manual}곳 · 푼 곳 ${off}곳. 노란 [REDACTED]를 누르면 풀고, 다시 누르면 가려요. 글자를 드래그하면 더 가릴 수 있어요. 내보내기에도 그대로 반영돼요.`,
+      );
+    }
+
+    // 선택한 글자 → 원문 위치로 바꿔 '가리기' 버튼 띄우기
+    let pending = null;
+    function selectionTarget() {
+      const sel = getSelection();
+      if (!sel || sel.isCollapsed || !sel.rangeCount) return null;
+      const r = sel.getRangeAt(0);
+      const a = r.startContainer.parentElement?.closest(".plain"), b = r.endContainer.parentElement?.closest(".plain");
+      if (!a || !b) return null;
+      const textEl = a.closest(".text");
+      if (!textEl || textEl !== b.closest(".text")) return null;
+      const row = textEl.closest(".row");
+      const m = current.messages.find((x) => String(x.id) === row.dataset.id);
+      const s = Number(a.dataset.s) + r.startOffset, e = Number(b.dataset.s) + r.endOffset;
+      if (!(e > s)) return null;
+      // 이미 가린 구간과 겹치면 안 된다
+      if (m.pii.some((x) => s < x.e && e > x.s)) return null;
+      return { m, s, e, el: textEl, rect: r.getBoundingClientRect() };
+    }
+    document.addEventListener("selectionchange", () => {
+      clearTimeout(pending?.t);
+      const t = setTimeout(() => {
+        const target = current && selectionTarget();
+        if (!target) { $("maskBtn").hidden = true; return; }
+        pending = { ...target };
+        $("maskBtn").hidden = false;
+        $("maskBtn").style.left = `${Math.max(8, target.rect.left + scrollX)}px`;
+        $("maskBtn").style.top = `${target.rect.bottom + scrollY + 8}px`;
+      }, 250);
+      pending = { ...(pending || {}), t };
+    });
+    $("maskBtn").addEventListener("mousedown", (e) => e.preventDefault());
+    $("maskBtn").addEventListener("click", () => {
+      if (!pending?.m) return;
+      const { m, s, e, el } = pending;
+      m.pii.push({ s, e, kind: "기타", src: "manual", on: true });
+      m.pii.sort((x, y) => x.s - y.s);
+      getSelection().removeAllRanges();
+      $("maskBtn").hidden = true;
+      saveSpans(m, el);
+      toast("선택한 부분을 가렸어요");
+    });
+
+    // ── 내보내기: 기록 노트 마크다운 (INT-01_P01.md) ──
+    const masked = (m) => {
+      let out = "", at = 0;
+      for (const sp of m.pii) { out += m.content.slice(at, sp.s) + (sp.on ? "[REDACTED]" : m.content.slice(sp.s, sp.e)); at = sp.e; }
+      return out + m.content.slice(at);
+    };
+
+    function noteMarkdown(t, withHeader = true) {
+      const iv = t.interview, msgs = t.messages, code = codeOf(iv);
+      const [label] = STATUS[iv.status] || [iv.status];
+      const lines = [];
+      if (withHeader) {
+        lines.push("---", `session: ${session.name}`, `topic: ${session.topic}`, `interview: ${intOf(iv)}`, `participant: ${code}`, `status: ${label}`,
+          `started: ${iv.started_at ? fmtTime(iv.started_at) : "-"}`, `ended: ${iv.finished_at ? fmtTime(iv.finished_at) : "-"}`, `duration: ${fmtDur(iv.duration_sec)}`,
+          `profile: ${Object.values(iv.profile || {}).join(", ") || "-"}`, `masking: [REDACTED] = 개인을 특정할 수 있는 정보 (자동 탐지 + 리서처 검토)`, "---", "");
+      }
+      lines.push(`# ${intOf(iv)}_${code} 기록 노트`, "", "> 발화는 따옴표 그대로, 관찰과 해석은 리서처 메모로 분리했습니다. 참가자가 빼 달라고 한 구간은 내용을 싣지 않았습니다.", "");
+      const start = iv.started_at || msgs[0]?.created_at || 0;
+      let skip = 0;
+      const flushSkip = () => { if (skip) { lines.push(`*(분석 제외 구간 — 참가자 요청으로 내용을 싣지 않음, 발화 ${skip}개)*`, ""); skip = 0; } };
+      for (const m of msgs) {
+        if (m.excluded) { skip++; continue; }
+        flushSkip();
+        lines.push(`### [${offset(m.created_at, start)}] ${m.role === "participant" ? code : "모더레이터"}`, "", `"${masked(m)}"`, "");
+        if (m.observation.trim()) lines.push(`- **관찰**: ${m.observation.trim()}`);
+        if (m.interpretation.trim()) lines.push(`- **해석**: ${m.interpretation.trim()}`);
+        if (m.observation.trim() || m.interpretation.trim()) lines.push("");
+      }
+      flushSkip();
+      return lines.join("\n");
+    }
+
+    $("exportOne").addEventListener("click", () => {
+      if (!current) return;
+      download(`${intOf(current.interview)}_${codeOf(current.interview)}.md`, noteMarkdown(current));
+    });
+
+    $("exportAll").addEventListener("click", async () => {
+      const btn = $("exportAll");
+      btn.disabled = true;
+      btn.textContent = "모으는 중…";
+      try {
+        const parts = [
+          "---", `session: ${session.name}`, `topic: ${session.topic}`, `guide: ${session.guide_title}`, `duration: ${session.duration}분`,
+          `exported: ${fmtTime(Math.floor(Date.now() / 1000))}`, "---", "", `# ${session.name} — 세션 기록`, "", `- ${$("pSummary").textContent}`, "",
+        ];
+        for (const p of people) {
+          if (p.status === "withdrawn") { parts.push(`## ${intOf(p)}_${codeOf(p)} — 철회`, "", "참가자가 참여를 철회해 기록을 삭제했습니다.", ""); continue; }
+          const t = current?.interview.id === p.id ? current : await fetchTranscript(p.id);
+          parts.push(`## ${intOf(p)}_${codeOf(p)}`, "", noteMarkdown(t, false).replace(/^# .*\n/, ""), "");
+        }
+        download(`SESSION_${session.name.replace(/[\\/:*?"<>|\s]+/g, "_")}.md`, parts.join("\n"));
+      } catch (err) {
+        toast(err.message || "내보내지 못했어요.");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "세션 전체 내보내기 (.md)";
+      }
+    });
+
+    function download(name, text) {
+      const url = URL.createObjectURL(new Blob([text], { type: "text/markdown;charset=utf-8" }));
+      const a = Object.assign(document.createElement("a"), { href: url, download: name });
+      document.body.append(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      toast(`${name}을(를) 내려받았어요`);
+    }
+
+    async function copy(text, msg) {
+      try { await navigator.clipboard.writeText(text); toast(msg); }
+      catch { $("linkInput").select(); toast(document.execCommand("copy") ? msg : "복사하지 못했어요. 선택된 링크를 직접 복사해 주세요."); }
+    }
+    let toastTimer;
+    function toast(msg) {
+      $("toast").textContent = msg;
+      $("toast").classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => $("toast").classList.remove("show"), 2200);
+    }
+
+    // ── 디브리핑 ──
+    // 완료된 참가자의 마스킹된 전사로 AI가 초안을 쓰고(Worker), 리서처가 고쳐서 확정한다
+    const CONF = ["높음", "보통", "낮음"];
+    const IMPROVE = ["놓친 프로빙", "이해하지 못한 질문", "시간이 모자란 블록", "기타"];
+    const SAT = ["포화", "새 정보 나오는 중", "판단 어려움"];
+    let db = null, dbContent = null, sources = null;
+
+    async function loadDebrief() {
+      const { res, data } = await UXA.api(`/api/sessions/${sessionId}/debrief`).catch(() => ({ res: { ok: false }, data: {} }));
+      if (!res.ok) { $("dbBody").innerHTML = '<p class="db-empty">디브리핑을 불러오지 못했어요.</p>'; return; }
+      db = data.debrief;
+      sources = data.sources;
+      dbContent = db?.draft ? structuredClone(db.draft) : null;
+      renderDebrief();
+    }
+
+    function renderDebrief() {
+      const c = sources || {};
+      $("dbSources").textContent = `읽을 대상: 완료된 참가자 ${c.completed || 0}명${c.in_progress ? ` · 진행 중 ${c.in_progress}명` : ""}${c.stopped ? ` · 중간 종료 ${c.stopped}명` : ""}${c.withdrawn ? ` · 철회 ${c.withdrawn}명` : ""} — 완료된 참가자만, '분석 제외' 구간은 빼고, 개인정보를 가린 전사로 읽어요.`;
+      $("dbGenerate").disabled = !c.completed;
+      $("dbGenerate").title = c.completed ? "" : "인터뷰를 마친 참가자가 있어야 만들 수 있어요";
+      $("dbGenerate").textContent = dbContent ? "초안 다시 만들기" : "디브리핑 초안 만들기";
+      $("dbExport").hidden = !dbContent;
+      $("dbFinalize").hidden = !dbContent;
+      const body = $("dbBody");
+      body.replaceChildren();
+      if (!dbContent) {
+        body.innerHTML = `<p class="db-empty">${c.completed ? "'디브리핑 초안 만들기'를 누르면 AI가 완료된 참가자의 전사를 읽고 톱 인사이트·인용구·다음 세션 개선점·포화 판단 초안을 써요." : "아직 인터뷰를 마친 참가자가 없어요. 완료된 참가자가 생기면 디브리핑 초안을 만들 수 있어요."}</p>`;
+        return;
+      }
+      body.append(statusBanner());
+      body.append(section("톱 인사이트", "한 문장씩 · 근거 발화 · 확신도", dbContent.insights, insightItem));
+      body.append(section("인상적인 인용구", "참가자 말 그대로", dbContent.quotes, quoteItem, () => ({ ref: null, id: null, code: "", text: "", why: "", verified: false })));
+      body.append(section("다음 세션에서 고칠 점", "놓친 프로빙 · 이해 못 한 질문 · 시간 부족", dbContent.improvements, improveItem, () => ({ type: "기타", text: "", refs: [] })));
+      body.append(section("포화 판단", "새 정보가 더 나오는지", dbContent.saturation, satItem, () => ({ topic: "", status: "판단 어려움", note: "" })));
+      const memo = document.createElement("div");
+      memo.className = "db-sec";
+      memo.innerHTML = '<h3>리서처 메모 <small>선택</small></h3><div class="db-item"><textarea rows="2" placeholder="팀에게 남길 말, 다음 세션 계획 등"></textarea></div>';
+      const ta = memo.querySelector("textarea");
+      ta.value = dbContent.memo || "";
+      ta.addEventListener("input", () => { dbContent.memo = ta.value; changed(); });
+      body.append(memo);
+      body.querySelectorAll("textarea").forEach(grow);
+    }
+
+    function statusBanner() {
+      const el = document.createElement("div");
+      if (db?.is_draft !== false) {
+        el.className = "draft-banner";
+        el.innerHTML = '<span class="big">초안</span><p></p>';
+        el.querySelector("p").textContent = `AI가 쓴 초안이에요. 근거 발화를 눌러 전사와 맞춰 보고 고친 뒤 '확정'을 눌러야 내 디브리핑으로 저장돼요.${db?.finalized_at ? ` (마지막 확정: ${fmtTime(db.finalized_at)} — 지금 고친 내용은 아직 반영 전)` : ""}`;
+      } else {
+        el.className = "final-banner";
+        el.textContent = `✓ ${fmtTime(db.finalized_at)}에 확정한 디브리핑이에요. 고치면 다시 초안이 되고, 확정해야 반영돼요.`;
+      }
+      return el;
+    }
+
+    function section(title, sub, list, itemFn, blank) {
+      const sec = document.createElement("div");
+      sec.className = "db-sec";
+      sec.innerHTML = `<h3></h3>`;
+      sec.querySelector("h3").append(title, Object.assign(document.createElement("small"), { textContent: sub }));
+      list.forEach((x, i) => sec.append(itemFn(x, i, list)));
+      if (blank) {
+        const add = Object.assign(document.createElement("button"), { type: "button", className: "btn btn-sm add-row", textContent: "+ 추가" });
+        add.addEventListener("click", () => { list.push(blank()); changed(); renderDebrief(); });
+        sec.append(add);
+      }
+      return sec;
+    }
+
+    function shell(list, i, extraClass = "") {
+      const el = document.createElement("div");
+      el.className = `db-item ${extraClass}`;
+      const del = Object.assign(document.createElement("button"), { type: "button", className: "del", textContent: "×", title: "지우기" });
+      del.addEventListener("click", () => { list.splice(i, 1); changed(); renderDebrief(); });
+      el.append(del);
+      return el;
+    }
+
+    function textBox(obj, key, rows, placeholder, onEdit) {
+      const ta = Object.assign(document.createElement("textarea"), { rows, placeholder, value: obj[key] || "" });
+      ta.addEventListener("input", () => { obj[key] = ta.value; grow(ta); onEdit?.(); changed(); });
+      return ta;
+    }
+
+    function select(obj, key, options) {
+      const sel = document.createElement("select");
+      sel.innerHTML = options.map((o) => `<option>${o}</option>`).join("");
+      sel.value = obj[key];
+      sel.addEventListener("change", () => { obj[key] = sel.value; changed(); renderDebrief(); });
+      return sel;
+    }
+
+    function refChips(refs) {
+      return (refs || []).map((r) => {
+        const b = Object.assign(document.createElement("button"), { type: "button", className: "ref", textContent: r.ref, title: "전사에서 이 발화 보기" });
+        b.addEventListener("click", () => jumpTo(r));
+        return b;
+      });
+    }
+
+    function insightItem(x, i, list) {
+      const el = shell(list, i, x.confidence === "낮음" ? "low" : "");
+      el.append(textBox(x, "text", 2, "인사이트 한 문장"));
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      meta.append("확신도", select(x, "confidence", CONF));
+      if (x.confidence === "낮음") meta.append(Object.assign(document.createElement("span"), { className: "warn-tag", textContent: "⚠️ 리서처가 꼭 확인" }));
+      if (x.confidence_reason) meta.append(Object.assign(document.createElement("span"), { textContent: x.confidence_reason }));
+      meta.append(...refChips(x.refs));
+      el.append(meta);
+      return el;
+    }
+
+    function quoteItem(q, i, list) {
+      const el = shell(list, i, "quote");
+      el.append(textBox(q, "text", 2, "참가자가 한 말 그대로", () => { q.verified = false; }));
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      const code = Object.assign(document.createElement("input"), { type: "text", value: q.code, placeholder: "P01", size: 4 });
+      code.style.width = "64px";
+      code.addEventListener("input", () => { q.code = code.value.trim(); changed(); });
+      meta.append(code);
+      if (q.ref) meta.append(...refChips([{ ref: q.ref, id: q.id }]));
+      if (!q.verified) meta.append(Object.assign(document.createElement("span"), { className: "warn-tag", textContent: q.ref ? "⚠️ 원문과 다름 · 확인 필요" : "⚠️ 원문 확인 필요" }));
+      el.append(meta);
+      el.append(textBox(q, "why", 1, "왜 인상적인지 (선택)"));
+      return el;
+    }
+
+    function improveItem(x, i, list) {
+      const el = shell(list, i);
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      meta.style.marginTop = "0";
+      meta.append(select(x, "type", IMPROVE), ...refChips(x.refs));
+      el.append(meta, textBox(x, "text", 2, "무엇을 어떻게 고칠지"));
+      return el;
+    }
+
+    function satItem(x, i, list) {
+      const el = shell(list, i);
+      const meta = document.createElement("div");
+      meta.className = "meta";
+      meta.style.marginTop = "0";
+      const topic = Object.assign(document.createElement("input"), { type: "text", value: x.topic, placeholder: "주제" });
+      topic.style.flex = "1";
+      topic.addEventListener("input", () => { x.topic = topic.value; changed(); });
+      meta.append(topic, select(x, "status", SAT));
+      el.append(meta, textBox(x, "note", 1, "근거 한 문장"));
+      return el;
+    }
+
+    function grow(ta) { ta.style.height = "auto"; ta.style.height = ta.scrollHeight + 2 + "px"; }
+
+    // 근거 발화로: 그 참가자의 전사를 열고 해당 발화를 반짝 표시
+    async function jumpTo(r) {
+      const code = r.ref.split("-")[0];
+      const p = people.find((x) => x.code === code);
+      if (!p) return toast("그 참가자를 찾을 수 없어요.");
+      if (current?.interview.id !== p.id) await openTranscript(p.id);
+      const row = document.querySelector(`#rows .row[data-id="${r.id}"]`);
+      if (!row) return toast("전사에서 그 발화를 찾지 못했어요.");
+      row.scrollIntoView({ behavior: "smooth", block: "center" });
+      row.classList.remove("flash");
+      void row.offsetWidth;
+      row.classList.add("flash");
+    }
+
+    // 고치면 초안으로 자동 저장
+    let saveTimer;
+    function changed() {
+      if (db) db.is_draft = true;
+      const banner = $("dbBody").querySelector(".final-banner");
+      if (banner) banner.replaceWith(statusBanner());
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(async () => {
+        const { res, data } = await UXA.api(`/api/sessions/${sessionId}/debrief/draft`, { method: "PUT", body: { content: dbContent } }).catch(() => ({ res: { ok: false }, data: {} }));
+        if (!res.ok) return toast(data.error || "초안을 저장하지 못했어요.");
+        db = data.debrief;
+      }, 800);
+    }
+
+    $("dbGenerate").addEventListener("click", () => {
+      if (dbContent) $("regenDialog").showModal();
+      else generate();
+    });
+    $("regenDialog").addEventListener("close", () => { if ($("regenDialog").returnValue === "go") generate(); });
+
+    async function generate() {
+      const btn = $("dbGenerate");
+      btn.disabled = true;
+      btn.textContent = "전사를 읽는 중… (30초~1분)";
+      try {
+        const { res, data } = await UXA.api(`/api/sessions/${sessionId}/debrief/generate`, { method: "POST" });
+        if (!res.ok) throw new Error(data.error || "초안을 만들지 못했어요.");
+        db = data.debrief;
+        dbContent = structuredClone(db.draft);
+        renderDebrief();
+        toast("디브리핑 초안을 만들었어요. 근거를 확인하고 고쳐 주세요.");
+      } catch (err) {
+        toast(err instanceof TypeError ? "서버에 연결하지 못했어요." : err.message);
+      } finally {
+        btn.disabled = !sources?.completed;
+        btn.textContent = dbContent ? "초안 다시 만들기" : "디브리핑 초안 만들기";
+      }
+    }
+
+    $("dbFinalize").addEventListener("click", async () => {
+      clearTimeout(saveTimer);
+      const { res, data } = await UXA.api(`/api/sessions/${sessionId}/debrief/finalize`, { method: "POST", body: { content: dbContent } }).catch(() => ({ res: { ok: false }, data: {} }));
+      if (!res.ok) return toast(data.error || "확정하지 못했어요.");
+      db = data.debrief;
+      renderDebrief();
+      toast("확정했어요. 마이페이지 '내 디브리핑'에서 모아 볼 수 있어요.");
+    });
+
+    $("dbExport").addEventListener("click", () => {
+      const isDraft = db?.is_draft !== false;
+      UXA_DEBRIEF.download(UXA_DEBRIEF.fileName(session.name, isDraft), UXA_DEBRIEF.toMarkdown(dbContent, {
+        sessionName: session.name, topic: session.topic, meta: db?.draft_meta, finalizedAt: isDraft ? null : db.finalized_at, isDraft,
+      }));
+    });
+  </script>
+</body>
+</html>
