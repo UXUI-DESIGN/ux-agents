@@ -56,38 +56,6 @@
     }
     .menu a:hover { background: var(--accent-soft); color: var(--accent); }
     .menu a[aria-current="page"] { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
-    .settings-btn {
-      flex: none; display: inline-flex; align-items: center; gap: 8px;
-      padding: 7px 14px; border: 1px solid var(--line); border-radius: 999px; background: #fff;
-      font-size: 14px; font-weight: 600; color: var(--text-sub); cursor: pointer;
-    }
-    .settings-btn:hover { border-color: var(--accent); color: var(--accent); }
-    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-faint); }
-    .status-dot.on { background: var(--good); }
-
-    /* 설정 창 */
-    .settings { width: min(480px, calc(100vw - 32px)); margin: auto; padding: 0; border: 0; border-radius: var(--radius); box-shadow: 0 20px 60px rgba(20, 22, 31, .2); }
-    .settings::backdrop { background: rgba(20, 22, 31, .4); }
-    .settings-inner { padding: 28px 24px 24px; }
-    .settings-top { display: flex; justify-content: space-between; align-items: center; }
-    .close-btn { width: 32px; height: 32px; border: 0; border-radius: 8px; background: none; font-size: 20px; color: var(--text-sub); cursor: pointer; }
-    .close-btn:hover { background: var(--bg-soft); }
-    .conn { margin-top: 20px; border: 1px solid var(--line); border-radius: 10px; font-size: 14px; }
-    .conn div { display: flex; justify-content: space-between; gap: 12px; padding: 11px 14px; }
-    .conn div + div { border-top: 1px solid var(--line); }
-    .conn dt { color: var(--text-sub); }
-    .conn dd { text-align: right; font-weight: 600; word-break: break-all; }
-    .conn code { font-family: ui-monospace, Consolas, monospace; font-size: 13px; }
-    .conn .on { color: var(--good); }
-    .conn .off { color: var(--danger); }
-    .test-btn { width: 100%; margin-top: 16px; }
-    .test-result { display: none; margin-top: 12px; padding: 12px 14px; border-radius: 10px; font-size: 14px; white-space: pre-line; }
-    .test-result.show { display: block; }
-    .test-result.ok { background: #ecfdf3; color: #05603a; }
-    .test-result.fail { background: #fff4f3; color: #7a271a; }
-    .test-result .meta { display: block; margin-top: 6px; font-size: 12.5px; opacity: .8; }
-    .security-note { margin-top: 16px; font-size: 12.5px; color: var(--text-sub); }
-
     /* 본문 */
     main { flex: 1; padding: 72px 0 100px; background: var(--bg-soft); }
     .page-head { text-align: center; margin-bottom: 48px; }
@@ -276,9 +244,7 @@
     @media (max-width: 640px) {
       .container { padding: 0 16px; }
       .nav .container { flex-direction: column; align-items: flex-start; height: auto; padding-top: 12px; padding-bottom: 8px; gap: 6px; }
-      .nav .container { position: relative; }
       .nav nav { width: 100%; }
-      .settings-btn { position: absolute; top: 10px; right: 16px; }
       .menu a { padding: 8px 12px 8px 0; }
       .menu a[aria-current="page"] { padding-left: 12px; }
       main { padding: 48px 0 72px; }
@@ -315,31 +281,8 @@
           <li><a href="../scenario/index.html">시나리오 보드</a></li>
         </ul>
       </nav>
-      <button class="settings-btn" type="button" id="openSettings" aria-haspopup="dialog">
-        <span class="status-dot" id="statusDot"></span>설정
-      </button>
     </div>
   </header>
-
-  <dialog class="settings" id="settings" aria-labelledby="settingsTitle">
-    <div class="settings-inner">
-      <div class="settings-top">
-        <h2 class="panel-title" id="settingsTitle">AI 연결 상태</h2>
-        <button class="close-btn" type="button" id="closeSettings" aria-label="닫기">×</button>
-      </div>
-      <p class="panel-desc">모든 에이전트는 UXA API 서버(Worker)를 거쳐 OpenAI를 불러요.</p>
-
-      <dl class="conn">
-        <div><dt>API 서버</dt><dd><code id="apiBase"></code></dd></div>
-        <div><dt>OpenAI</dt><dd id="connStatus">확인 중…</dd></div>
-        <div><dt>모델</dt><dd><code id="connModel">gpt-6-luna</code></dd></div>
-      </dl>
-      <button class="btn test-btn" type="button" id="testBtn">연결 테스트</button>
-      <div class="test-result" id="testResult" role="status"></div>
-
-      <p class="security-note">OpenAI 키는 Cloudflare Worker의 비밀값으로만 보관돼요. 이 페이지와 브라우저에는 키가 없어요.</p>
-    </div>
-  </dialog>
 
   <main>
     <div class="container">
@@ -976,55 +919,6 @@
       if (!res.ok) throw new Error(data.error || `API 서버 오류 (${res.status})`);
       return data;
     }
-
-    async function refreshConnection() {
-      $("connStatus").textContent = "확인 중…";
-      $("connStatus").className = "";
-      try {
-        const data = await callApi("/health/openai");
-        const on = data.openai === "연결됨";
-        $("connStatus").textContent = on ? "연결됨" : `미연결 · ${data.reason || ""}`;
-        $("connStatus").className = on ? "on" : "off";
-        if (data.model) $("connModel").textContent = data.model;
-        $("statusDot").classList.toggle("on", on);
-        $("openSettings").title = on ? "AI 연결됨" : "AI 미연결";
-      } catch (err) {
-        $("connStatus").textContent = `미연결 · ${err.message}`;
-        $("connStatus").className = "off";
-        $("statusDot").classList.remove("on");
-        $("openSettings").title = "AI 미연결";
-      }
-    }
-
-    function showTest(kind, html) {
-      $("testResult").className = `test-result show ${kind}`;
-      $("testResult").innerHTML = html;
-    }
-
-    $("apiBase").textContent = API_BASE.replace("https://", "");
-    $("openSettings").addEventListener("click", () => { refreshConnection(); $("settings").showModal(); });
-    $("closeSettings").addEventListener("click", () => $("settings").close());
-    $("settings").addEventListener("click", (e) => { if (e.target === $("settings")) $("settings").close(); });
-
-    $("testBtn").addEventListener("click", async () => {
-      $("testBtn").disabled = true;
-      $("testBtn").textContent = "OpenAI에 묻는 중…";
-      $("testResult").className = "test-result";
-      const started = performance.now();
-      try {
-        const data = await callApi("/api/chat", { input: "연결 테스트예요. 한국어로 한 문장만, 짧게 인사해 주세요.", max_output_tokens: 60 });
-        const ms = Math.round(performance.now() - started);
-        const tokens = data.usage ? ` · 토큰 ${data.usage.input_tokens}+${data.usage.output_tokens}` : "";
-        showTest("ok", `연결 성공! OpenAI의 답:\n“${esc(data.text || "(빈 응답)")}”<span class="meta">${esc(data.model)} · ${ms}ms${tokens}</span>`);
-      } catch (err) {
-        showTest("fail", esc(err.message));
-      } finally {
-        $("testBtn").disabled = false;
-        $("testBtn").textContent = "연결 테스트";
-      }
-    });
-
-    refreshConnection();
   </script>
 </body>
 </html>
