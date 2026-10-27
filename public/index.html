@@ -5,146 +5,70 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>UXA · UX Agents</title>
   <meta name="description" content="UX 리서치부터 시나리오 설계까지, 5개의 AI 에이전트가 함께하는 UX 에이전트 서비스" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="stylesheet" href="styles.css" />
   <style>
-    :root {
-      --bg: #ffffff;
-      --bg-soft: #f6f7fb;
-      --text: #14161f;
-      --text-sub: #5b6072;
-      --line: #e4e6ee;
-      --accent: #4f46e5;
-      --accent-soft: #eef0ff;
-      --radius: 16px;
-      --max: 1160px;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    body {
-      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-      word-break: keep-all;
-    }
-    a { color: inherit; text-decoration: none; }
-    .container { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
-
-    /* 1. 내비게이션 */
-    .nav {
-      position: sticky; top: 0; z-index: 10;
-      background: rgba(255, 255, 255, 0.9);
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid var(--line);
-    }
-    .nav .container {
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 24px; height: 64px;
-    }
-    .logo { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
-    .logo span { color: var(--accent); }
-    .nav nav { min-width: 0; }
-    .menu { display: flex; gap: 4px; list-style: none; overflow-x: auto; }
-    .menu a {
-      display: block; padding: 8px 14px; border-radius: 999px;
-      font-size: 14px; font-weight: 500; color: var(--text-sub); white-space: nowrap;
-    }
-    .menu a:hover { background: var(--accent-soft); color: var(--accent); }
-
-    /* 2. 히어로 */
-    .hero { padding: 120px 0 100px; text-align: center; }
-    .hero .eyebrow {
-      display: inline-block; margin-bottom: 20px; padding: 6px 14px;
-      border-radius: 999px; background: var(--accent-soft); color: var(--accent);
-      font-size: 13px; font-weight: 600;
-    }
+    /* 히어로 */
+    .hero { padding: 128px 0 var(--section); }
     .hero h1 {
-      font-size: clamp(32px, 5vw, 52px); font-weight: 800;
-      line-height: 1.25; letter-spacing: -0.03em;
+      max-width: 1040px;
+      font-family: var(--font-display); font-size: clamp(40px, 6.5vw, 72px); font-weight: 700; line-height: 1.15;
     }
-    .hero p { margin: 20px auto 40px; max-width: 560px; font-size: 18px; color: var(--text-sub); }
-    .btn {
-      display: inline-block; padding: 16px 36px; border-radius: 12px;
-      background: var(--accent); color: #fff; font-size: 16px; font-weight: 700;
-      transition: transform 0.15s, box-shadow 0.15s;
-    }
-    .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(79, 70, 229, 0.3); }
+    .hero .lime { margin: 6px 0; }
+    .hero .body-lg { max-width: 560px; margin: 28px 0 40px; }
 
-    /* 공통 섹션 */
-    section.block { padding: 100px 0; }
-    section.block.soft { background: var(--bg-soft); }
-    .section-head { margin-bottom: 48px; text-align: center; }
-    .section-head h2 { font-size: clamp(26px, 3.5vw, 34px); font-weight: 800; letter-spacing: -0.02em; }
-    .section-head p { margin-top: 10px; color: var(--text-sub); }
-
-    /* 3. 에이전트 카드 */
+    /* 에이전트 카드 (card-feature-dark) */
     .agents {
       display: grid;
       grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr auto 1fr;
-      align-items: stretch; list-style: none;
+      list-style: none;
     }
     .card {
-      display: flex; flex-direction: column;
-      padding: 24px 20px; background: #fff;
-      border: 1px solid var(--line); border-radius: var(--radius);
-      transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+      display: flex; flex-direction: column; padding: 24px;
+      background: var(--night);
+      border: 1px solid var(--hairline-violet);
+      border-radius: var(--r-xl);
+      transition: border-color 0.15s;
     }
-    .card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: 0 12px 28px rgba(20, 22, 31, 0.08); }
-    .card .num {
-      display: grid; place-items: center; width: 40px; height: 40px; margin-bottom: 16px;
-      border-radius: 50%; background: var(--accent); color: #fff; font-weight: 800; font-size: 16px;
+    .card:hover { border-color: var(--accent-violet-mid); }
+    .card .tag {
+      align-self: flex-start; margin-bottom: 20px; padding: 2px 10px;
+      border-radius: var(--r-xl); background: var(--accent-violet-mid); color: var(--on-primary);
+      font-size: 12px; font-weight: 500; letter-spacing: 0.2px; text-transform: uppercase;
     }
-    .card h3 { font-size: 17px; font-weight: 700; line-height: 1.4; }
-    .card .io { margin: 10px 0 20px; font-size: 14px; color: var(--text-sub); flex: 1; }
-    .card .io b { color: var(--text); font-weight: 600; }
-    .card .open { font-size: 14px; font-weight: 700; color: var(--accent); }
-    .card .open::after { content: " →"; }
-    .flow-arrow {
-      display: grid; place-items: center; width: 28px;
-      color: var(--accent); font-size: 20px; font-weight: 700;
-    }
+    .card .io { flex: 1; margin: 10px 0 24px; font-size: 14px; font-weight: 400; line-height: 1.6; color: var(--on-dark-muted); }
+    .card .io b { color: var(--on-primary); font-weight: 600; }
+    .flow-arrow { display: grid; place-items: center; width: 32px; color: var(--accent-violet-mid); font-size: 18px; }
 
-    /* 4. 작동 방식 타임라인 */
+    /* 작동 방식 타임라인 */
     .timeline { position: relative; display: grid; grid-template-columns: repeat(5, 1fr); list-style: none; }
     .timeline::before {
-      content: ""; position: absolute; top: 23px; left: 10%; right: 10%;
-      height: 2px; background: linear-gradient(90deg, var(--accent-soft), var(--accent));
+      content: ""; position: absolute; top: 20px; left: 20px; right: 20%;
+      height: 1px; background: var(--hairline-violet);
     }
-    .step { position: relative; text-align: center; padding: 0 8px; }
+    .step { position: relative; padding-right: 24px; }
     .step .dot {
-      display: grid; place-items: center; width: 48px; height: 48px; margin: 0 auto 16px;
-      border-radius: 50%; background: #fff; border: 2px solid var(--accent);
-      color: var(--accent); font-weight: 800;
+      display: grid; place-items: center; width: 40px; height: 40px; margin-bottom: 20px;
+      border-radius: var(--r-md); background: var(--ink-deep); border: 1px solid var(--accent-violet-mid);
+      font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace; font-size: 15px; font-weight: 700;
     }
-    .step:last-child .dot { background: var(--accent); color: #fff; }
-    .step h4 { font-size: 16px; font-weight: 700; }
-    .step p { margin-top: 6px; font-size: 13px; color: var(--text-sub); }
+    .step:last-child .dot { background: var(--on-primary); border-color: var(--on-primary); color: var(--ink-deep); }
+    .step p { margin-top: 6px; font-size: 14px; font-weight: 400; line-height: 1.6; color: var(--on-dark-muted); }
 
-    /* 5. 푸터 */
-    footer { padding: 40px 0; border-top: 1px solid var(--line); }
-    footer .container {
-      display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px;
-      font-size: 14px; color: var(--text-sub);
-    }
-    footer .logo { font-size: 18px; color: var(--text); }
-
-    /* 반응형 */
-    @media (max-width: 960px) {
-      .agents { grid-template-columns: 1fr; gap: 0; }
-      .flow-arrow { width: auto; height: 36px; transform: rotate(90deg); }
+    @media (max-width: 991px) {
+      .agents { grid-template-columns: 1fr; }
+      .flow-arrow { width: auto; height: 40px; transform: rotate(90deg); }
       .timeline { grid-template-columns: 1fr; gap: 28px; }
-      .timeline::before { top: 24px; bottom: 24px; left: 23px; right: auto; width: 2px; height: auto;
-        background: linear-gradient(180deg, var(--accent-soft), var(--accent)); }
-      .step { display: grid; grid-template-columns: 48px 1fr; column-gap: 16px; text-align: left; padding: 0; }
+      .timeline::before { top: 20px; bottom: 20px; left: 20px; right: auto; width: 1px; height: auto; }
+      .step { display: grid; grid-template-columns: 40px 1fr; column-gap: 20px; padding: 0; }
       .step .dot { grid-row: span 2; margin: 0; }
-      .step h4 { align-self: end; }
+      .step .heading-sm { align-self: end; }
     }
-    @media (max-width: 640px) {
-      .nav .container { flex-direction: column; align-items: flex-start; height: auto; padding-top: 12px; padding-bottom: 8px; gap: 6px; }
-      .nav nav { width: 100%; }
-      .menu a { padding: 8px 12px 8px 0; }
-      .hero { padding: 80px 0 72px; }
-      section.block { padding: 72px 0; }
+    @media (max-width: 767px) {
+      .hero { padding: 80px 0 var(--section); }
     }
   </style>
 </head>
@@ -168,92 +92,94 @@
 
   <main>
     <!-- 2. 히어로 -->
-    <section class="hero">
+    <section class="hero starfield">
       <div class="container">
         <span class="eyebrow">UX Agents · 5 AI Agents</span>
-        <h1>리서치 목표 하나로,<br />시나리오까지 이어지는 UX 설계</h1>
-        <p>인터뷰 가이드부터 페르소나, 저니맵, 시나리오 보드까지 — 5개의 AI 에이전트가 UX 리서치 전 과정을 함께합니다.</p>
+        <h1>리서치 목표 하나로,<br /><span class="lime">시나리오</span>까지 이어지는 UX&nbsp;설계</h1>
+        <p class="body-lg">인터뷰 가이드부터 페르소나, 저니맵, 시나리오 보드까지 — 5개의 AI 에이전트가 UX 리서치 전 과정을 함께합니다.</p>
         <a href="guide/index.html" class="btn">시작하기</a>
       </div>
     </section>
 
     <!-- 3. 에이전트 소개 -->
-    <section class="block soft" id="agents">
+    <section class="section" id="agents">
       <div class="container">
         <div class="section-head">
-          <h2>5개의 UX 에이전트</h2>
-          <p>앞 단계의 결과물이 다음 에이전트의 입력이 됩니다.</p>
+          <span class="eyebrow">Agents</span>
+          <h2 class="heading-xl">5개의 UX 에이전트</h2>
+          <p class="body-lg">앞 단계의 결과물이 다음 에이전트의 입력이 됩니다.</p>
         </div>
         <ol class="agents">
           <li class="card">
-            <span class="num">1</span>
-            <h3>인터뷰 가이드 설계</h3>
+            <span class="tag">Agent 01</span>
+            <h3 class="heading-sm">인터뷰 가이드 설계</h3>
             <p class="io"><b>리서치 목표</b> → 인터뷰 질문지</p>
-            <a href="guide/index.html" class="open">열기</a>
+            <a href="guide/index.html" class="link">열기</a>
           </li>
           <li class="flow-arrow" aria-hidden="true">→</li>
           <li class="card">
-            <span class="num">2</span>
-            <h3>페르소나 인터뷰 시뮬레이터</h3>
+            <span class="tag">Agent 02</span>
+            <h3 class="heading-sm">페르소나 인터뷰 시뮬레이터</h3>
             <p class="io"><b>인터뷰 질문지</b> → 가상 인터뷰 기록</p>
-            <a href="simulator/index.html" class="open">열기</a>
+            <a href="simulator/index.html" class="link">열기</a>
           </li>
           <li class="flow-arrow" aria-hidden="true">→</li>
           <li class="card">
-            <span class="num">3</span>
-            <h3>페르소나 생성</h3>
+            <span class="tag">Agent 03</span>
+            <h3 class="heading-sm">페르소나 생성</h3>
             <p class="io"><b>인터뷰 기록</b> → 페르소나 프로필</p>
-            <a href="persona/index.html" class="open">열기</a>
+            <a href="persona/index.html" class="link">열기</a>
           </li>
           <li class="flow-arrow" aria-hidden="true">→</li>
           <li class="card">
-            <span class="num">4</span>
-            <h3>저니맵 생성</h3>
+            <span class="tag">Agent 04</span>
+            <h3 class="heading-sm">저니맵 생성</h3>
             <p class="io"><b>페르소나</b> → 고객 여정 지도</p>
-            <a href="journey/index.html" class="open">열기</a>
+            <a href="journey/index.html" class="link">열기</a>
           </li>
           <li class="flow-arrow" aria-hidden="true">→</li>
           <li class="card">
-            <span class="num">5</span>
-            <h3>시나리오 보드 생성</h3>
+            <span class="tag">Agent 05</span>
+            <h3 class="heading-sm">시나리오 보드 생성</h3>
             <p class="io"><b>저니맵</b> → 사용 시나리오 보드</p>
-            <a href="scenario/index.html" class="open">열기</a>
+            <a href="scenario/index.html" class="link">열기</a>
           </li>
         </ol>
       </div>
     </section>
 
     <!-- 4. 작동 방식 -->
-    <section class="block" id="how">
+    <section class="section night" id="how">
       <div class="container">
         <div class="section-head">
-          <h2>작동 방식</h2>
-          <p>목표 입력부터 시나리오 완성까지, 5단계로 이어집니다.</p>
+          <span class="eyebrow">How it works</span>
+          <h2 class="heading-xl">작동 방식</h2>
+          <p class="body-lg">목표 입력부터 시나리오 완성까지, 5단계로 이어집니다.</p>
         </div>
         <ol class="timeline">
           <li class="step">
             <span class="dot">1</span>
-            <h4>리서치 목표 입력</h4>
+            <h3 class="heading-sm">리서치 목표 입력</h3>
             <p>알고 싶은 것을 한 문장으로</p>
           </li>
           <li class="step">
             <span class="dot">2</span>
-            <h4>인터뷰</h4>
+            <h3 class="heading-sm">인터뷰</h3>
             <p>질문지 설계와 가상 인터뷰</p>
           </li>
           <li class="step">
             <span class="dot">3</span>
-            <h4>페르소나</h4>
+            <h3 class="heading-sm">페르소나</h3>
             <p>인터뷰에서 사용자 유형 도출</p>
           </li>
           <li class="step">
             <span class="dot">4</span>
-            <h4>저니맵</h4>
+            <h3 class="heading-sm">저니맵</h3>
             <p>단계별 행동·감정·페인포인트</p>
           </li>
           <li class="step">
             <span class="dot">5</span>
-            <h4>시나리오</h4>
+            <h3 class="heading-sm">시나리오</h3>
             <p>개선 경험을 시나리오 보드로</p>
           </li>
         </ol>
@@ -263,6 +189,9 @@
 
   <!-- 5. 푸터 -->
   <footer>
+    <svg class="squiggle" viewBox="0 0 1200 14" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M0 7 Q 15 0 30 7 T 60 7 T 90 7 T 120 7 T 150 7 T 180 7 T 210 7 T 240 7 T 270 7 T 300 7 T 330 7 T 360 7 T 390 7 T 420 7 T 450 7 T 480 7 T 510 7 T 540 7 T 570 7 T 600 7 T 630 7 T 660 7 T 690 7 T 720 7 T 750 7 T 780 7 T 810 7 T 840 7 T 870 7 T 900 7 T 930 7 T 960 7 T 990 7 T 1020 7 T 1050 7 T 1080 7 T 1110 7 T 1140 7 T 1170 7 T 1200 7" fill="none" stroke="#c2ef4e" stroke-width="3" vector-effect="non-scaling-stroke" />
+    </svg>
     <div class="container">
       <span class="logo">UXA · UX Agents</span>
       <span>만든 사람 [내 이름] · © 2026</span>
