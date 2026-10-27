@@ -3,39 +3,60 @@
 //   GET  /health/openai  비밀값 키로 OpenAI에 실제로 접속되는지 확인 (토큰 사용 없음, 키 값은 절대 내보내지 않음)
 //   POST /api/chat       { input, instructions?, max_output_tokens?, schema? } → { text, model, usage, incomplete }
 //                        schema(JSON Schema)를 주면 그 형식의 JSON 문자열로만 답한다
+//   POST /api/auth/signup { email, password, name, agree } → { token, user }
+//   GET  /api/auth/me     Authorization: Bearer <token> → { user }
+
+import { signup, me } from "./auth.js";
 
 const MAX_INPUT_CHARS = 20000;
 const MAX_OUTPUT_TOKENS = 4000;
 
 export default {
   async fetch(request, env) {
-    const url = new URL(request.url);
     const cors = corsHeaders(request, env);
-
-    if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
-
-    if (url.pathname === "/health" && request.method === "GET") {
-      return json({
-        ok: true,
-        service: "uxa-api",
-        model: env.OPENAI_MODEL,
-        openaiKey: env.OPENAI_API_KEY ? "set" : "missing",
-        time: new Date().toISOString(),
-      }, 200, cors);
+    try {
+      return await route(request, env, cors);
+    } catch (err) {
+      // 요청 본문(비밀번호 등)은 남기지 않고 오류 내용만 기록한다
+      console.error("unhandled", String(err?.message || err));
+      return json({ error: "서버에서 문제가 생겼어요. 잠시 후 다시 시도해 주세요." }, 500, cors);
     }
-
-    if (url.pathname === "/health/openai" && request.method === "GET") {
-      return json(await checkOpenAI(env), 200, cors);
-    }
-
-    if (url.pathname === "/api/chat" && request.method === "POST") {
-      if (!cors["Access-Control-Allow-Origin"]) return json({ error: "허용되지 않은 사이트에서 온 요청이에요." }, 403, cors);
-      return chat(request, env, cors);
-    }
-
-    return json({ error: "없는 경로예요." }, 404, cors);
   },
 };
+
+async function route(request, env, cors) {
+  const url = new URL(request.url);
+
+  if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
+
+  if (url.pathname === "/health" && request.method === "GET") {
+    return json({
+      ok: true,
+      service: "uxa-api",
+      model: env.OPENAI_MODEL,
+      openaiKey: env.OPENAI_API_KEY ? "set" : "missing",
+      time: new Date().toISOString(),
+    }, 200, cors);
+  }
+
+  if (url.pathname === "/health/openai" && request.method === "GET") {
+    return json(await checkOpenAI(env), 200, cors);
+  }
+
+  if (url.pathname === "/api/chat" && request.method === "POST") {
+    if (!cors["Access-Control-Allow-Origin"]) return json({ error: "허용되지 않은 사이트에서 온 요청이에요." }, 403, cors);
+    return chat(request, env, cors);
+  }
+
+  if (url.pathname.startsWith("/api/auth/")) {
+    if (!cors["Access-Control-Allow-Origin"]) return json({ error: "허용되지 않은 사이트에서 온 요청이에요." }, 403, cors);
+    const reply = (data, status = 200) => json(data, status, cors);
+    if (url.pathname === "/api/auth/signup" && request.method === "POST") return signup(request, env, reply);
+    if (url.pathname === "/api/auth/me" && request.method === "GET") return me(request, env, reply);
+  }
+
+  return json({ error: "없는 경로예요." }, 404, cors);
+}
 
 async function chat(request, env, cors) {
   if (!env.OPENAI_API_KEY) return json({ error: "Worker에 OPENAI_API_KEY 비밀값이 없어요." }, 500, cors);
@@ -102,7 +123,7 @@ function corsHeaders(request, env) {
   return {
     "Access-Control-Allow-Origin": origin,
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
     "Access-Control-Max-Age": "86400",
     Vary: "Origin",
   };

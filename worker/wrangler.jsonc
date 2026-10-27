@@ -6,6 +6,10 @@
   "main": "src/index.js",
   "compatibility_date": "2026-10-01",
   "observability": { "enabled": true },
+  // 회원·세션·가입 시도 기록 (테이블은 migrations/ 참고)
+  "d1_databases": [
+    { "binding": "DB", "database_name": "uxa-db", "database_id": "ba08509d-65b8-4e5c-837f-e2189b18fe57" }
+  ],
   "vars": {
     // 이 Worker를 부를 수 있는 사이트 주소 (쉼표로 구분)
     "ALLOWED_ORIGINS": "https://ux-agents.pages.dev,http://localhost:5173",
