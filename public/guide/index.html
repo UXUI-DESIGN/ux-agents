@@ -12,9 +12,12 @@
       --bg-soft: #f6f7fb;
       --text: #14161f;
       --text-sub: #5b6072;
+      --text-faint: #a3a7b7;
       --line: #e4e6ee;
       --accent: #4f46e5;
       --accent-soft: #eef0ff;
+      --danger: #d92d20;
+      --good: #12805c;
       --radius: 16px;
       --max: 1160px;
     }
@@ -28,6 +31,7 @@
       word-break: keep-all;
     }
     a { color: inherit; text-decoration: none; }
+    button, input, textarea { font: inherit; color: inherit; }
     .container { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
 
     /* 내비게이션 (랜딩과 동일) */
@@ -53,7 +57,7 @@
     .menu a[aria-current="page"] { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
 
     /* 본문 */
-    main { flex: 1; padding: 100px 0; background: var(--bg-soft); }
+    main { flex: 1; padding: 72px 0 100px; background: var(--bg-soft); }
     .page-head { text-align: center; margin-bottom: 48px; }
     .page-head .num {
       display: inline-grid; place-items: center; width: 44px; height: 44px; margin-bottom: 16px;
@@ -61,16 +65,163 @@
     }
     .page-head h1 { font-size: clamp(28px, 4vw, 40px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.3; }
     .page-head p { margin-top: 12px; font-size: 17px; color: var(--text-sub); }
-    .notice {
-      max-width: 560px; margin: 0 auto; padding: 48px 32px; text-align: center;
-      background: #fff; border: 1px dashed var(--accent); border-radius: var(--radius);
+
+    .workspace { display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: 24px; align-items: start; }
+    .panel { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); }
+
+    /* 입력 영역 */
+    .input-panel { position: sticky; top: 88px; padding: 28px 24px; }
+    .panel-title { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
+    .panel-desc { margin-top: 4px; font-size: 14px; color: var(--text-sub); }
+    .field { margin-top: 22px; }
+    .field > label, .field > .label {
+      display: flex; align-items: baseline; gap: 6px;
+      font-size: 14px; font-weight: 600; margin-bottom: 8px;
     }
-    .notice .badge {
+    .req { color: var(--accent); }
+    .opt { font-size: 12px; font-weight: 500; color: var(--text-faint); }
+    .hint { margin-top: 6px; font-size: 12.5px; color: var(--text-sub); }
+    .text-input {
+      display: block; width: 100%; padding: 11px 14px;
+      border: 1px solid var(--line); border-radius: 10px; background: #fff;
+      font-size: 14.5px; line-height: 1.55; resize: vertical;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .text-input + .text-input { margin-top: 8px; }
+    .text-input::placeholder { color: var(--text-faint); }
+    .text-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .text-input.invalid { border-color: var(--danger); }
+    .error { display: none; margin-top: 6px; font-size: 12.5px; color: var(--danger); }
+    .error.show { display: block; }
+
+    .segmented { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; padding: 4px; background: var(--bg-soft); border-radius: 12px; }
+    .segmented input { position: absolute; opacity: 0; pointer-events: none; }
+    .segmented label {
+      padding: 9px 8px; border-radius: 9px; text-align: center; cursor: pointer;
+      font-size: 14px; font-weight: 500; color: var(--text-sub);
+      transition: background .15s, color .15s;
+    }
+    .segmented label small { display: block; font-size: 11.5px; font-weight: 400; color: var(--text-faint); }
+    .segmented input:checked + label { background: #fff; color: var(--accent); font-weight: 700; box-shadow: 0 1px 3px rgba(20, 22, 31, .08); }
+    .segmented input:checked + label small { color: var(--text-sub); }
+    .segmented input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 10px 16px; border-radius: 10px; border: 1px solid var(--line); background: #fff;
+      font-size: 14px; font-weight: 600; cursor: pointer; transition: background .15s, border-color .15s;
+    }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-primary { width: 100%; margin-top: 28px; padding: 14px; border: 0; background: var(--accent); color: #fff; font-size: 16px; }
+    .btn-primary:hover { background: #4338ca; color: #fff; }
+    .btn-primary:disabled { opacity: .6; cursor: progress; }
+    .btn-link { margin-top: 10px; width: 100%; border: 0; background: none; color: var(--text-sub); font-size: 13px; font-weight: 500; }
+    .btn-link:hover { color: var(--accent); }
+
+    /* 결과 영역 */
+    .result-panel { min-height: 640px; }
+    .empty { display: grid; place-items: center; min-height: 640px; padding: 48px 32px; text-align: center; }
+    .empty .badge {
       display: inline-block; margin-bottom: 16px; padding: 6px 14px; border-radius: 999px;
       background: var(--accent-soft); color: var(--accent); font-size: 13px; font-weight: 600;
     }
-    .notice h2 { font-size: 22px; font-weight: 700; }
-    .notice p { margin-top: 8px; color: var(--text-sub); font-size: 15px; }
+    .empty h2 { font-size: 20px; font-weight: 700; }
+    .empty p { margin-top: 8px; color: var(--text-sub); font-size: 15px; }
+    .empty ol { margin: 24px auto 0; max-width: 320px; text-align: left; list-style: none; counter-reset: s; }
+    .empty li { counter-increment: s; display: flex; gap: 10px; padding: 6px 0; font-size: 14px; color: var(--text-sub); }
+    .empty li::before {
+      content: counter(s); flex: none; display: grid; place-items: center; width: 22px; height: 22px; margin-top: 1px;
+      border-radius: 50%; background: var(--bg-soft); color: var(--text-sub); font-size: 12px; font-weight: 700;
+    }
+    .loading { display: none; place-items: center; min-height: 640px; color: var(--text-sub); font-size: 15px; }
+    .spinner { width: 28px; height: 28px; margin: 0 auto 12px; border: 3px solid var(--accent-soft); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .guide { display: none; }
+    .guide-head { padding: 28px 32px 24px; border-bottom: 1px solid var(--line); }
+    .guide-head .top { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; align-items: flex-start; }
+    .guide-head .eyebrow { font-size: 13px; font-weight: 600; color: var(--accent); }
+    .guide-head h2 { margin-top: 2px; font-size: 22px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.4; }
+    .actions { display: flex; gap: 8px; }
+    .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+    .tag { padding: 4px 10px; border-radius: 999px; background: var(--bg-soft); font-size: 12.5px; color: var(--text-sub); }
+    .tag b { color: var(--text); font-weight: 600; }
+    .demo-note { margin-top: 14px; padding: 10px 14px; border-radius: 10px; background: #fff8e6; color: #8a5a00; font-size: 13px; }
+
+    .toc { display: flex; gap: 4px; padding: 10px 24px; overflow-x: auto; border-bottom: 1px solid var(--line); }
+    .toc a { padding: 6px 12px; border-radius: 999px; font-size: 13px; color: var(--text-sub); white-space: nowrap; }
+    .toc a:hover { background: var(--accent-soft); color: var(--accent); }
+
+    .sec { padding: 32px; border-bottom: 1px solid var(--line); scroll-margin-top: 80px; }
+    .sec:last-child { border-bottom: 0; }
+    .sec-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 18px; }
+    .sec-head .n { font-size: 13px; font-weight: 700; color: var(--accent); }
+    .sec-head h3 { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
+    .sec-head .meta { margin-left: auto; font-size: 12.5px; color: var(--text-faint); }
+
+    .rq-list { list-style: none; display: grid; gap: 10px; }
+    .rq-list li { display: flex; gap: 12px; padding: 14px 16px; border-radius: 12px; background: var(--bg-soft); font-size: 15px; }
+    .rq-list .code { flex: none; font-weight: 800; color: var(--accent); }
+    .ai-chip { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-size: 11.5px; font-weight: 600; vertical-align: 1px; }
+    .warn { margin-top: 10px; font-size: 13px; color: #8a5a00; }
+
+    .timebar { display: flex; height: 36px; border-radius: 10px; overflow: hidden; gap: 2px; }
+    .timebar span { display: grid; place-items: center; min-width: 0; font-size: 11.5px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; }
+    .flow { width: 100%; margin-top: 18px; border-collapse: collapse; font-size: 14px; }
+    .flow th, .flow td { padding: 11px 8px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    .flow th { font-size: 12.5px; font-weight: 600; color: var(--text-faint); }
+    .flow tr:last-child td { border-bottom: 0; }
+    .flow .dot { display: inline-block; width: 10px; height: 10px; margin-right: 8px; border-radius: 3px; vertical-align: 0; }
+    .flow .min { white-space: nowrap; font-weight: 700; }
+    .flow .clock { white-space: nowrap; color: var(--text-sub); font-variant-numeric: tabular-nums; }
+    .flow td:last-child { color: var(--text-sub); }
+    .pre-note { margin-top: 12px; font-size: 13px; color: var(--text-sub); }
+
+    .block { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+    .block + .block { margin-top: 16px; }
+    .block-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 16px 20px; background: var(--bg-soft); }
+    .block-head h4 { font-size: 16px; font-weight: 700; }
+    .block-head .chip { padding: 2px 9px; border-radius: 999px; background: #fff; border: 1px solid var(--line); font-size: 12px; color: var(--text-sub); }
+    .block-head .chip.rq { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+    .block-head .time { margin-left: auto; font-size: 13px; font-weight: 700; }
+    .block-goal { padding: 12px 20px 0; font-size: 13.5px; color: var(--text-sub); }
+    .q { padding: 16px 20px; }
+    .q + .q { border-top: 1px dashed var(--line); }
+    .q-main { display: flex; gap: 10px; font-size: 15.5px; font-weight: 600; line-height: 1.55; }
+    .q-main .qn { flex: none; color: var(--accent); }
+    .probes { list-style: none; margin: 10px 0 0 30px; display: grid; gap: 6px; }
+    .probes li { position: relative; padding-left: 16px; font-size: 14px; color: var(--text-sub); }
+    .probes li::before { content: "↳"; position: absolute; left: 0; color: var(--text-faint); }
+    .probes .why { margin-left: 4px; font-size: 12px; color: var(--text-faint); }
+    .avoid { margin: 0 20px 16px; padding: 10px 14px; border-radius: 10px; background: #fff4f3; font-size: 13px; color: #7a271a; }
+    .avoid b { color: var(--danger); }
+    .avoid .ok { color: var(--good); }
+    .principles { margin-top: 20px; padding: 16px 18px; border-radius: 12px; background: var(--accent-soft); font-size: 13.5px; }
+    .principles strong { display: block; margin-bottom: 6px; color: var(--accent); }
+    .principles ul { padding-left: 18px; color: var(--text-sub); }
+
+    .check-group + .check-group { margin-top: 20px; }
+    .check-group h4 { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+    .check-group h4 small { margin-left: 6px; font-weight: 500; color: var(--text-faint); }
+    .checks { list-style: none; display: grid; gap: 2px; }
+    .checks label { display: flex; gap: 10px; padding: 8px 10px; border-radius: 8px; font-size: 14px; cursor: pointer; }
+    .checks label:hover { background: var(--bg-soft); }
+    .checks input { flex: none; width: 16px; height: 16px; margin-top: 3px; accent-color: var(--accent); }
+    .checks input:checked + span { color: var(--text-faint); text-decoration: line-through; }
+    .checks .new { margin-left: 6px; padding: 0 7px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-size: 11px; font-weight: 600; }
+
+    .script { position: relative; padding: 18px 20px; border-radius: 12px; background: var(--bg-soft); font-size: 14.5px; white-space: pre-line; }
+    .script + .script-label { margin-top: 20px; }
+    .script-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 14px; font-weight: 700; }
+    .btn-sm { padding: 5px 10px; font-size: 12.5px; border-radius: 8px; }
+    .script .fill { color: var(--accent); font-weight: 600; }
+
+    .toast {
+      position: fixed; left: 50%; bottom: 32px; z-index: 20; transform: translate(-50%, 20px);
+      padding: 10px 18px; border-radius: 999px; background: var(--text); color: #fff; font-size: 14px;
+      opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
     /* 푸터 (랜딩과 동일) */
     footer { padding: 40px 0; border-top: 1px solid var(--line); }
@@ -80,13 +231,34 @@
     }
     footer .logo { font-size: 18px; color: var(--text); }
 
+    @media (max-width: 960px) {
+      .workspace { grid-template-columns: 1fr; }
+      .input-panel { position: static; }
+      .result-panel, .empty, .loading { min-height: 360px; }
+    }
     @media (max-width: 640px) {
+      .container { padding: 0 16px; }
       .nav .container { flex-direction: column; align-items: flex-start; height: auto; padding-top: 12px; padding-bottom: 8px; gap: 6px; }
       .nav nav { width: 100%; }
       .menu a { padding: 8px 12px 8px 0; }
       .menu a[aria-current="page"] { padding-left: 12px; }
-      main { padding: 72px 0; }
-      .notice { padding: 40px 24px; }
+      main { padding: 48px 0 72px; }
+      .page-head { margin-bottom: 32px; }
+      .input-panel { padding: 24px 18px; }
+      .guide-head, .sec { padding: 24px 18px; }
+      .toc { padding: 10px 12px; }
+      .block-head, .q { padding-left: 16px; padding-right: 16px; }
+      .avoid { margin-left: 16px; margin-right: 16px; }
+      .probes { margin-left: 12px; }
+      .flow .clock { display: none; }
+    }
+    @media print {
+      .nav, footer, .input-panel, .actions, .toc, .btn-sm { display: none !important; }
+      main { padding: 0; background: #fff; }
+      .page-head { display: none; }
+      .workspace { display: block; }
+      .panel { border: 0; }
+      .block { break-inside: avoid; }
     }
   </style>
 </head>
@@ -114,10 +286,91 @@
         <h1>인터뷰 가이드 설계</h1>
         <p>리서치 목표를 입력하면 인터뷰 질문지를 설계해 줍니다.</p>
       </div>
-      <div class="notice">
-        <span class="badge">Coming soon</span>
-        <h2>준비 중입니다</h2>
-        <p>이 에이전트는 현재 개발 중이에요. 곧 만나보실 수 있습니다.</p>
+
+      <div class="workspace">
+        <!-- 입력 영역 -->
+        <form class="panel input-panel" id="guideForm" novalidate>
+          <h2 class="panel-title">무엇을 알고 싶나요?</h2>
+          <p class="panel-desc">몇 가지만 적으면 반구조화 인터뷰 가이드를 만들어 드려요.</p>
+
+          <div class="field">
+            <label for="topic">연구 주제와 배경 <span class="req">*</span></label>
+            <input class="text-input" id="topic" type="text" maxlength="60"
+              placeholder="예) 1인 가구의 온라인 장보기" />
+            <textarea class="text-input" id="background" rows="3"
+              placeholder="예) 장바구니 이탈률이 40%로 높아요. 1인 가구가 왜 결제 직전에 그만두는지, 장보기를 어떻게 하고 있는지 알고 싶어요."></textarea>
+            <p class="error" id="topicError">연구 주제를 한 줄로 적어 주세요.</p>
+          </div>
+
+          <div class="field">
+            <label for="rq">알고 싶은 것 <span class="opt">연구 질문 · 선택</span></label>
+            <textarea class="text-input" id="rq" rows="3"
+              placeholder="예) 1인 가구는 장보기 품목을 어떻게 정하는가?&#10;결제 직전에 그만두게 만드는 순간은 언제인가?"></textarea>
+            <p class="hint">한 줄에 하나씩, 2~3개가 적당해요. 비워 두면 AI가 제안해요.</p>
+          </div>
+
+          <div class="field">
+            <label for="target">인터뷰 대상 <span class="req">*</span></label>
+            <input class="text-input" id="target" type="text" maxlength="80"
+              placeholder="예) 최근 3개월 안에 온라인 장보기를 해 본 20~30대 1인 가구" />
+            <p class="error" id="targetError">누구를 인터뷰할지 적어 주세요.</p>
+          </div>
+
+          <div class="field">
+            <span class="label" id="typeLabel">인터뷰 성격</span>
+            <div class="segmented" role="radiogroup" aria-labelledby="typeLabel">
+              <input type="radio" name="type" id="typeExplore" value="explore" checked />
+              <label for="typeExplore">탐색형<small>문제를 찾고 싶을 때</small></label>
+              <input type="radio" name="type" id="typeValidate" value="validate" />
+              <label for="typeValidate">검증형<small>가설을 확인할 때</small></label>
+            </div>
+          </div>
+
+          <div class="field">
+            <span class="label" id="durationLabel">세션 시간</span>
+            <div class="segmented" role="radiogroup" aria-labelledby="durationLabel">
+              <input type="radio" name="duration" id="dur45" value="45" />
+              <label for="dur45">45분</label>
+              <input type="radio" name="duration" id="dur60" value="60" checked />
+              <label for="dur60">60분</label>
+            </div>
+          </div>
+
+          <div class="field">
+            <span class="label" id="modeLabel">진행 방식</span>
+            <div class="segmented" role="radiogroup" aria-labelledby="modeLabel">
+              <input type="radio" name="mode" id="modeOffline" value="offline" checked />
+              <label for="modeOffline">대면</label>
+              <input type="radio" name="mode" id="modeRemote" value="remote" />
+              <label for="modeRemote">원격</label>
+            </div>
+          </div>
+
+          <button class="btn btn-primary" type="submit" id="generateBtn">가이드 생성</button>
+          <button class="btn btn-link" type="button" id="fillExample">예시로 채워 보기</button>
+        </form>
+
+        <!-- 결과 영역 -->
+        <section class="panel result-panel" aria-live="polite">
+          <div class="empty" id="emptyState">
+            <div>
+              <span class="badge">결과 미리보기</span>
+              <h2>여기에 인터뷰 가이드가 나와요</h2>
+              <p>왼쪽을 채우고 ‘가이드 생성’을 눌러 주세요.</p>
+              <ol>
+                <li>연구 질문 2~3개</li>
+                <li>세션 흐름과 시간 배분</li>
+                <li>주제 블록별 메인 질문 · 꼬리 질문</li>
+                <li>진행자 체크리스트</li>
+                <li>동의 · 녹음 안내 문구</li>
+              </ol>
+            </div>
+          </div>
+          <div class="loading" id="loadingState">
+            <div><div class="spinner"></div>질문을 설계하는 중이에요…</div>
+          </div>
+          <article class="guide" id="guide"></article>
+        </section>
       </div>
     </div>
   </main>
@@ -129,5 +382,385 @@
     </div>
   </footer>
 
+  <div class="toast" id="toast" role="status"></div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+    // 받침 유무에 따라 조사를 고른다: josa("장보기", "을/를") → "장보기를"
+    function josa(word, pair) {
+      const [withJong, withoutJong] = pair.split("/");
+      const code = word.charCodeAt(word.length - 1) - 0xac00;
+      const hasJong = code >= 0 && code <= 11171 ? code % 28 !== 0 : false;
+      return word + (hasJong ? withJong : withoutJong);
+    }
+
+    // 스킬 §4.1 세션 흐름(60분 기준)을 45분으로 비례 축소한 값
+    const FLOW = {
+      60: { rapport: 5, consent: 3, warmup: 5, blocks: [12, 15, 13], closing: 5, buffer: 2 },
+      45: { rapport: 3, consent: 2, warmup: 4, blocks: [9, 11, 10], closing: 4, buffer: 2 },
+    };
+    const COLORS = { rapport: "#a5b4fc", consent: "#818cf8", warmup: "#6366f1", blocks: ["#4f46e5", "#4338ca", "#3730a3"], closing: "#7c83a6", buffer: "#c4c7d4" };
+
+    const SUGGESTED_RQ = {
+      explore: (t) => [
+        `참가자는 ${josa(t, "을/를")} 실제로 어떤 순서·도구·맥락에서 하고 있는가?`,
+        `그 과정에서 가장 크게 막히거나 포기하게 만드는 순간은 언제이며, 어떻게 우회하는가?`,
+        `참가자가 ${t}에서 궁극적으로 얻고 싶은 것(성공 기준·가치)은 무엇인가?`,
+      ],
+      validate: (t) => [
+        `${t}에서 우리가 가정한 핵심 문제가 참가자의 최근 실제 경험에서도 나타나는가?`,
+        `그 문제가 나타나지 않는 경우(반증 사례)는 언제이며, 무엇이 다른가?`,
+        `참가자는 지금 그 문제를 어떤 대안으로 해결하고 있으며, 바꾸지 않는 이유는 무엇인가?`,
+      ],
+    };
+
+    function buildBlocks(type, t, remote) {
+      const show = remote ? "화면을 공유해서" : "지금 휴대폰으로";
+      if (type === "explore") return [
+        {
+          title: "행동·맥락 재구성", technique: "인지적 재연",
+          goal: "평소 습관이 아니라 가장 최근의 실제 사건 하나를 처음부터 끝까지 복원합니다.",
+          qs: [
+            { q: `가장 최근에 ${josa(t, "과/와")} 관련된 일을 했던 때를 떠올려 주세요. 그날 상황을 처음부터 그대로 들려주시겠어요?`,
+              p: [["그 일을 하기 직전에는 뭘 하고 계셨어요?", "트리거"], ["제일 먼저 뭘 하셨어요? 그다음엔요?", ""], ["그렇게 하기로 하신 건 어떤 점 때문이었어요?", "판단 근거"]] },
+            { q: "그 과정에서 함께 쓴 도구나 앱, 도움을 받은 사람이 있었나요?",
+              p: [["그건 어떤 역할을 했어요?", ""], [`가능하면 ${show} 그때 화면을 보여주실 수 있을까요?`, "행동 증거"]] },
+          ],
+          avoid: ["보통 어떻게 하세요?", "가장 최근에 했던 때를 떠올려 주세요."],
+        },
+        {
+          title: "페인 포인트·결정적 사건", technique: "결정적 사건 기법",
+          goal: "평균적인 경험 대신 기억이 선명한 극단의 순간을 묻고, 감정까지 내려갑니다.",
+          qs: [
+            { q: `${josa(t, "을/를")} 하면서 ‘아, 이건 좀…’ 싶었던 순간이 있었나요?`,
+              p: [["조금 더 자세히 들려주시겠어요?", ""], ["그때 어떤 기분이었어요?", "감정"], ["그때 그만둘까 생각하신 적은요? 그런데도 계속한 이유는요?", "전환 비용"]] },
+            { q: "지금까지 가장 최악이었던 한 번은 언제였나요? 그날 이야기를 들려주세요.",
+              p: [["그 일이 정확히 어떤 순서로 일어났는지 짚어주시겠어요?", ""], ["반대로 ‘이건 정말 잘했다’ 싶었던 순간은요?", "기쁨의 순간"], ["주변에 그 경험을 이야기한 적 있어요? 뭐라고 하셨어요?", ""]] },
+          ],
+          avoid: ["그때 많이 불편하셨죠?", "그때 어떠셨나요?"],
+        },
+        {
+          title: "니즈·가치 탐색", technique: "래더링",
+          goal: "속성 → 결과 → 가치 순으로 사다리를 올라 행동의 근본 동기를 찾습니다.",
+          qs: [
+            { q: "지금 방식에서 딱 하나만 바꿀 수 있다면 뭘 바꾸시겠어요?",
+              p: [["그게 해결되면 일상에서 뭐가 달라질까요?", "결과"], ["그게 달라지는 게 ○○님께 어떤 점에서 중요하세요?", "가치"], ["그러면 결국 어떤 걸 얻게 되는 걸까요?", ""]] },
+            { q: `${josa(t, "을/를")} 잘한다는 건 ○○님에게 어떤 의미예요?`,
+              p: [["예를 들면요?", ""], ["그렇게 느꼈던 최근의 순간이 있었나요?", ""]] },
+            { q: "만약 지금 쓰시는 방법이 내일 사라진다면, 당장 뭐부터 하실 것 같아요?",
+              p: [["그 방법은 지금 방법과 비교해 어때요?", "대체재·의존도"]] },
+          ],
+          avoid: ["이런 기능이 있으면 쓰시겠어요?", "그 문제를 해결하려고 직접 해 보신 게 있나요?"],
+        },
+      ];
+      return [
+        {
+          title: "가설 관련 최근 경험", technique: "인지적 재연",
+          goal: "가설을 드러내지 않은 채, 가설이 다루는 상황의 최근 실제 경험을 복원합니다.",
+          qs: [
+            { q: `가장 최근에 ${josa(t, "과/와")} 관련된 일을 했던 때를 처음부터 끝까지 들려주시겠어요?`,
+              p: [["그 일을 하기 직전에는 뭘 하고 계셨어요?", "트리거"], ["화면을 열고 제일 먼저 뭘 보셨어요?", ""], ["그걸 보고 뭘 하기로 하셨어요? 그렇게 판단한 건 어떤 점 때문이었어요?", "판단 근거"]] },
+            { q: `가능하면 ${show} 그때 하셨던 과정을 한번 보여주실 수 있을까요?`,
+              p: [["지금 멈추신 부분에서는 어떤 생각을 하셨어요?", ""], ["여기서 다른 방법도 고민하셨나요?", ""]] },
+          ],
+          avoid: ["○○ 단계가 제일 불편하시죠?", "그 과정에서 시간이 가장 오래 걸린 단계는 어디였어요?"],
+        },
+        {
+          title: "가설 점검·반증 탐색", technique: "결정적 사건 기법",
+          goal: "가설을 지지하는 사례와 반대되는 사례를 함께 모아 확증 편향을 막습니다.",
+          qs: [
+            { q: "그 과정에서 가장 막혔거나 그만두고 싶었던 한 번은 언제였나요?",
+              p: [["그때 어떤 기분이었어요?", "감정"], ["그다음엔 어떻게 하셨어요?", "우회 행동"], ["정리하면 ~라는 말씀이 맞을까요?", "요약 확인"]] },
+            { q: "반대로 아무 문제 없이 순조로웠던 때는요? 그때는 뭐가 달랐나요?",
+              p: [["그 차이를 만든 건 뭐였다고 생각하세요?", "반증 단서"], ["예를 들면요?", ""]] },
+          ],
+          avoid: ["결제 단계가 복잡해서 그만두신 거죠?", "그때 그만두게 된 과정을 들려주시겠어요?"],
+        },
+        {
+          title: "의사결정·현재 대안", technique: "의사결정 재구성",
+          goal: "지금 쓰는 대안과 바꾸지 않는 이유에서 해결책의 실제 경쟁 상대를 찾습니다.",
+          qs: [
+            { q: "여러 선택지 중에 지금 방법을 고르셨는데, 마지막까지 고민했던 다른 후보는요?",
+              p: [["결정하는 데 누구(무엇)의 영향이 가장 컸어요?", ""], ["그 후보를 고르지 않은 건 어떤 점 때문이었어요?", ""]] },
+            { q: "그 문제를 해결하려고 직접 시도해 본 방법이 있나요?",
+              p: [["그 방법은 어땠어요?", ""], ["시간이나 비용은 얼마나 들었어요?", "문제의 크기"], ["지금도 그 방법을 쓰세요? 아니라면 그만둔 계기는요?", ""]] },
+          ],
+          avoid: ["저희가 이런 서비스를 만들면 쓰시겠어요?", "지금 그 문제를 어떻게 해결하고 계세요?"],
+        },
+      ];
+    }
+
+    function readForm() {
+      const v = (id) => $(id).value.trim();
+      return {
+        topic: v("topic"), background: v("background"), target: v("target"),
+        rqs: v("rq").split("\n").map((s) => s.replace(/^\s*([-*•·]|\d+[.)]|RQ\d*[:.)]?)\s*/i, "").trim()).filter(Boolean),
+        type: document.querySelector("input[name=type]:checked").value,
+        duration: Number(document.querySelector("input[name=duration]:checked").value),
+        remote: document.querySelector("input[name=mode]:checked").value === "remote",
+      };
+    }
+
+    function validate(d) {
+      let ok = true;
+      [["topic", "topicError"], ["target", "targetError"]].forEach(([field, err]) => {
+        const empty = !d[field];
+        $(field).classList.toggle("invalid", empty);
+        $(err).classList.toggle("show", empty);
+        if (empty && ok) { $(field).focus(); ok = false; }
+      });
+      return ok;
+    }
+
+    function render(d) {
+      const t = d.topic;
+      const f = FLOW[d.duration];
+      const typeName = d.type === "explore" ? "탐색형" : "검증형";
+      const suggested = d.rqs.length === 0;
+      const rqs = suggested ? SUGGESTED_RQ[d.type](t) : d.rqs;
+      const blocks = buildBlocks(d.type, t, d.remote);
+
+      // 세션 흐름
+      const steps = [
+        { key: "rapport", name: "라포 형성", min: f.rapport, color: COLORS.rapport, note: "정답이 없는 ‘배우는 자리’임을 알려 긴장을 풉니다." },
+        { key: "consent", name: "동의·녹음 안내", min: f.consent, color: COLORS.consent, note: "목적·녹음·데이터 처리·철회권을 안내하고 동의를 받습니다." },
+        { key: "warmup", name: "워밍업", min: f.warmup, color: COLORS.warmup, note: "자기소개와 일상처럼 넓고 편한 질문으로 말문을 엽니다." },
+        ...blocks.map((b, i) => ({ key: "b" + i, name: `블록 ${"ABC"[i]} · ${b.title}`, short: `블록 ${"ABC"[i]}`, min: f.blocks[i], color: COLORS.blocks[i], note: `${b.technique} 중심. ${b.goal}` })),
+        { key: "closing", name: "클로징", min: f.closing, color: COLORS.closing, note: "핵심 한 가지를 되묻고, 감사 인사와 리워드를 안내합니다." },
+        { key: "buffer", name: "버퍼", min: f.buffer, color: COLORS.buffer, note: "늘어진 블록을 흡수하는 여유 시간입니다." },
+      ];
+      let clock = 0;
+      const flowRows = steps.map((s) => {
+        const start = clock; clock += s.min;
+        return `<tr><td><span class="dot" style="background:${s.color}"></span>${esc(s.name)}</td><td class="min">${s.min}분</td><td class="clock">${start}–${clock}분</td><td>${esc(s.note)}</td></tr>`;
+      }).join("");
+      const bar = steps.map((s) => `<span style="flex:${s.min};background:${s.color}" title="${esc(s.name)} ${s.min}분">${s.short ? esc(s.short) : ""}</span>`).join("");
+      const mainMin = f.blocks.reduce((a, b) => a + b, 0);
+
+      // 블록별 질문
+      let qn = 0;
+      const warmup = `
+        <div class="block">
+          <div class="block-head"><h4>워밍업</h4><span class="chip">라포 · 퍼널 시작</span><span class="time">${f.warmup}분</span></div>
+          <div class="q"><p class="q-main"><span class="qn">W1</span>간단히 자기소개 부탁드려요. 요즘 평일 하루는 어떻게 흘러가세요?</p>
+            <ul class="probes"><li>그중 가장 바쁜 시간대는 언제예요?</li></ul></div>
+          <div class="q"><p class="q-main"><span class="qn">W2</span>${esc(josa(t, "과/와"))} 관련해서 요즘 가장 자주 하시는 일은 뭔가요?</p>
+            <ul class="probes"><li>예를 들면요?</li></ul></div>
+        </div>`;
+      const blockHtml = blocks.map((b, i) => {
+        const rqCode = `RQ${Math.min(i + 1, rqs.length)}`;
+        const qs = b.qs.map((x) => {
+          qn++;
+          const probes = x.p.map(([p, why]) => `<li>${esc(p)}${why ? `<span class="why">· ${esc(why)}</span>` : ""}</li>`).join("");
+          return `<div class="q"><p class="q-main"><span class="qn">Q${qn}</span>${esc(x.q)}</p><ul class="probes">${probes}</ul></div>`;
+        }).join("");
+        return `
+          <div class="block">
+            <div class="block-head"><h4>블록 ${"ABC"[i]} · ${esc(b.title)}</h4><span class="chip rq">${rqCode}</span><span class="chip">${esc(b.technique)}</span><span class="time">${f.blocks[i]}분</span></div>
+            <p class="block-goal">${esc(b.goal)}</p>
+            ${qs}
+            <p class="avoid"><b>피할 질문</b> “${esc(b.avoid[0])}” → <span class="ok">이렇게</span> “${esc(b.avoid[1])}”</p>
+          </div>`;
+      }).join("");
+      const closing = `
+        <div class="block">
+          <div class="block-head"><h4>클로징</h4><span class="chip">마무리</span><span class="time">${f.closing}분</span></div>
+          <div class="q"><p class="q-main"><span class="qn">C1</span>오늘 이야기 중에 가장 중요하다고 생각하시는 한 가지는 뭘까요?</p></div>
+          <div class="q"><p class="q-main"><span class="qn">C2</span>제가 미처 여쭙지 못했지만, 꼭 하고 싶은 말씀이 있으세요?</p>
+            <ul class="probes"><li>감사 인사 → 리워드 지급 방법 안내 → 녹음 종료</li></ul></div>
+        </div>`;
+
+      // 체크리스트
+      const pre = [
+        "연구 질문을 2~3개로 압축하고 가설과 연결했다",
+        "스크리너로 세그먼트당 4~6명 확보 (노쇼 대비 +20%)",
+        "동의서 · 녹음 도구 · 백업 녹음 준비",
+        "파일럿 1회 이상 진행하고 가이드를 고쳤다",
+        "진행자 · 기록자 역할을 나눴다",
+        ...(d.remote ? ["[원격] 시작 전 오디오·화면 공유 리허설 2분 확보", "[원격] 녹화를 클라우드 + 로컬로 이중 백업 설정"] : ["[대면] 시연이 필요하면 참가자에게 기기 지참을 미리 안내"]),
+      ];
+      const during = [
+        "발화 비율 진행자 2 : 참가자 8 유지",
+        "질문 후 침묵 5~10초 견디기 — 보기를 먼저 주지 않기",
+        "모든 답변에 최소 2단계 꼬리 질문",
+        "참가자가 쓴 단어를 그대로 되돌려 주기(미러링)",
+        "블록이 끝날 때마다 “정리하면 ~가 맞을까요?”로 요약 확인",
+        "기록은 발화 · 관찰 · 해석을 분리 (발화는 따옴표 그대로)",
+        ...(d.remote ? ["[원격] 카메라를 보며 시선 맞추기", "[원격] “천천히 생각하셔도 됩니다”로 침묵이 끊김으로 오해받지 않게"] : []),
+      ];
+      const post = [
+        "24시간 안에 디브리핑 (톱 인사이트 3 · 인용구 5~7 · 다음 세션 개선점)",
+        "전사 → 이름·연락처 마스킹 → 참가자 코드(P01…)로 저장",
+        "1차 코딩에 confidence 부착, 0.7 미만은 사람이 확정",
+        "포화 여부 판단 → 추가 세션 결정",
+      ];
+      const checks = (items) => items.map((s) => {
+        const tag = s.match(/^\[(원격|대면)\]\s*/);
+        const text = tag ? s.slice(tag[0].length) : s;
+        return `<li><label><input type="checkbox" /><span>${esc(text)}${tag ? `<span class="new">${tag[1]}</span>` : ""}</span></label></li>`;
+      }).join("");
+
+      // 동의·녹음 안내
+      const rec = d.remote ? "녹화" : "녹음";
+      const recNoun = d.remote ? "화면과 음성을 녹화" : "대화를 녹음";
+      const script =
+`오늘 시간 내 주셔서 감사합니다. 저는 오늘 진행을 맡은 ○○○입니다.
+오늘은 ‘${t}’에 대한 ○○님의 경험을 듣고 배우는 자리예요. 평가나 판매 목적이 아니고, 정답도 없습니다. 저희가 만든 것을 평가받는 자리가 아니라서 솔직하게 말씀해 주실수록 큰 도움이 돼요.
+
+정확하게 기록하기 위해 ${recNoun}하고 싶은데, 괜찮으실까요? ${rec} 내용은 분석에만 쓰고 외부에 공개하지 않습니다. 이름 같은 개인정보는 익명 코드로 바꿔 보관하고, 보관 기간이 지나면 파기해요.
+
+답하기 어려운 질문은 언제든 건너뛰셔도 되고, 중간에 그만두셔도 괜찮습니다. “이 얘기는 빼 주세요”라고 하시면 그 부분은 분석에서 빼겠습니다.${d.remote ? "\n\n화면이 잠시 멈추거나 소리가 끊기면 편하게 말씀해 주세요. 그리고 생각하실 때는 천천히 하셔도 돼요. 제가 조용히 기다리고 있을게요." : ""}
+
+인터뷰는 약 ${d.duration}분 걸립니다. 시작하기 전에 궁금한 점 있으세요?`;
+      const consentForm =
+`[리서치 참여 동의서]
+1. 목적: 본 인터뷰는 ‘${t}’ 이해를 위한 리서치이며, 평가나 판매 목적이 아닙니다.
+2. ${rec}: 분석 목적으로만 사용하며, 외부에 공개되지 않습니다. □ 동의 □ 미동의
+3. 데이터 처리: 이름 등 개인정보는 익명 코드(P##)로 바뀌며, 보관 기간([기간]) 경과 후 파기됩니다.
+4. 권리: 언제든 답변을 거부하거나 인터뷰를 중단할 수 있으며, 참여 철회 시 데이터는 즉시 삭제됩니다.
+5. 리워드: 세션 완료 시 [리워드]가 지급됩니다.
+
+참가자 서명: ____________  날짜: ____________`;
+      const hl = (s) => esc(s).replace(/\[(기간|리워드)\]|○○○?님?/g, (m) => `<span class="fill">${m}</span>`);
+
+      $("guide").innerHTML = `
+        <header class="guide-head">
+          <div class="top">
+            <div>
+              <p class="eyebrow">${typeName} · 반구조화 인터뷰 가이드 v1.0</p>
+              <h2>${esc(t)}</h2>
+            </div>
+            <div class="actions">
+              <button class="btn btn-sm" type="button" data-copy="all">전체 복사</button>
+              <button class="btn btn-sm" type="button" onclick="window.print()">인쇄</button>
+            </div>
+          </div>
+          <div class="tags">
+            <span class="tag">대상 <b>${esc(d.target)}</b></span>
+            <span class="tag">시간 <b>${d.duration}분</b></span>
+            <span class="tag">방식 <b>${d.remote ? "원격(화상)" : "대면"}</b></span>
+            <span class="tag">권장 인원 <b>세그먼트당 4~6명</b></span>
+          </div>
+          <p class="demo-note">AI 연결 전이라 스킬 형식에 맞춘 예시 가이드를 보여 드려요. 주제·대상·성격·시간·방식은 입력값이 반영됩니다. 파일럿 후 v1.1로 다듬어 쓰세요.</p>
+        </header>
+        <nav class="toc" aria-label="가이드 목차">
+          <a href="#sec-rq">연구 질문</a><a href="#sec-flow">세션 흐름</a><a href="#sec-q">질문</a><a href="#sec-check">체크리스트</a><a href="#sec-consent">동의 안내</a>
+        </nav>
+
+        <section class="sec" id="sec-rq">
+          <div class="sec-head"><span class="n">01</span><h3>연구 질문</h3>${suggested ? '<span class="ai-chip">AI 제안</span>' : ""}</div>
+          <ul class="rq-list">${rqs.map((q, i) => `<li><span class="code">RQ${i + 1}</span><span>${esc(q)}</span></li>`).join("")}</ul>
+          ${rqs.length > 3 ? `<p class="warn">연구 질문이 ${rqs.length}개예요. “다 물어보기”는 실패의 지름길 — 2~3개로 줄이는 걸 권해요.</p>` : ""}
+          ${d.background ? `<p class="pre-note">배경: ${esc(d.background)}</p>` : ""}
+        </section>
+
+        <section class="sec" id="sec-flow">
+          <div class="sec-head"><span class="n">02</span><h3>세션 흐름과 시간 배분</h3><span class="meta">총 ${d.duration}분 · 본 질문 ${mainMin}분</span></div>
+          <div class="timebar" role="img" aria-label="시간 배분 막대">${bar}</div>
+          <table class="flow">
+            <thead><tr><th>단계</th><th>시간</th><th class="clock">구간</th><th>할 일</th></tr></thead>
+            <tbody>${flowRows}</tbody>
+          </table>
+          ${d.remote ? '<p class="pre-note">원격 진행: 세션 시작 전에 오디오·화면 공유 점검 2분을 따로 확보하세요.</p>' : ""}
+        </section>
+
+        <section class="sec" id="sec-q">
+          <div class="sec-head"><span class="n">03</span><h3>주제 블록별 질문</h3><span class="meta">넓은 질문 → 구체 경험 → 심층 → 마무리</span></div>
+          ${warmup}${blockHtml}${closing}
+          <div class="principles">
+            <strong>질문할 때 기억할 5원칙</strong>
+            <ul>
+              <li>개방형으로 묻기 — 예/아니오로 끝나는 질문 금지</li>
+              <li>“보통”이 아니라 “가장 최근에” 있었던 구체적 사건으로</li>
+              <li>유도하지 않기 — “불편하셨죠?” 대신 “어떠셨나요?”</li>
+              <li>한 문장에 한 가지만 묻기</li>
+              <li>“왜요?” 대신 “어떤 점 때문에 그렇게 하셨어요?”</li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="sec" id="sec-check">
+          <div class="sec-head"><span class="n">04</span><h3>진행자 체크리스트</h3></div>
+          <div class="check-group"><h4>사전<small>세션 전날까지</small></h4><ul class="checks">${checks(pre)}</ul></div>
+          <div class="check-group"><h4>진행 중</h4><ul class="checks">${checks(during)}</ul></div>
+          <div class="check-group"><h4>사후<small>세션 직후 ~ 24시간</small></h4><ul class="checks">${checks(post)}</ul></div>
+        </section>
+
+        <section class="sec" id="sec-consent">
+          <div class="sec-head"><span class="n">05</span><h3>동의 · ${rec} 안내 문구</h3><span class="meta">파란 글씨는 직접 채우세요</span></div>
+          <div class="script-label">진행자 멘트 (소리 내어 읽기)<button class="btn btn-sm" type="button" data-copy="script">복사</button></div>
+          <div class="script">${hl(script)}</div>
+          <div class="script-label">서면 동의서 (요약형)<button class="btn btn-sm" type="button" data-copy="form">복사</button></div>
+          <div class="script">${hl(consentForm)}</div>
+        </section>`;
+
+      // 복사용 평문
+      const plain = [
+        `# ${t} — ${typeName} 인터뷰 가이드 v1.0`,
+        `대상: ${d.target} / ${d.duration}분 / ${d.remote ? "원격" : "대면"}`,
+        "", "## 연구 질문", ...rqs.map((q, i) => `RQ${i + 1}. ${q}`),
+        "", "## 세션 흐름", ...steps.map((s) => `- ${s.name} ${s.min}분`),
+        "", "## 질문",
+        ...[...$("guide").querySelectorAll(".block")].flatMap((b) => [
+          `### ${b.querySelector("h4").textContent}`,
+          ...[...b.querySelectorAll(".q")].flatMap((q) => [q.querySelector(".q-main").textContent.replace(/^(\w\d+)/, "$1. "), ...[...q.querySelectorAll(".probes li")].map((li) => `   ↳ ${li.textContent}`)]),
+        ]),
+        "", "## 진행자 체크리스트", ...[...pre, ...during, ...post].map((s) => `- [ ] ${s}`),
+        "", "## 동의·녹음 안내", script, "", consentForm,
+      ].join("\n");
+      const texts = { all: plain, script, form: consentForm };
+      $("guide").querySelectorAll("[data-copy]").forEach((btn) => {
+        btn.addEventListener("click", () => copy(texts[btn.dataset.copy]));
+      });
+    }
+
+    async function copy(text) {
+      try { await navigator.clipboard.writeText(text); showToast("복사했어요"); }
+      catch { showToast("복사하지 못했어요. 직접 선택해 복사해 주세요."); }
+    }
+    let toastTimer;
+    function showToast(msg) {
+      $("toast").textContent = msg;
+      $("toast").classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => $("toast").classList.remove("show"), 1800);
+    }
+
+    function setState(state) {
+      $("emptyState").style.display = state === "empty" ? "grid" : "none";
+      $("loadingState").style.display = state === "loading" ? "grid" : "none";
+      $("guide").style.display = state === "done" ? "block" : "none";
+    }
+
+    $("guideForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const d = readForm();
+      if (!validate(d)) return;
+      $("generateBtn").disabled = true;
+      setState("loading");
+      if (window.matchMedia("(max-width: 960px)").matches) $("loadingState").scrollIntoView({ behavior: "smooth", block: "start" });
+      setTimeout(() => {
+        render(d);
+        setState("done");
+        $("generateBtn").disabled = false;
+        $("generateBtn").textContent = "가이드 다시 생성";
+      }, 900);
+    });
+
+    ["topic", "target"].forEach((id) => $(id).addEventListener("input", () => {
+      $(id).classList.remove("invalid");
+      $(id + "Error").classList.remove("show");
+    }));
+
+    $("fillExample").addEventListener("click", () => {
+      $("topic").value = "1인 가구의 온라인 장보기";
+      $("background").value = "장바구니 이탈률이 40%로 높아요. 1인 가구가 결제 직전에 왜 그만두는지, 평소 장보기를 어떻게 하는지 알고 싶어요.";
+      $("rq").value = "";
+      $("target").value = "최근 3개월 안에 온라인 장보기를 해 본 20~30대 1인 가구";
+      ["topic", "target"].forEach((id) => { $(id).classList.remove("invalid"); $(id + "Error").classList.remove("show"); });
+    });
+  </script>
 </body>
 </html>
