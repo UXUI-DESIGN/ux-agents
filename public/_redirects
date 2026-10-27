@@ -1,2 +1,4 @@
 /simulator    /moderator/          301
 /simulator/*  /moderator/:splat    301
+/moderator/new    /moderator/          301
+/moderator/new/*  /moderator/          301

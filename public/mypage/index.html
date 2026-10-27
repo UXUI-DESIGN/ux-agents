@@ -107,7 +107,11 @@
     .guide .meta .target { overflow-wrap: anywhere; }
     .chip { padding: 1px 9px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-size: 12px; font-weight: 600; }
     .chip.validate { background: #ecfdf3; color: var(--good); }
-    .guide .actions { flex: none; display: flex; align-items: center; gap: 2px; }
+    .guide .actions { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+    .guide { flex-wrap: wrap; }
+    .guide .info { flex: 1 1 320px; }
+    .session .stats { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 6px; font-size: 13px; color: var(--text-sub); }
+    .session .stats b { color: var(--text); font-weight: 700; }
 
     .empty {
       padding: 56px 24px; text-align: center; background: #fff;
@@ -194,7 +198,7 @@
 
         <div class="tabs" role="tablist" aria-label="내 작업">
           <button class="tab" role="tab" id="tab-guides" aria-controls="panel-guides" aria-selected="true">내 인터뷰 가이드<span class="count" id="guideCount" hidden></span></button>
-          <button class="tab" role="tab" id="tab-sessions" aria-controls="panel-sessions" aria-selected="false" tabindex="-1">내 인터뷰 세션</button>
+          <button class="tab" role="tab" id="tab-sessions" aria-controls="panel-sessions" aria-selected="false" tabindex="-1">내 인터뷰 세션<span class="count" id="sessionCount" hidden></span></button>
         </div>
 
         <section class="panel" id="panel-guides" role="tabpanel" aria-labelledby="tab-guides">
@@ -227,7 +231,19 @@
         </section>
 
         <section class="panel" id="panel-sessions" role="tabpanel" aria-labelledby="tab-sessions" hidden>
-          <div class="empty">
+          <div id="sessionsLoading" aria-busy="true"><div class="skeleton"></div></div>
+          <div class="load-error" id="sessionsError" hidden>
+            <p id="sessionsErrorMsg">세션을 불러오지 못했어요.</p>
+            <button class="btn" type="button" id="sessionsRetry">다시 시도</button>
+          </div>
+          <div id="sessionsList" hidden>
+            <div class="list-head">
+              <span id="sessionsSummary"></span>
+              <a class="btn" href="/moderator/">+ 새 세션</a>
+            </div>
+            <ul class="guides" id="sessions"></ul>
+          </div>
+          <div class="empty" id="sessionsEmpty" hidden>
             <svg viewBox="0 0 56 56" fill="none" aria-hidden="true">
               <rect x="6" y="10" width="34" height="26" rx="6" stroke="currentColor" stroke-width="2.5" />
               <path d="M14 36l-4 8 10-8" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round" />
@@ -348,6 +364,7 @@
           </div>
           <div class="actions">
             <a class="btn btn-accent open">열기</a>
+            <a class="btn make">이 가이드로 인터뷰 세션 만들기</a>
             <button class="btn btn-ghost rename" type="button">이름 바꾸기</button>
             <button class="btn btn-ghost del" type="button">삭제</button>
           </div>`;
@@ -356,6 +373,7 @@
         li.querySelector(".title").href = href;
         li.querySelector(".open").href = href;
         li.querySelector(".open").setAttribute("aria-label", `${g.title} 열기`);
+        li.querySelector(".make").href = `/moderator/?guide=${encodeURIComponent(g.id)}`;
         li.querySelector(".target").textContent = g.target ? `대상 · ${g.target}` : "대상 미입력";
         const chip = li.querySelector(".chip");
         chip.textContent = TYPE_NAME[g.type] || "성격 미정";
@@ -383,6 +401,76 @@
     }
     $("retryBtn").addEventListener("click", loadGuides);
     if (UXA.getSession()) loadGuides();
+
+    // ── 내 인터뷰 세션 ──
+    let sessions = [];
+    const sessionLink = (token) => `${location.origin}/interview/#${token}`;
+
+    function showSessions(state) {
+      $("sessionsLoading").hidden = state !== "loading";
+      $("sessionsError").hidden = state !== "error";
+      $("sessionsEmpty").hidden = state !== "empty";
+      $("sessionsList").hidden = state !== "list";
+    }
+
+    function renderSessions() {
+      $("sessionCount").hidden = false;
+      $("sessionCount").textContent = sessions.length;
+      if (!sessions.length) return showSessions("empty");
+      $("sessionsSummary").textContent = `만든 세션 ${sessions.length}개 · 최근 만든 순`;
+      $("sessions").replaceChildren(...sessions.map((s) => {
+        const li = document.createElement("li");
+        li.className = "guide session";
+        li.innerHTML = `
+          <div class="info">
+            <span class="title"></span>
+            <div class="stats">
+              <span>가이드 · <b class="g"></b></span>
+              <span class="date"></span>
+              <span>참가자 <b class="n"></b></span>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn btn-accent copy" type="button">링크 복사</button>
+          </div>`;
+        li.querySelector(".title").textContent = s.name;
+        li.querySelector(".g").textContent = s.guide_title;
+        li.querySelector(".date").textContent = `${fmtDate(s.created_at)} 만듦`;
+        li.querySelector(".n").textContent = s.expected_participants ? `${s.participants} / ${s.expected_participants}명` : `${s.participants}명`;
+        li.querySelector(".copy").addEventListener("click", () => copyLink(sessionLink(s.token)));
+        return li;
+      }));
+      showSessions("list");
+    }
+
+    async function loadSessions() {
+      showSessions("loading");
+      try {
+        const { res, data } = await UXA.api("/api/sessions");
+        if (res.status === 401) { UXA.clearSession(); location.replace(UXA.loginUrl()); return; }
+        if (!res.ok) throw new Error(data.error);
+        sessions = data.sessions;
+        renderSessions();
+      } catch (err) {
+        $("sessionsErrorMsg").textContent = err instanceof TypeError ? "서버에 연결하지 못했어요. 인터넷 연결을 확인해 주세요." : err.message || "세션을 불러오지 못했어요.";
+        showSessions("error");
+      }
+    }
+    $("sessionsRetry").addEventListener("click", loadSessions);
+    if (UXA.getSession()) loadSessions();
+
+    async function copyLink(link) {
+      try { await navigator.clipboard.writeText(link); showToast("참가자 링크를 복사했어요."); }
+      catch {
+        // 클립보드 권한이 없을 때: 숨긴 입력칸으로 복사
+        const tmp = Object.assign(document.createElement("textarea"), { value: link });
+        document.body.appendChild(tmp);
+        tmp.select();
+        const ok = document.execCommand("copy");
+        tmp.remove();
+        showToast(ok ? "참가자 링크를 복사했어요." : `복사하지 못했어요: ${link}`);
+      }
+    }
 
     // ── 이름 바꾸기 ──
     function openRename(g) {

@@ -8,9 +8,12 @@
 //   POST /api/auth/logout Authorization: Bearer <token> → { ok }
 //   GET  /api/auth/me     Authorization: Bearer <token> → { user }
 //   /api/guides, /api/guides/:id  내 인터뷰 가이드 목록·저장·열기·덮어쓰기·이름 바꾸기·삭제 (guides.js)
+//   /api/sessions                 내 인터뷰 세션 목록·만들기 (sessions.js)
+//   /api/p/:token[/interviews]    참가자 링크로 세션 정보 보기·인터뷰 시작 (sessions.js)
 
 import { signup, login, logout, me } from "./auth.js";
 import { guides } from "./guides.js";
+import { sessions, participant } from "./sessions.js";
 
 const MAX_INPUT_CHARS = 20000;
 const MAX_OUTPUT_TOKENS = 4000;
@@ -53,7 +56,8 @@ async function route(request, env, cors) {
   }
 
   const guidePath = url.pathname.match(/^\/api\/guides(?:\/([^/]+))?$/);
-  if (url.pathname.startsWith("/api/auth/") || guidePath) {
+  const participantPath = url.pathname.match(/^\/api\/p\/([^/]+)(?:\/(interviews))?$/);
+  if (url.pathname.startsWith("/api/auth/") || guidePath || participantPath || url.pathname === "/api/sessions") {
     if (!cors["Access-Control-Allow-Origin"]) return json({ error: "허용되지 않은 사이트에서 온 요청이에요." }, 403, cors);
     const reply = (data, status = 200) => json(data, status, cors);
     const routes = {
@@ -63,6 +67,8 @@ async function route(request, env, cors) {
       "GET /api/auth/me": me,
     };
     if (guidePath) return guides(request, env, reply, guidePath[1]);
+    if (url.pathname === "/api/sessions") return sessions(request, env, reply);
+    if (participantPath) return participant(request, env, reply, participantPath[1], participantPath[2]);
     const handler = routes[`${request.method} ${url.pathname}`];
     if (handler) return handler(request, env, reply);
   }

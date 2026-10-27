@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>인터뷰 참여 · UXA</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="referrer" content="no-referrer" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-soft: #f6f7fb;
+      --text: #14161f;
+      --text-sub: #5b6072;
+      --text-faint: #a3a7b7;
+      --line: #e4e6ee;
+      --accent: #4f46e5;
+      --accent-soft: #eef0ff;
+      --danger: #d92d20;
+      --good: #12805c;
+      --radius: 16px;
+      --max: 1160px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      display: flex; flex-direction: column; min-height: 100vh;
+      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      word-break: keep-all;
+    }
+    a { color: inherit; text-decoration: none; }
+    button, input, textarea { font: inherit; color: inherit; }
+    [hidden] { display: none !important; }
+    .container { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+
+    /* 내비게이션 (랜딩과 동일) */
+    .nav {
+      position: sticky; top: 0; z-index: 10;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--line);
+    }
+    .nav .container {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 24px; height: 64px;
+    }
+    .logo { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
+    .logo span { color: var(--accent); }
+    .nav nav { min-width: 0; }
+    .menu { display: flex; gap: 4px; list-style: none; overflow-x: auto; }
+    .menu a {
+      display: block; padding: 8px 14px; border-radius: 999px;
+      font-size: 14px; font-weight: 500; color: var(--text-sub); white-space: nowrap;
+    }
+    .menu a:hover { background: var(--accent-soft); color: var(--accent); }
+    .menu a[aria-current="page"] { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+
+    /* 본문 */
+    main { flex: 1; padding: 72px 0 100px; background: var(--bg-soft); }
+    .page-head { text-align: center; margin-bottom: 40px; }
+    .page-head .num {
+      display: inline-grid; place-items: center; width: 44px; height: 44px; margin-bottom: 16px;
+      border-radius: 50%; background: var(--accent); color: #fff; font-weight: 800; font-size: 18px;
+    }
+    .page-head h1 { font-size: clamp(28px, 4vw, 40px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.3; }
+    .page-head p { margin-top: 12px; font-size: 17px; color: var(--text-sub); }
+    .wrap { max-width: 820px; margin: 0 auto; }
+
+    .card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); }
+    .gate { padding: 48px 32px; text-align: center; }
+    .gate svg { width: 56px; height: 56px; color: var(--accent); }
+    .gate h2 { max-width: 460px; margin: 12px auto 0; font-size: 19px; font-weight: 700; }
+    .gate .btn { margin-top: 22px; }
+
+    .step { padding: 28px 32px; }
+    .step + .step { border-top: 1px solid var(--line); }
+    .step-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; }
+    .step-head .n { font-size: 13px; font-weight: 700; color: var(--accent); }
+    .step-head h2 { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
+    .step-desc { font-size: 14px; color: var(--text-sub); }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 10px 16px; border: 1px solid var(--line); border-radius: 10px; background: #fff;
+      font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: background .15s, border-color .15s;
+    }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-accent { border-color: var(--accent); background: var(--accent); color: #fff; }
+    .btn-accent:hover { background: #4338ca; color: #fff; }
+    .btn-link { padding: 0; border: 0; background: none; color: var(--accent); font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+    .btn-primary { width: 100%; padding: 15px; border: 0; border-radius: 12px; background: var(--accent); color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; }
+    .btn-primary:hover { background: #4338ca; }
+    .btn-primary:disabled { opacity: .6; cursor: progress; }
+
+    /* 가이드 고르기 */
+    .picker { list-style: none; display: grid; gap: 8px; max-height: 300px; overflow-y: auto; margin-top: 16px; padding: 2px; }
+    .picker.invalid { outline: 2px solid var(--danger); outline-offset: 2px; border-radius: 12px; }
+    .pick label {
+      display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; cursor: pointer;
+      border: 1px solid var(--line); border-radius: 12px; transition: border-color .15s, background .15s;
+    }
+    .pick label:hover { border-color: var(--accent); }
+    .pick input { flex: none; width: 18px; height: 18px; margin-top: 3px; accent-color: var(--accent); }
+    .pick label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+    .pick-title { display: block; font-weight: 700; overflow-wrap: anywhere; }
+    .pick-meta { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 2px; font-size: 13px; color: var(--text-sub); }
+    .chip { padding: 1px 9px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-size: 12px; font-weight: 600; }
+    .chip.validate { background: #ecfdf3; color: var(--good); }
+    .picker-foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; margin-top: 12px; font-size: 14px; color: var(--text-sub); }
+
+    .empty-guides { margin-top: 16px; padding: 28px 24px; text-align: center; border: 1px dashed var(--line); border-radius: 12px; }
+    .empty-guides h3 { font-size: 16px; font-weight: 700; }
+    .empty-guides p { margin-top: 4px; font-size: 14px; color: var(--text-sub); }
+    .empty-guides .row { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 16px; }
+
+    .paste { margin-top: 16px; }
+    .paste-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 14px; font-weight: 600; }
+
+    .preview { margin-top: 18px; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+    .preview-head { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 14px 18px; background: var(--bg-soft); font-size: 14px; }
+    .preview-head b { font-size: 15px; overflow-wrap: anywhere; }
+    .preview-head span { flex: none; color: var(--text-sub); }
+    .preview-body { padding: 4px 18px 18px; max-height: 460px; overflow-y: auto; }
+    .preview h4 { margin-top: 16px; font-size: 13px; font-weight: 700; color: var(--accent); }
+    .preview .rqs { list-style: none; margin-top: 6px; display: grid; gap: 6px; font-size: 14px; }
+    .preview .rqs b { margin-right: 6px; color: var(--accent); }
+    .pv-block { margin-top: 10px; padding: 12px 14px; border-radius: 10px; background: var(--bg-soft); }
+    .pv-block .bt { font-size: 14.5px; font-weight: 700; }
+    .pv-block .bt small { margin-left: 6px; font-weight: 500; color: var(--text-sub); }
+    .pv-block ol { margin: 6px 0 0 18px; font-size: 14px; }
+    .pv-block ol li { margin-top: 4px; }
+    .pv-block ul { list-style: none; margin-top: 2px; font-size: 13px; color: var(--text-sub); }
+    .pv-block ul li::before { content: "↳ "; color: var(--text-faint); }
+    .pv-loading { padding: 24px; text-align: center; font-size: 14px; color: var(--text-sub); }
+
+    /* 입력 */
+    .field { margin-top: 20px; }
+    .field > label, .field > .label { display: flex; align-items: baseline; gap: 6px; margin-bottom: 8px; font-size: 14px; font-weight: 600; }
+    .opt { font-size: 12px; font-weight: 500; color: var(--text-faint); }
+    .req { color: var(--accent); }
+    .text-input {
+      display: block; width: 100%; padding: 11px 14px;
+      border: 1px solid var(--line); border-radius: 10px; background: #fff;
+      font-size: 14.5px; line-height: 1.6; resize: vertical; transition: border-color .15s, box-shadow .15s;
+    }
+    .text-input::placeholder { color: var(--text-faint); }
+    .text-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .text-input.invalid { border-color: var(--danger); }
+    .text-input.short { max-width: 160px; }
+    .hint { margin-top: 6px; font-size: 12.5px; color: var(--text-sub); }
+    .error { margin-top: 6px; font-size: 13px; color: var(--danger); }
+    .error:empty { display: none; }
+    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
+
+    .segmented { display: inline-grid; grid-auto-flow: column; gap: 4px; padding: 4px; background: var(--bg-soft); border-radius: 12px; }
+    .segmented input { position: absolute; opacity: 0; pointer-events: none; }
+    .segmented label { padding: 8px 18px; border-radius: 9px; text-align: center; cursor: pointer; font-size: 14px; font-weight: 500; color: var(--text-sub); }
+    .segmented input:checked + label { background: #fff; color: var(--accent); font-weight: 700; box-shadow: 0 1px 3px rgba(20, 22, 31, .08); }
+    .segmented input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+    .collect-mode { display: grid; gap: 8px; margin-top: 14px; }
+    .radio-row { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; cursor: pointer; font-size: 14.5px; }
+    .radio-row:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+    .radio-row input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--accent); }
+    .radio-row small { display: block; font-size: 13px; color: var(--text-sub); }
+    .collect-items { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 0 28px; }
+    .check-chip { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border: 1px solid var(--line); border-radius: 999px; background: #fff; font-size: 14px; cursor: pointer; }
+    .check-chip:has(input:checked) { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+    .check-chip input { accent-color: var(--accent); }
+    .privacy-note { margin-top: 12px; padding: 10px 14px; border-radius: 10px; background: #fff8e6; color: #8a5a00; font-size: 13px; }
+
+    .submit-area { padding: 24px 32px 32px; border-top: 1px solid var(--line); }
+    .form-error { display: none; margin-bottom: 14px; padding: 12px 14px; border-radius: 10px; background: #fff4f3; color: #7a271a; font-size: 14px; }
+    .form-error.show { display: block; }
+
+    /* 만든 뒤 */
+    .done { padding: 40px 32px; text-align: center; }
+    .done .check { display: inline-grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: #ecfdf3; color: var(--good); font-size: 28px; font-weight: 800; }
+    .done h2 { margin-top: 14px; font-size: 22px; font-weight: 800; letter-spacing: -0.02em; overflow-wrap: anywhere; }
+    .done > p { margin-top: 6px; font-size: 15px; color: var(--text-sub); }
+    .link-box { display: flex; gap: 8px; max-width: 620px; margin: 24px auto 0; }
+    .link-box input { flex: 1; min-width: 0; font-family: ui-monospace, Consolas, monospace; font-size: 13.5px; background: var(--bg-soft); }
+    .done .note { max-width: 520px; margin: 14px auto 0; font-size: 13px; color: var(--text-sub); }
+    .done .row { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 26px; }
+
+    .loading-card { padding: 48px; text-align: center; color: var(--text-sub); }
+
+    .toast {
+      position: fixed; left: 50%; bottom: 32px; z-index: 20; transform: translate(-50%, 20px);
+      padding: 10px 18px; border-radius: 999px; background: var(--text); color: #fff; font-size: 14px;
+      opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    /* 푸터 (랜딩과 동일) */
+    footer { padding: 40px 0; border-top: 1px solid var(--line); }
+    footer .container {
+      display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px;
+      font-size: 14px; color: var(--text-sub);
+    }
+    footer .logo { font-size: 18px; color: var(--text); }
+
+    @media (max-width: 640px) {
+      .container { padding: 0 16px; }
+      .nav .container { flex-direction: column; align-items: flex-start; height: auto; padding-top: 12px; padding-bottom: 8px; gap: 6px; }
+      .nav nav { width: 100%; }
+      .menu a { padding: 8px 12px 8px 0; }
+      .menu a[aria-current="page"] { padding-left: 12px; }
+      main { padding: 48px 0 72px; }
+      .step, .submit-area { padding-left: 18px; padding-right: 18px; }
+      .two { grid-template-columns: 1fr; }
+      .collect-items { margin-left: 0; }
+      .preview-head { flex-direction: column; align-items: flex-start; gap: 2px; }
+      .link-box { flex-direction: column; }
+      .done { padding: 32px 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="nav">
+    <div class="container">
+      <span class="logo">UX<span>A</span></span>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="wrap">
+        <div class="card loading-card" id="loadingCard">인터뷰 정보를 불러오는 중…</div>
+
+        <section class="card gate" id="invalid" hidden>
+          <h2>열 수 없는 인터뷰 링크예요</h2>
+          <p class="step-desc" style="margin-top:8px">링크가 잘못됐거나 세션이 닫혔을 수 있어요. 링크를 보낸 리서처에게 확인해 주세요.</p>
+        </section>
+
+        <section class="card" id="info" hidden>
+          <div class="step">
+            <p class="step-desc">인터뷰 초대</p>
+            <h1 id="sName" style="margin-top:4px;font-size:24px;font-weight:800;letter-spacing:-0.02em;overflow-wrap:anywhere"></h1>
+            <p id="sPurpose" style="margin-top:12px;font-size:15.5px;white-space:pre-line"></p>
+            <p class="hint" id="sMeta" style="margin-top:12px"></p>
+          </div>
+          <div class="step">
+            <div class="step-head"><h2>참여 동의서</h2></div>
+            <p id="sConsent" style="margin-top:8px;padding:16px 18px;border-radius:12px;background:var(--bg-soft);font-size:14px;white-space:pre-line"></p>
+          </div>
+          <div class="submit-area">
+            <p class="privacy-note" style="margin-top:0">참가자 인터뷰 화면은 준비 중이에요. 곧 이 링크에서 AI 모더레이터와 인터뷰를 시작할 수 있어요.</p>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // 참가자 링크: /interview/#<무작위 값>. # 뒤는 서버 로그에 남지 않는다
+    const API_BASE = "https://uxa-api.kopeakai88.workers.dev";
+    const $ = (id) => document.getElementById(id);
+    const show = (id) => ["loadingCard", "invalid", "info"].forEach((x) => { $(x).hidden = x !== id; });
+    (async () => {
+      const token = location.hash.slice(1);
+      if (!/^[A-Za-z0-9_-]{40,}$/.test(token)) return show("invalid");
+      try {
+        const res = await fetch(`${API_BASE}/api/p/${token}`);
+        if (!res.ok) return show("invalid");
+        const { session: s } = await res.json();
+        $("sName").textContent = s.name;
+        $("sPurpose").textContent = s.purpose;
+        $("sMeta").textContent = `약 ${s.duration}분 · AI 모더레이터가 1:1로 진행해요${s.collect.length ? ` · 시작 전에 ${s.collect.map((c) => c.label).join(", ")}을(를) 여쭤봐요` : ""}`;
+        $("sConsent").textContent = s.consent;
+        show("info");
+      } catch {
+        $("loadingCard").textContent = "서버에 연결하지 못했어요. 잠시 후 다시 열어 주세요.";
+      }
+    })();
+  </script>
+</body>
+</html>
