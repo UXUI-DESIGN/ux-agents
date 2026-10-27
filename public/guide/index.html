@@ -31,6 +31,7 @@
       word-break: keep-all;
     }
     a { color: inherit; text-decoration: none; }
+    [hidden] { display: none !important; }
     button, input, textarea { font: inherit; color: inherit; }
     .container { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
 
@@ -55,6 +56,36 @@
     }
     .menu a:hover { background: var(--accent-soft); color: var(--accent); }
     .menu a[aria-current="page"] { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+    .settings-btn {
+      flex: none; display: inline-flex; align-items: center; gap: 8px;
+      padding: 7px 14px; border: 1px solid var(--line); border-radius: 999px; background: #fff;
+      font-size: 14px; font-weight: 600; color: var(--text-sub); cursor: pointer;
+    }
+    .settings-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-faint); }
+    .status-dot.on { background: var(--good); }
+
+    /* 설정 창 */
+    .settings { width: min(480px, calc(100vw - 32px)); margin: auto; padding: 0; border: 0; border-radius: var(--radius); box-shadow: 0 20px 60px rgba(20, 22, 31, .2); }
+    .settings::backdrop { background: rgba(20, 22, 31, .4); }
+    .settings-inner { padding: 28px 24px 24px; }
+    .settings-top { display: flex; justify-content: space-between; align-items: center; }
+    .close-btn { width: 32px; height: 32px; border: 0; border-radius: 8px; background: none; font-size: 20px; color: var(--text-sub); cursor: pointer; }
+    .close-btn:hover { background: var(--bg-soft); }
+    .key-saved { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 14px; border-radius: 10px; background: var(--bg-soft); font-size: 14.5px; }
+    .key-saved code { font-family: ui-monospace, Consolas, monospace; letter-spacing: .02em; }
+    .key-row { display: flex; gap: 8px; }
+    .key-row .text-input { flex: 1; min-width: 0; font-family: ui-monospace, Consolas, monospace; }
+    .btn-danger:hover { border-color: var(--danger); color: var(--danger); }
+    .model-info { margin-top: 22px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; font-size: 13.5px; color: var(--text-sub); }
+    .model-info b { color: var(--text); font-family: ui-monospace, Consolas, monospace; }
+    .test-btn { width: 100%; margin-top: 16px; }
+    .test-result { display: none; margin-top: 12px; padding: 12px 14px; border-radius: 10px; font-size: 14px; white-space: pre-line; }
+    .test-result.show { display: block; }
+    .test-result.ok { background: #ecfdf3; color: #05603a; }
+    .test-result.fail { background: #fff4f3; color: #7a271a; }
+    .test-result .meta { display: block; margin-top: 6px; font-size: 12.5px; opacity: .8; }
+    .security-note { margin-top: 16px; font-size: 12.5px; color: var(--text-sub); }
 
     /* 본문 */
     main { flex: 1; padding: 72px 0 100px; background: var(--bg-soft); }
@@ -239,7 +270,9 @@
     @media (max-width: 640px) {
       .container { padding: 0 16px; }
       .nav .container { flex-direction: column; align-items: flex-start; height: auto; padding-top: 12px; padding-bottom: 8px; gap: 6px; }
+      .nav .container { position: relative; }
       .nav nav { width: 100%; }
+      .settings-btn { position: absolute; top: 10px; right: 16px; }
       .menu a { padding: 8px 12px 8px 0; }
       .menu a[aria-current="page"] { padding-left: 12px; }
       main { padding: 48px 0 72px; }
@@ -276,8 +309,40 @@
           <li><a href="../scenario/index.html">시나리오 보드</a></li>
         </ul>
       </nav>
+      <button class="settings-btn" type="button" id="openSettings" aria-haspopup="dialog">
+        <span class="status-dot" id="statusDot"></span>설정
+      </button>
     </div>
   </header>
+
+  <dialog class="settings" id="settings" aria-labelledby="settingsTitle">
+    <div class="settings-inner">
+      <div class="settings-top">
+        <h2 class="panel-title" id="settingsTitle">AI 연결 설정</h2>
+        <button class="close-btn" type="button" id="closeSettings" aria-label="닫기">×</button>
+      </div>
+      <p class="panel-desc">OpenAI API 키를 붙여 넣으면 이 브라우저에만 저장돼요.</p>
+
+      <div class="field">
+        <span class="label">OpenAI API 키</span>
+        <div class="key-saved" id="keySaved" hidden>
+          <span>저장됨 <code id="keyMasked"></code></span>
+          <button class="btn btn-sm btn-danger" type="button" id="deleteKey">삭제</button>
+        </div>
+        <form class="key-row" id="keyForm" autocomplete="off">
+          <input class="text-input" id="keyInput" type="password" placeholder="sk-proj-…" spellcheck="false" autocomplete="off" aria-label="OpenAI API 키" />
+          <button class="btn" type="submit">저장</button>
+        </form>
+        <p class="error" id="keyError"></p>
+      </div>
+
+      <div class="model-info">사용 모델 <b>gpt-6-luna</b> · 입력 100만 토큰당 $0.10 / 출력 $0.50</div>
+      <button class="btn test-btn" type="button" id="testBtn">연결 테스트</button>
+      <div class="test-result" id="testResult" role="status"></div>
+
+      <p class="security-note">키는 GitHub에 올라가지 않고 이 브라우저의 저장소(localStorage)에만 남아요. 지금은 브라우저가 OpenAI를 바로 부르는 테스트용 방식이니, 공용 PC에서는 쓰고 나서 꼭 삭제해 주세요.</p>
+    </div>
+  </dialog>
 
   <main>
     <div class="container">
@@ -761,6 +826,111 @@
       $("target").value = "최근 3개월 안에 온라인 장보기를 해 본 20~30대 1인 가구";
       ["topic", "target"].forEach((id) => { $(id).classList.remove("invalid"); $(id + "Error").classList.remove("show"); });
     });
+
+    // ── OpenAI 연결 (테스트용: 브라우저에서 바로 호출. 다음 단계에서 Worker 경유로 바꾼다) ──
+    const OPENAI_MODEL = "gpt-6-luna";
+    const KEY_STORAGE = "uxa.openaiKey";
+
+    function getKey() {
+      try { return localStorage.getItem(KEY_STORAGE) || ""; } catch { return ""; }
+    }
+    const maskKey = (key) => key.slice(0, 10) + "••••••••";
+
+    function refreshKeyUI() {
+      const key = getKey();
+      $("keySaved").hidden = !key;
+      $("keyForm").hidden = !!key;
+      $("keyMasked").textContent = key ? maskKey(key) : "";
+      $("statusDot").classList.toggle("on", !!key);
+      $("testBtn").disabled = !key;
+      $("openSettings").title = key ? "API 키 저장됨" : "API 키 미설정";
+    }
+
+    function showKeyError(msg) {
+      $("keyError").textContent = msg;
+      $("keyError").classList.toggle("show", !!msg);
+    }
+
+    function showTest(kind, html) {
+      $("testResult").className = `test-result show ${kind}`;
+      $("testResult").innerHTML = html;
+    }
+
+    $("openSettings").addEventListener("click", () => { refreshKeyUI(); $("settings").showModal(); });
+    $("closeSettings").addEventListener("click", () => $("settings").close());
+    $("settings").addEventListener("click", (e) => { if (e.target === $("settings")) $("settings").close(); });
+
+    $("keyForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const key = $("keyInput").value.trim();
+      $("keyInput").value = "";
+      if (!key.startsWith("sk-") || key.length < 20) { showKeyError("OpenAI API 키는 ‘sk-’로 시작해요. 다시 확인해 주세요."); return; }
+      try { localStorage.setItem(KEY_STORAGE, key); }
+      catch { showKeyError("이 브라우저에서는 저장할 수 없어요. 시크릿 모드인지 확인해 주세요."); return; }
+      showKeyError("");
+      $("testResult").className = "test-result";
+      refreshKeyUI();
+      showToast("키를 저장했어요");
+    });
+
+    $("deleteKey").addEventListener("click", () => {
+      try { localStorage.removeItem(KEY_STORAGE); } catch {}
+      $("testResult").className = "test-result";
+      refreshKeyUI();
+      $("keyInput").focus();
+      showToast("키를 삭제했어요");
+    });
+
+    // Responses API 응답에서 텍스트만 꺼낸다
+    const extractText = (data) => (data.output || [])
+      .filter((item) => item.type === "message")
+      .flatMap((item) => item.content || [])
+      .filter((c) => c.type === "output_text")
+      .map((c) => c.text).join("").trim();
+
+    function describeError(status, data) {
+      const msg = data?.error?.message || "";
+      if (status === 401) return "API 키가 올바르지 않아요. 키를 삭제하고 다시 붙여 넣어 주세요.";
+      if (status === 429) return /quota|billing/i.test(msg) ? "크레딧이 부족해요. OpenAI 결제(Billing) 설정을 확인해 주세요." : "요청이 너무 많아요. 잠시 후 다시 시도해 주세요.";
+      if (status === 404 || data?.error?.code === "model_not_found") return `이 키로는 ${OPENAI_MODEL} 모델을 쓸 수 없어요.`;
+      return `OpenAI 오류 (${status})${msg ? `: ${msg}` : ""}`;
+    }
+
+    $("testBtn").addEventListener("click", async () => {
+      const key = getKey();
+      if (!key) return;
+      $("testBtn").disabled = true;
+      $("testBtn").textContent = "OpenAI에 묻는 중…";
+      $("testResult").className = "test-result";
+      const started = performance.now();
+      try {
+        const res = await fetch("https://api.openai.com/v1/responses", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+          body: JSON.stringify({
+            model: OPENAI_MODEL,
+            input: "연결 테스트예요. 한국어로 한 문장만, 짧게 인사해 주세요.",
+            reasoning: { effort: "none" },
+            max_output_tokens: 60,
+            store: false,
+          }),
+        });
+        const data = await res.json().catch(() => ({}));
+        const ms = Math.round(performance.now() - started);
+        if (!res.ok) { showTest("fail", esc(describeError(res.status, data))); return; }
+        const text = extractText(data) || "(빈 응답)";
+        const tokens = data.usage ? ` · 토큰 ${data.usage.input_tokens}+${data.usage.output_tokens}` : "";
+        showTest("ok", `연결 성공! OpenAI의 답:\n“${esc(text)}”<span class="meta">${esc(data.model || OPENAI_MODEL)} · ${ms}ms${tokens}</span>`);
+      } catch {
+        // OpenAI는 잘못된 키(401) 응답에 CORS 헤더를 붙이지 않아 브라우저에선 네트워크 오류로만 보인다
+        showTest("fail", "OpenAI에 연결하지 못했어요.\n· API 키가 올바른지 먼저 확인해 주세요. 키가 틀리면 브라우저에서는 이 메시지로만 보여요.\n· 인터넷 연결이나 광고 차단 확장 프로그램도 확인해 주세요.");
+      } finally {
+        $("testBtn").disabled = !getKey();
+        $("testBtn").textContent = "연결 테스트";
+      }
+    });
+
+    refreshKeyUI();
   </script>
 </body>
 </html>
