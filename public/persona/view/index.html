@@ -1,0 +1,680 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>페르소나 · UXA</title>
+  <meta name="description" content="인터뷰에서 정리한 페르소나 1장." />
+  <meta name="robots" content="noindex" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-soft: #f6f7fb;
+      --text: #14161f;
+      --text-sub: #5b6072;
+      --text-faint: #a3a7b7;
+      --line: #e4e6ee;
+      --accent: #4f46e5;
+      --accent-soft: #eef0ff;
+      --radius: 16px;
+      --max: 1160px;
+
+      /* ── 페르소나 문서 테마 (나중에 프로젝트 테마로 바꿔 끼운다) ── */
+      --persona-doc-bg: #ffffff;           /* 문서 종이 배경 */
+      --persona-doc-text: #1f2128;
+      --persona-doc-sub: #4b4f5c;
+      --persona-doc-line: #e6e8ee;
+      --persona-heading: #6ab04c;          /* Lifestyle · Behavior · Painpoint · Needs 제목, 라벨 키 */
+      --persona-badge-bg: #d9f7a3;         /* priority 배지 (연두색 알약) */
+      --persona-badge-text: #2d4a12;
+      --persona-chip-bg: #f1f3f7;          /* 해시태그 칩 */
+      --persona-chip-text: #3b3f4b;
+      --persona-slider-track: #e3e5ec;     /* 슬라이더 선 */
+      --persona-slider-thumb: #8fd460;     /* 슬라이더 손잡이 */
+      --persona-slider-label: #b4b8c6;     /* 낮음·높음 기본 글자 */
+      --persona-slider-label-on: #4f9a2d;  /* 값이 가까운 쪽 라벨 */
+      --persona-panel-bg: #2a2a2e;         /* 왼쪽 세로 패널 */
+      --persona-panel-text: #ffffff;
+      --persona-panel-sub: #c9ccd6;
+      --persona-panel-quote: #8fd460;      /* 큰따옴표 */
+      --persona-photo-bg: #3b3b41;         /* 사진 없을 때 플레이스홀더 배경 */
+      --persona-photo-fg: #6a6a72;
+      --persona-point-bullet: #1f2128;     /* Painpoint·Needs 목록 점 */
+      --persona-doc-radius: 20px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      display: flex; flex-direction: column; min-height: 100vh;
+      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      word-break: keep-all;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; color: inherit; }
+    [hidden] { display: none !important; }
+    .container { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+
+    /* 내비게이션 (랜딩과 동일) */
+    .nav {
+      position: sticky; top: 0; z-index: 10;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--line);
+    }
+    .nav .container { display: flex; align-items: center; justify-content: space-between; gap: 24px; height: 64px; }
+    .logo { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
+    .logo span { color: var(--accent); }
+    .nav nav { min-width: 0; }
+    .menu { display: flex; gap: 4px; list-style: none; overflow-x: auto; }
+    .menu a { display: block; padding: 8px 14px; border-radius: 999px; font-size: 14px; font-weight: 500; color: var(--text-sub); white-space: nowrap; }
+    .menu a:hover { background: var(--accent-soft); color: var(--accent); }
+    .menu a[aria-current="page"] { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+
+    /* 본문 */
+    main { flex: 1; padding: 40px 0 80px; background: var(--bg-soft); }
+    .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; }
+    .toolbar .crumb { font-size: 14px; color: var(--text-sub); }
+    .toolbar .crumb a:hover { color: var(--accent); }
+    .toolbar .actions { display: flex; gap: 8px; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 999px; cursor: pointer;
+      border: 1px solid var(--line); background: #fff; font-size: 14px; font-weight: 600; color: var(--text);
+    }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── 페르소나 문서 ── */
+    .doc {
+      --doc-pad: 28px;
+      position: relative;
+      display: grid;
+      grid-template-columns: 236px minmax(0, 1fr);
+      grid-template-rows: auto 1fr;
+      gap: 18px 28px;
+      padding: var(--doc-pad);
+      background: var(--persona-doc-bg);
+      color: var(--persona-doc-text);
+      border: 1px solid var(--persona-doc-line);
+      border-radius: var(--persona-doc-radius);
+      box-shadow: 0 12px 40px rgba(20, 22, 31, 0.06);
+      font-size: 12.5px;
+      line-height: 1.6;
+    }
+    @media (min-width: 1024px) {
+      /* 가로형 1페이지 비율(A4 가로 ≈ 1.414). 내용이 더 길면 아래로 늘어난다 */
+      .doc { aspect-ratio: 297 / 200; }
+    }
+
+    /* 상단: 배지 + 태그라인 */
+    .doc-head { grid-column: 1 / -1; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .priority {
+      font-size: 22px; font-weight: 800; letter-spacing: -0.02em; white-space: nowrap;
+    }
+    .tagline {
+      display: inline-block; padding: 8px 18px; border-radius: 999px;
+      background: var(--persona-badge-bg); color: var(--persona-badge-text);
+      font-size: 15px; font-weight: 500; line-height: 1.4;
+    }
+    .tagline strong { font-weight: 800; }
+
+    /* 왼쪽 세로 패널 */
+    .panel {
+      display: flex; flex-direction: column;
+      border-radius: 110px 110px 24px 24px;
+      background: var(--persona-panel-bg); color: var(--persona-panel-text);
+      overflow: hidden;
+    }
+    .photo {
+      position: relative; width: 100%; aspect-ratio: 236 / 280; flex: none;
+      background: var(--persona-photo-bg); overflow: hidden;
+    }
+    .photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+    .photo .silhouette { display: block; width: 100%; height: 100%; color: var(--persona-photo-fg); }
+    .photo::after {
+      /* 사진 아래쪽을 패널 색으로 자연스럽게 잇는다 */
+      content: ""; position: absolute; inset: auto 0 0 0; height: 70px;
+      background: linear-gradient(to bottom, transparent, var(--persona-panel-bg));
+    }
+    .profile { padding: 4px 24px 8px; }
+    .profile h2 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+    .profile dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 12.5px; }
+    .profile dt { color: var(--persona-panel-sub); }
+    .profile dd { color: var(--persona-panel-text); }
+    .quote { margin-top: auto; padding: 24px 24px 28px; font-size: 12.5px; line-height: 1.7; color: var(--persona-panel-sub); }
+    .quote .mark { display: block; font-size: 42px; line-height: 0.6; font-weight: 800; color: var(--persona-panel-quote); font-family: Georgia, serif; }
+    .quote .mark.close { text-align: right; margin-top: 18px; }
+    .quote p { margin-top: 18px; }
+    .quote strong { color: var(--persona-panel-text); font-weight: 800; }
+
+    /* 오른쪽 */
+    .body { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+    .context { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 28px; }
+    .context .kv { font-size: 12.5px; }
+    .context .kv:nth-child(3) { grid-column: 1 / -1; }
+    .kv b { color: var(--persona-heading); font-weight: 700; margin-right: 6px; }
+    .kv b::after { content: ":"; }
+    .section-title { font-size: 14px; font-weight: 800; color: var(--persona-heading); margin-bottom: 6px; }
+    .lifestyle p { color: var(--persona-doc-sub); white-space: pre-line; }
+
+    .cols { display: grid; grid-template-columns: 1.05fr 1fr 1fr; gap: 24px; margin-top: 6px; }
+    .col h3 { font-size: 14px; font-weight: 800; color: var(--persona-heading); margin-bottom: 10px; }
+
+    /* Behavior */
+    .tag-group { margin-bottom: 14px; }
+    .tag-group h4, .scale h4 { font-size: 12.5px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .tag-group h4::before, .scale h4::before { content: ""; width: 4px; height: 4px; border-radius: 50%; background: var(--persona-point-bullet); flex: none; }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 0 12px; }
+    .chip {
+      padding: 3px 9px; border-radius: 999px; background: var(--persona-chip-bg); color: var(--persona-chip-text);
+      font-size: 11px; font-weight: 500; white-space: nowrap;
+    }
+    .scale { margin-bottom: 12px; }
+    .scale .track-row { display: flex; align-items: center; gap: 10px; margin: 8px 0 0 12px; font-size: 11px; color: var(--persona-slider-label); }
+    .scale .end.on { color: var(--persona-slider-label-on); font-weight: 700; }
+    .scale .track { position: relative; flex: 1; height: 2px; background: var(--persona-slider-track); border-radius: 2px; }
+    .scale .thumb {
+      position: absolute; top: 50%; width: 12px; height: 12px; border-radius: 50%;
+      background: var(--persona-slider-thumb); transform: translate(-50%, -50%);
+      box-shadow: 0 0 0 3px var(--persona-doc-bg);
+    }
+
+    /* Painpoint · Needs */
+    .points { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .points li { padding-left: 12px; position: relative; }
+    .points li::before { content: ""; position: absolute; left: 0; top: 8px; width: 4px; height: 4px; border-radius: 50%; background: var(--persona-point-bullet); }
+    .points b { display: block; font-size: 12.5px; font-weight: 700; }
+    .points p { margin-top: 2px; font-size: 11.5px; line-height: 1.55; color: var(--persona-doc-sub); }
+
+    /* ── 인라인 편집 모드 ── */
+    .btn-accent { border-color: var(--accent); background: var(--accent); color: #fff; }
+    .btn-accent:hover { background: #4338ca; color: #fff; }
+    .btn[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+    .edit-hint { font-size: 13px; color: var(--text-sub); }
+    .doc.editing [data-edit] { cursor: text; border-radius: 4px; outline: 1px dashed transparent; outline-offset: 2px; transition: outline-color .12s, background .12s; }
+    .doc.editing [data-edit]:hover { outline-color: var(--accent); }
+    .doc.editing [data-edit]:focus { outline: 2px solid var(--accent); background: var(--accent-soft); color: var(--text); }
+    .doc.editing .panel [data-edit]:focus, .doc.editing .tagline[data-edit]:focus { background: rgba(255, 255, 255, .12); color: inherit; }
+    .doc.editing [data-edit]:empty::before { content: attr(data-placeholder); color: var(--text-faint); }
+    .doc.editing .scale .track { height: 6px; cursor: ew-resize; }
+    .doc.editing .scale .thumb { width: 16px; height: 16px; cursor: grab; }
+    .doc.editing .scale .thumb:active { cursor: grabbing; }
+    .doc.editing .chip { cursor: text; }
+    .chip-add, .point-add { display: none; }
+    .doc.editing .chip-add { display: inline-flex; padding: 3px 9px; border: 1px dashed var(--persona-heading); border-radius: 999px; background: none; color: var(--persona-heading); font-size: 11px; font-weight: 600; cursor: pointer; }
+    .doc.editing .point-add { display: inline-block; margin-top: 10px; padding: 0; border: 0; background: none; color: var(--persona-heading); font-size: 12px; font-weight: 700; cursor: pointer; }
+    .doc.editing .points li { padding-right: 18px; }
+    .points li:has(.point-add) { display: none; }
+    .points li:has(.point-add)::before { display: none; }
+    .doc.editing .points li:has(.point-add) { display: block; padding: 0; }
+    .point-del { display: none; position: absolute; right: 0; top: 2px; width: 16px; height: 16px; border: 0; border-radius: 50%; background: var(--persona-chip-bg); color: var(--text-sub); font-size: 11px; line-height: 16px; cursor: pointer; }
+    .doc.editing .points li:hover .point-del { display: block; }
+    .toast {
+      position: fixed; left: 50%; bottom: 28px; z-index: 20; transform: translateX(-50%) translateY(10px);
+      padding: 10px 16px; border-radius: 999px; background: var(--text); color: #fff; font-size: 14px;
+      opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%); }
+
+    /* 푸터 (랜딩과 동일) */
+    footer { padding: 40px 0; border-top: 1px solid var(--line); }
+    footer .container { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font-size: 14px; color: var(--text-sub); }
+    footer .logo { font-size: 18px; color: var(--text); }
+
+    /* ── 모바일: 세로 스택 ── */
+    @media (max-width: 900px) {
+      .cols { grid-template-columns: 1fr; gap: 20px; }
+    }
+    @media (max-width: 720px) {
+      .doc { grid-template-columns: 1fr; --doc-pad: 20px; gap: 20px; font-size: 14px; }
+      .doc-head { flex-direction: column; align-items: flex-start; gap: 10px; }
+      .priority { font-size: 20px; }
+      .tagline { font-size: 14px; }
+      .panel { flex-direction: row; flex-wrap: wrap; border-radius: 24px; }
+      .photo { width: 140px; aspect-ratio: 1; border-radius: 0 0 24px 0; }
+      .photo::after { display: none; }
+      .profile { flex: 1; min-width: 180px; padding: 20px; }
+      .quote { flex-basis: 100%; margin-top: 0; padding-top: 0; }
+      .context { grid-template-columns: 1fr; }
+      .points p { font-size: 13px; }
+      .chip { font-size: 12px; }
+    }
+    @media (max-width: 640px) {
+      .nav .container { flex-direction: column; align-items: flex-start; height: auto; padding-top: 12px; padding-bottom: 8px; gap: 6px; }
+      .nav nav { width: 100%; }
+      .menu a { padding: 8px 12px 8px 0; }
+      .menu a[aria-current="page"] { padding-left: 12px; }
+      main { padding: 24px 0 64px; }
+      .container { padding: 0 16px; }
+      .toolbar { flex-direction: column; align-items: flex-start; }
+    }
+
+    /* ── 인쇄: A4 가로 한 장 ── */
+    @page { size: A4 landscape; margin: 10mm; }
+    @media print {
+      html, body { background: #fff; }
+      .nav, footer, .toolbar, .toast, .chip-add, .point-add, .point-del { display: none !important; }
+      .doc.editing [data-edit] { outline: none; }
+      main { padding: 0; background: #fff; }
+      .container { max-width: none; padding: 0; }
+      .doc {
+        aspect-ratio: auto; width: 277mm; min-height: 190mm; max-height: 190mm; overflow: hidden;
+        grid-template-columns: 62mm minmax(0, 1fr); gap: 5mm 8mm; --doc-pad: 7mm;
+        border: 0; box-shadow: none; border-radius: 0; font-size: 9.5pt; line-height: 1.5;
+        break-inside: avoid; page-break-inside: avoid;
+        -webkit-print-color-adjust: exact; print-color-adjust: exact;
+      }
+      .priority { font-size: 16pt; }
+      .tagline { font-size: 11pt; }
+      .cols { grid-template-columns: 1.05fr 1fr 1fr; gap: 6mm; }
+      .context { grid-template-columns: 1fr 1fr; }
+      .panel { border-radius: 30mm 30mm 6mm 6mm; }
+      .photo { aspect-ratio: 236 / 260; }
+      .section-title, .col h3 { font-size: 10.5pt; }
+      .points p, .chip { font-size: 8.5pt; }
+      .scale .thumb { box-shadow: 0 0 0 2px #fff; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="nav">
+    <div class="container">
+      <a href="/index.html" class="logo">UX<span>A</span></a>
+      <nav aria-label="에이전트 메뉴">
+        <ul class="menu">
+          <li><a href="/guide/index.html">인터뷰 가이드</a></li>
+          <li><a href="/moderator/index.html">인터뷰 모더레이터</a></li>
+          <li><a href="/persona/index.html" aria-current="page">페르소나</a></li>
+          <li><a href="/journey/index.html">저니맵</a></li>
+          <li><a href="/scenario/index.html">시나리오 보드</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="toolbar">
+        <div class="crumb"><a href="/persona/index.html">페르소나</a> · <span id="crumbName">불러오는 중…</span></div>
+        <div class="actions">
+          <span class="edit-hint" id="editHint" hidden>글자를 클릭해 고치고, 슬라이더는 끌어서 옮기세요.</span>
+          <button type="button" class="btn" id="editBtn" aria-pressed="false">편집</button>
+          <button type="button" class="btn btn-accent" id="saveBtn" hidden>저장</button>
+          <button type="button" class="btn" id="printBtn">인쇄 · PDF 저장</button>
+        </div>
+      </div>
+
+      <article class="doc" id="doc" aria-labelledby="personaTitle">
+        <header class="doc-head">
+          <h1 class="priority" id="personaTitle"></h1>
+          <p class="tagline" id="tagline"></p>
+        </header>
+
+        <aside class="panel">
+          <div class="photo" id="photo"></div>
+          <section class="profile">
+            <h2>Profile</h2>
+            <dl id="profileList"></dl>
+          </section>
+          <blockquote class="quote">
+            <span class="mark" aria-hidden="true">“</span>
+            <p id="quote"></p>
+            <span class="mark close" aria-hidden="true">”</span>
+          </blockquote>
+        </aside>
+
+        <div class="body">
+          <section class="context" id="context" aria-label="이용 맥락"></section>
+
+          <section class="lifestyle">
+            <h2 class="section-title">Lifestyle</h2>
+            <p id="lifestyle"></p>
+          </section>
+
+          <div class="cols">
+            <section class="col">
+              <h3>Behavior</h3>
+              <div id="behavior"></div>
+            </section>
+            <section class="col">
+              <h3>Painpoint</h3>
+              <ul class="points" id="painpoints"></ul>
+            </section>
+            <section class="col">
+              <h3>Needs</h3>
+              <ul class="points" id="needs"></ul>
+            </section>
+          </div>
+        </div>
+      </article>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <span class="logo">UXA · UX Agents</span>
+      <span>만든 사람 [내 이름] · © 2026</span>
+    </div>
+  </footer>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="/js/auth.js"></script>
+  <script>
+    // ── 더미 Persona (shared/persona.ts 의 Persona 타입과 같은 모양) ──
+    // 아직 API 연결 전. /persona/[id] 의 id 는 경로 또는 ?id= 에서 읽어 두기만 한다.
+    const PRIORITY_LABEL = { primary: "Primary Persona", secondary: "Secondary Persona", tertiary: "Tertiary Persona" };
+
+    const DUMMY_PERSONA = {
+      id: "p_demo",
+      userId: "u_demo",
+      sessionId: null,
+      priority: "primary",
+      tagline: "다양한 콘텐츠를 감상하며 **지인과 소통**하고 **피드백을 공유**하고 싶어요",
+      photoUrl: null,
+      profile: { name: "세은", gender: "여성", age: 32, hobbies: ["여행", "요리"], job: "음악강사" },
+      context: {
+        environment: "스마트폰, 태블릿, 노트북을 자주 사용",
+        personality: "열정적이면서도 평화로운 성향, 창의적이고 다양한 예술과 문화에 관심이 많은 유형",
+        motivation: "일상 생활에서의 스트레스 해소와 새로운 문화 및 예술 경험을 위해 이용",
+      },
+      lifestyle: "밤, 세은은 피곤한 하루 끝에 가장 좋아하는 온라인 OTT 서비스를 열어 휴식을 취하려 합니다. 세은은 다양한 콘텐츠를 즐기기 위해 여러 서비스를 이용하고 있습니다. 그러나 기존의 추천 시스템은 세은에게 만족스러운 결과를 제공하지 않았습니다. 세은은 자주 검색을 통해 새로운 콘텐츠를 찾는 편이며, 이를 통해 지인들의 추천도 확인합니다. 지인들과의 소통을 통해 세은은 새로운 문화와 예술에 대한 통찰력을 얻고, 지인들과 함께 콘텐츠에 대해 토론하는 경험을 즐깁니다. 세은은 자발적으로 좋아하는 콘텐츠를 지인들에게 추천하고, 받은 피드백을 통해 계속해서 새로운 콘텐츠를 탐험하고자 합니다. 추천에 대한 피드백을 받은 후에도 세은은 더 많은 추천을 받는 것을 원하고, 다양한 경험을 지속적으로 쌓고 싶어 합니다.",
+      behavior: {
+        tagGroups: [
+          { title: "콘텐츠 이용 행태", tags: ["밤", "휴식 목적", "상황과 목적에 따라 다른 콘텐츠", "검색으로 콘텐츠 선택", "검색으로 정보 수집", "콘텐츠 관련 정보가 선택에 많은 영향", "서비스 교차 활용"] },
+        ],
+        scales: [
+          { label: "추천시스템을 활용한 콘텐츠 탐색 선호도", value: 22 },
+          { label: "지인을 통한 콘텐츠 탐색 선호도", value: 86 },
+          { label: "콘텐츠를 활용한 공유, 공감 경험 만족도", value: 86 },
+        ],
+      },
+      painpoints: [
+        { title: "부족한 추천 시스템", description: "이전에 사용한 추천 시스템이 기대에 못 미치며, 세은은 많은 만족스러운 콘텐츠를 찾지 못해 실망하고 있습니다." },
+        { title: "콘텐츠 다양성에 대한 어려움", description: "콘텐츠를 찾아보려면 다양한 선택 속에서 어떤 것을 골라야 할지 결정하는 데 어려움을 겪고 있습니다." },
+        { title: "취향을 고려하지 않는 추천", description: "이전 추천 시스템은 세은의 기호나 평가를 고려하지 않고 단순한 콘텐츠 추천만을 제공했습니다." },
+        { title: "혼자 감상하는 외로움", description: "지인들이 추천을 통해 함께 감상하고 토론하는 경험을 얻고 싶어 하는데, 현재는 혼자서만 콘텐츠를 감상하고 있습니다." },
+        { title: "소통의 부재", description: "새로운 지인들과의 소통이 적어서 콘텐츠 추천을 통한 소통의 기회가 부족하다고 느낍니다." },
+      ],
+      needs: [
+        { title: "풍부한 추천 경험", description: "콘텐츠 추천 시스템이 세은의 취향과 기호를 고려하여 풍부한 경험을 제공해줄 것을 원합니다." },
+        { title: "다양한 콘텐츠 선택의 도움", description: "다양한 콘텐츠 중에서 자신에게 맞는 것을 선택하는 데 도움을 주는 시스템을 원합니다." },
+        { title: "지인들과 추천을 통한 취향의 확장", description: "지인들이 추천한 콘텐츠도 함께 탐색하며 새로운 경험을 즐기고 싶어 합니다." },
+        { title: "소통과 토론의 기회", description: "지인들과 함께 감상하고 토론하는 경험을 통해 소통의 기회를 얻고 싶어 합니다." },
+        { title: "감상의 공동체 참여", description: "콘텐츠를 함께 즐기며 소통하는 즐거움을 경험하고 싶어 합니다." },
+      ],
+      quote: "나에게 딱 맞는 콘텐츠를 찾아 추천해주는 시스템과 함께 **지인들과 감상하며 소통하는 경험**을 원해요.",
+      createdAt: 0,
+      updatedAt: 0,
+    };
+
+    // /persona/<id> 또는 /persona/view/?id=<id>
+    function personaIdFromUrl() {
+      const q = new URLSearchParams(location.search).get("id");
+      if (q) return q;
+      const m = location.pathname.match(/\/persona\/([^/]+)\/?$/);
+      return m && !["view", "new"].includes(m[1]) ? decodeURIComponent(m[1]) : "";
+    }
+
+    const $ = (id) => document.getElementById(id);
+    const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    // `**…**` 만 <strong> 으로 바꾼다 (그 밖의 마크업은 모두 글자로 취급)
+    const emph = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+
+    const SILHOUETTE = `
+      <svg class="silhouette" viewBox="0 0 236 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="사진 없음">
+        <circle cx="118" cy="104" r="52" fill="currentColor"/>
+        <path d="M14 280c0-64 46-108 104-108s104 44 104 108" fill="currentColor"/>
+      </svg>`;
+
+    // data-edit="경로" : 편집 모드에서 contenteditable 이 되고, blur 때 persona 객체의 그 경로에 다시 쓴다
+    //   data-kind: "emph"(**강조** 유지) | "number" | "list"(쉼표 구분 배열) | 없음(문자열)
+    const ed = (path, kind) => `data-edit="${path}"${kind ? ` data-kind="${kind}"` : ""}`;
+
+    function render(p) {
+      document.title = `${p.profile.name} · 페르소나 · UXA`;
+      $("crumbName").textContent = p.profile.name;
+      $("personaTitle").textContent = PRIORITY_LABEL[p.priority] || PRIORITY_LABEL.primary;
+      $("personaTitle").dataset.priority = p.priority;
+      $("tagline").innerHTML = emph(p.tagline);
+      $("tagline").setAttribute("data-edit", "tagline");
+      $("tagline").setAttribute("data-kind", "emph");
+
+      $("photo").innerHTML = p.photoUrl
+        ? `<img src="${esc(p.photoUrl)}" alt="${esc(p.profile.name)} 페르소나 사진" />`
+        : SILHOUETTE;
+
+      $("profileList").innerHTML = [
+        ["이름", p.profile.name, "profile.name"],
+        ["성별", p.profile.gender, "profile.gender"],
+        ["나이", p.profile.age, "profile.age", "number", "세"],
+        ["취미", (p.profile.hobbies || []).join(", "), "profile.hobbies", "list"],
+        ["직업", p.profile.job, "profile.job"],
+      ].map(([k, v, path, kind, unit]) => `<dt>${esc(k)}:</dt><dd><span ${ed(path, kind)}>${esc(v)}</span>${unit || ""}</dd>`).join("");
+
+      $("quote").innerHTML = emph(p.quote);
+      $("quote").setAttribute("data-edit", "quote");
+      $("quote").setAttribute("data-kind", "emph");
+
+      $("context").innerHTML = [
+        ["서비스 이용 환경", p.context.environment, "context.environment"],
+        ["성격", p.context.personality, "context.personality"],
+        ["콘텐츠 이용동기", p.context.motivation, "context.motivation"],
+      ].map(([k, v, path]) => `<p class="kv"><b>${esc(k)}</b><span ${ed(path)}>${esc(v)}</span></p>`).join("");
+
+      $("lifestyle").textContent = p.lifestyle;
+      $("lifestyle").setAttribute("data-edit", "lifestyle");
+
+      const groups = (p.behavior.tagGroups || []).map((g, gi) => `
+        <div class="tag-group">
+          <h4 ${ed(`behavior.tagGroups.${gi}.title`)}>${esc(g.title)}</h4>
+          <div class="chips">
+            ${g.tags.map((t, ti) => `<span class="chip" ${ed(`behavior.tagGroups.${gi}.tags.${ti}`)} data-placeholder="태그">#${esc(t)}</span>`).join("")}
+            <button type="button" class="chip-add" data-add-tag="${gi}">+ 태그</button>
+          </div>
+        </div>`).join("");
+      const scales = (p.behavior.scales || []).map((s, si) => {
+        const v = Math.max(0, Math.min(100, Number(s.value) || 0));
+        return `
+        <div class="scale" data-scale="${si}">
+          <h4 ${ed(`behavior.scales.${si}.label`)}>${esc(s.label)}</h4>
+          <div class="track-row" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${v}" aria-label="${esc(s.label)}">
+            <span class="end ${v < 50 ? "on" : ""}">${esc(s.lowLabel || "낮음")}</span>
+            <span class="track"><span class="thumb" style="left:${v}%"></span></span>
+            <span class="end ${v >= 50 ? "on" : ""}">${esc(s.highLabel || "높음")}</span>
+          </div>
+        </div>`;
+      }).join("");
+      $("behavior").innerHTML = groups + scales;
+
+      const points = (list, key) => list.map((x, i) => `
+        <li>
+          <b ${ed(`${key}.${i}.title`)} data-placeholder="제목">${esc(x.title)}</b>
+          <p ${ed(`${key}.${i}.description`)} data-placeholder="설명">${esc(x.description)}</p>
+          <button type="button" class="point-del" data-del="${key}.${i}" aria-label="항목 삭제">×</button>
+        </li>`).join("") + `<li style="padding:0"><button type="button" class="point-add" data-add-point="${key}">+ 항목 추가</button></li>`;
+      $("painpoints").innerHTML = points(p.painpoints || [], "painpoints");
+      $("needs").innerHTML = points(p.needs || [], "needs");
+
+      applyEditable();
+    }
+
+    // ── 인라인 편집 모드 ──
+    //   저장: 아직 API 연결 전이라 브라우저(localStorage)에 초안으로만 둔다.
+    //   TODO(API): PUT /api/personas/:id 로 바꾸고, 세션 기반 사용자 조사 데이터와 연결한다
+    let persona = null;
+    let editing = false;
+    let dirty = false;
+    const DRAFT_KEY = (id) => `uxa.persona.draft.${id}`;
+
+    const getPath = (obj, path) => path.split(".").reduce((o, k) => (o == null ? o : o[k]), obj);
+    function setPath(obj, path, value) {
+      const keys = path.split(".");
+      const last = keys.pop();
+      const target = keys.reduce((o, k) => (o[k] ??= /^\d+$/.test(k) ? [] : {}), obj);
+      target[last] = value;
+    }
+    // contenteditable 안의 <strong>/<b> 를 다시 **…** 로 되돌린다
+    function htmlToEmph(el) {
+      let out = "";
+      el.childNodes.forEach((n) => {
+        if (n.nodeType === 3) out += n.textContent;
+        else if (n.nodeName === "STRONG" || n.nodeName === "B") out += `**${n.textContent}**`;
+        else if (n.nodeName === "BR") out += "\n";
+        else out += n.textContent;
+      });
+      return out.replace(/ /g, " ").trim();
+    }
+
+    function applyEditable() {
+      document.querySelectorAll("#doc [data-edit]").forEach((el) => {
+        el.contentEditable = editing ? "plaintext-only" : "false";
+        if (editing && el.dataset.kind === "emph") el.contentEditable = "true"; // 굵게(Ctrl+B) 유지
+        if (editing) { el.setAttribute("tabindex", "0"); el.setAttribute("spellcheck", "false"); }
+        else { el.removeAttribute("tabindex"); }
+      });
+    }
+
+    // live=true 는 타이핑 중 호출: 값만 반영하고(빈 칩 삭제 같은) 다시 그리기는 하지 않는다
+    function commit(el, live = false) {
+      const path = el.dataset.edit;
+      const kind = el.dataset.kind;
+      let value;
+      if (kind === "emph") value = htmlToEmph(el);
+      else if (kind === "number") value = Math.max(0, parseInt(el.textContent.replace(/\D/g, ""), 10) || 0);
+      else if (kind === "list") value = el.textContent.split(/[,、，]/).map((s) => s.trim()).filter(Boolean);
+      else value = el.textContent.replace(/ /g, " ").trim();
+      // 칩은 '#' 을 떼고 저장한다
+      if (el.classList.contains("chip")) value = String(value).replace(/^#+\s*/, "");
+      if (JSON.stringify(getPath(persona, path)) !== JSON.stringify(value)) {
+        setPath(persona, path, value);
+        markDirty();
+      }
+      if (live) return;
+      // 빈 칩은 지운다
+      if (el.classList.contains("chip") && !value) {
+        const m = path.match(/^behavior\.tagGroups\.(\d+)\.tags\.(\d+)$/);
+        if (m) { persona.behavior.tagGroups[m[1]].tags.splice(Number(m[2]), 1); render(persona); return; }
+      }
+      // 제목 · 이름이 바뀌면 문서 밖(탭 제목·빵부스러기)도 맞춘다
+      if (path === "profile.name") { document.title = `${persona.profile.name} · 페르소나 · UXA`; $("crumbName").textContent = persona.profile.name; }
+    }
+
+    function markDirty() { dirty = true; $("saveBtn").textContent = "저장"; $("saveBtn").disabled = false; }
+
+    const doc = $("doc");
+    doc.addEventListener("input", (e) => { if (editing && e.target.matches("[data-edit]")) commit(e.target, true); });
+    doc.addEventListener("focusout", (e) => { if (editing && e.target.matches("[data-edit]")) commit(e.target); });
+    doc.addEventListener("keydown", (e) => {
+      if (!editing || !e.target.matches("[data-edit]")) return;
+      // 한 줄짜리(칩·제목·프로필)는 Enter 로 확정, Esc 는 되돌리기
+      const multiline = e.target.id === "lifestyle" || e.target.tagName === "P";
+      if (e.key === "Enter" && !multiline) { e.preventDefault(); e.target.blur(); }
+      if (e.key === "Escape") { e.preventDefault(); render(persona); }
+    });
+    doc.addEventListener("click", (e) => {
+      if (!editing) return;
+      const addTag = e.target.closest("[data-add-tag]");
+      const addPoint = e.target.closest("[data-add-point]");
+      const del = e.target.closest("[data-del]");
+      if (addTag) {
+        const g = persona.behavior.tagGroups[addTag.dataset.addTag];
+        g.tags.push("");
+        render(persona);
+        const chips = document.querySelectorAll(`[data-edit^="behavior.tagGroups.${addTag.dataset.addTag}.tags."]`);
+        const last = chips[chips.length - 1]; last.textContent = "#"; last.focus(); placeCaretEnd(last);
+      } else if (addPoint) {
+        persona[addPoint.dataset.addPoint].push({ title: "", description: "" });
+        markDirty(); render(persona);
+        const els = document.querySelectorAll(`[data-edit^="${addPoint.dataset.addPoint}."]`);
+        els[els.length - 2]?.focus();
+      } else if (del) {
+        const [key, i] = del.dataset.del.split(".");
+        persona[key].splice(Number(i), 1);
+        markDirty(); render(persona);
+      }
+    });
+    function placeCaretEnd(el) {
+      const r = document.createRange(); r.selectNodeContents(el); r.collapse(false);
+      const s = getSelection(); s.removeAllRanges(); s.addRange(r);
+    }
+
+    // 슬라이더: 편집 모드에서 트랙을 누르거나 손잡이를 끌면 값이 바뀐다
+    doc.addEventListener("pointerdown", (e) => {
+      if (!editing) return;
+      const track = e.target.closest(".track");
+      if (!track) return;
+      e.preventDefault();
+      const scaleEl = track.closest("[data-scale]");
+      const idx = Number(scaleEl.dataset.scale);
+      const row = scaleEl.querySelector(".track-row");
+      const ends = row.querySelectorAll(".end");
+      const thumb = track.querySelector(".thumb");
+      const update = (clientX) => {
+        const rect = track.getBoundingClientRect();
+        const v = Math.round(Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100)));
+        thumb.style.left = `${v}%`;
+        row.setAttribute("aria-valuenow", v);
+        ends[0].classList.toggle("on", v < 50);
+        ends[1].classList.toggle("on", v >= 50);
+        return v;
+      };
+      let v = update(e.clientX);
+      const move = (ev) => { v = update(ev.clientX); };
+      const up = () => {
+        window.removeEventListener("pointermove", move);
+        window.removeEventListener("pointerup", up);
+        if (persona.behavior.scales[idx].value !== v) { persona.behavior.scales[idx].value = v; markDirty(); }
+      };
+      window.addEventListener("pointermove", move);
+      window.addEventListener("pointerup", up);
+    });
+
+    function setEditing(on) {
+      editing = on;
+      doc.classList.toggle("editing", on);
+      $("editBtn").setAttribute("aria-pressed", String(on));
+      $("editBtn").textContent = on ? "편집 끝내기" : "편집";
+      $("saveBtn").hidden = !on;
+      $("editHint").hidden = !on;
+      $("saveBtn").disabled = !dirty;
+      applyEditable();
+    }
+    $("editBtn").addEventListener("click", () => {
+      if (editing && dirty && !confirm("저장하지 않은 수정이 있어요. 편집을 끝내면 마지막 저장 상태로 돌아갑니다. 계속할까요?")) return;
+      if (editing && dirty) { persona = loadPersona(); dirty = false; render(persona); }
+      setEditing(!editing);
+    });
+    $("saveBtn").addEventListener("click", () => {
+      if (document.activeElement?.matches("[data-edit]")) commit(document.activeElement);
+      persona.updatedAt = Date.now();
+      try { localStorage.setItem(DRAFT_KEY(persona.id), JSON.stringify(persona)); } catch {}
+      dirty = false; $("saveBtn").disabled = true; $("saveBtn").textContent = "저장됨";
+      toast("이 브라우저에 임시 저장했어요. 서버 저장은 API 연결 후 동작해요.");
+    });
+    window.addEventListener("beforeunload", (e) => { if (dirty) { e.preventDefault(); e.returnValue = ""; } });
+
+    let toastTimer;
+    function toast(msg) {
+      const t = $("toast"); t.textContent = msg; t.classList.add("show");
+      clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), 2600);
+    }
+
+    $("printBtn").addEventListener("click", () => window.print());
+
+    // TODO(API): GET /api/personas/:id 로 바꾼다. 지금은 id 와 무관하게 더미를 그리고, 브라우저 초안이 있으면 덮어쓴다
+    const personaId = personaIdFromUrl() || DUMMY_PERSONA.id;
+    function loadPersona() {
+      const base = structuredClone({ ...DUMMY_PERSONA, id: personaId });
+      try {
+        const draft = JSON.parse(localStorage.getItem(DRAFT_KEY(personaId)) || "null");
+        if (draft && draft.id === personaId) return draft;
+      } catch {}
+      return base;
+    }
+    persona = loadPersona();
+    render(persona);
+  </script>
+</body>
+</html>

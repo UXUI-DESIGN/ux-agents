@@ -2,3 +2,7 @@
 /simulator/*  /moderator/:splat    301
 /moderator/new    /moderator/          301
 /moderator/new/*  /moderator/          301
+# /persona/<id> → 페르소나 1장 보기 (public/persona/view/index.html 이 경로에서 id 를 읽는다)
+/persona/new   /persona/new/index.html   200
+/persona/view  /persona/view/index.html  200
+/persona/:id   /persona/view/index.html  200

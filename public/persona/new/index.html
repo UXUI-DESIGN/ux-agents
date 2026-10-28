@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>새 페르소나 만들기 · UXA</title>
+  <meta name="robots" content="noindex" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-soft: #f6f7fb;
+      --text: #14161f;
+      --text-sub: #5b6072;
+      --text-faint: #a3a7b7;
+      --line: #e4e6ee;
+      --accent: #4f46e5;
+      --accent-soft: #eef0ff;
+      --good: #12805c;
+      --good-soft: #e6f6ef;
+      --radius: 16px;
+      --max: 1160px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      display: flex; flex-direction: column; min-height: 100vh;
+      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      background: var(--bg); color: var(--text); line-height: 1.6; word-break: keep-all;
+    }
+    a { color: inherit; text-decoration: none; }
+    button, input, textarea, select { font: inherit; color: inherit; }
+    [hidden] { display: none !important; }
+    .container { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+
+    /* 내비게이션 (랜딩과 동일) */
+    .nav { position: sticky; top: 0; z-index: 10; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+    .nav .container { display: flex; align-items: center; justify-content: space-between; gap: 24px; height: 64px; }
+    .logo { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
+    .logo span { color: var(--accent); }
+    .nav nav { min-width: 0; }
+    .menu { display: flex; gap: 4px; list-style: none; overflow-x: auto; }
+    .menu a { display: block; padding: 8px 14px; border-radius: 999px; font-size: 14px; font-weight: 500; color: var(--text-sub); white-space: nowrap; }
+    .menu a:hover { background: var(--accent-soft); color: var(--accent); }
+    .menu a[aria-current="page"] { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+
+    /* 본문 */
+    main { flex: 1; padding: 56px 0 100px; background: var(--bg-soft); }
+    .wrap { max-width: 820px; margin: 0 auto; }
+    .crumb { font-size: 14px; color: var(--text-sub); margin-bottom: 20px; }
+    .crumb a:hover { color: var(--accent); }
+    .page-head { margin-bottom: 28px; }
+    .page-head h1 { font-size: clamp(26px, 3.5vw, 34px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.3; }
+    .page-head p { margin-top: 8px; font-size: 16px; color: var(--text-sub); }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 10px 16px; border: 1px solid var(--line); border-radius: 10px; background: #fff;
+      font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: background .15s, border-color .15s;
+    }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-accent { border-color: var(--accent); background: var(--accent); color: #fff; }
+    .btn-accent:hover { background: #4338ca; color: #fff; }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-primary { width: 100%; padding: 15px; border: 0; border-radius: 12px; background: var(--accent); color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; }
+    .btn-primary:disabled { background: #c7c9d9; cursor: not-allowed; }
+
+    /* 단계 카드 */
+    .card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); }
+    .card + .card { margin-top: 20px; }
+    .step { padding: 28px 32px; }
+    .step-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; }
+    .step-head .n { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 13px; font-weight: 800; align-self: center; }
+    .step-head h2 { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
+    .step-desc { font-size: 14px; color: var(--text-sub); }
+
+    /* Step 1: 인터뷰 목록 */
+    .pick-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 18px; font-size: 13.5px; color: var(--text-sub); }
+    .pick-bar .btn-link { padding: 0; border: 0; background: none; color: var(--accent); font-weight: 600; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+    .interviews { display: grid; gap: 8px; margin-top: 10px; }
+    .interview {
+      display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center;
+      padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; cursor: pointer; font-size: 14.5px;
+    }
+    .interview:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+    .interview input { width: 18px; height: 18px; accent-color: var(--accent); }
+    .interview .title { font-weight: 600; }
+    .interview .sub { font-size: 13px; color: var(--text-sub); }
+    .interview .sub span + span::before { content: "·"; margin: 0 6px; color: var(--text-faint); }
+    .interview .status { padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; background: var(--good-soft); color: var(--good); }
+    .interview .status.open { background: var(--bg-soft); color: var(--text-sub); }
+
+    /* Step 2: 옵션 */
+    .field { margin-top: 20px; }
+    .field > label, .field > .label { display: flex; align-items: baseline; gap: 6px; margin-bottom: 8px; font-size: 14px; font-weight: 600; }
+    .req { color: var(--accent); }
+    .text-input {
+      display: block; width: 100%; padding: 11px 14px; border: 1px solid var(--line); border-radius: 10px; background: #fff;
+      font-size: 14.5px; line-height: 1.6; transition: border-color .15s, box-shadow .15s;
+    }
+    .text-input::placeholder { color: var(--text-faint); }
+    .text-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .hint { margin-top: 6px; font-size: 12.5px; color: var(--text-sub); }
+    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
+    .segmented { display: inline-grid; grid-auto-flow: column; gap: 4px; padding: 4px; background: var(--bg-soft); border-radius: 12px; }
+    .segmented input { position: absolute; opacity: 0; pointer-events: none; }
+    .segmented label { padding: 8px 18px; border-radius: 9px; text-align: center; cursor: pointer; font-size: 14px; font-weight: 500; color: var(--text-sub); }
+    .segmented input:checked + label { background: #fff; color: var(--accent); font-weight: 700; box-shadow: 0 1px 3px rgba(20, 22, 31, .08); }
+    .segmented input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .segmented.count label { padding: 8px 14px; min-width: 42px; }
+    .type-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .type-card { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; cursor: pointer; font-size: 14.5px; }
+    .type-card:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+    .type-card input { width: 18px; height: 18px; margin-top: 3px; accent-color: var(--accent); }
+    .type-card b { display: block; font-weight: 700; }
+    .type-card small { display: block; font-size: 13px; color: var(--text-sub); }
+
+    /* Step 3: 진행 상태 */
+    .progress { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin-top: 20px; position: relative; }
+    .progress::before { content: ""; position: absolute; left: 12.5%; right: 12.5%; top: 17px; height: 2px; background: var(--line); }
+    .stage { position: relative; text-align: center; padding: 0 6px; }
+    .stage .dot {
+      display: grid; place-items: center; width: 36px; height: 36px; margin: 0 auto; border-radius: 50%;
+      background: #fff; border: 2px solid var(--line); color: var(--text-faint); font-size: 14px; font-weight: 700; position: relative; z-index: 1;
+    }
+    .stage b { display: block; margin-top: 10px; font-size: 14px; font-weight: 700; color: var(--text-faint); }
+    .stage small { display: block; font-size: 12.5px; color: var(--text-faint); }
+    .stage[data-state="active"] .dot { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+    .stage[data-state="active"] b { color: var(--accent); }
+    .stage[data-state="active"] small { color: var(--text-sub); }
+    .stage[data-state="done"] .dot { border-color: var(--accent); background: var(--accent); color: #fff; }
+    .stage[data-state="done"] b { color: var(--text); }
+    .stage[data-state="active"] .dot::after {
+      content: ""; position: absolute; inset: -6px; border-radius: 50%; border: 2px solid var(--accent-soft); animation: pulse 1.4s ease-out infinite;
+    }
+    @keyframes pulse { 0% { transform: scale(.8); opacity: 1; } 100% { transform: scale(1.3); opacity: 0; } }
+    .progress-log {
+      margin-top: 22px; padding: 14px 16px; border-radius: 12px; background: var(--bg-soft);
+      font-size: 13.5px; color: var(--text-sub); min-height: 56px;
+    }
+    .progress-log .row { display: flex; gap: 8px; }
+    .progress-log .row + .row { margin-top: 4px; }
+    .progress-log time { flex: none; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+    .submit { margin-top: 24px; }
+    .submit .hint { text-align: center; }
+
+    /* 푸터 (랜딩과 동일) */
+    footer { padding: 40px 0; border-top: 1px solid var(--line); }
+    footer .container { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font-size: 14px; color: var(--text-sub); }
+    footer .logo { font-size: 18px; color: var(--text); }
+
+    @media (max-width: 640px) {
+      .nav .container { flex-direction: column; align-items: flex-start; height: auto; padding-top: 12px; padding-bottom: 8px; gap: 6px; }
+      .nav nav { width: 100%; }
+      .menu a { padding: 8px 12px 8px 0; }
+      .menu a[aria-current="page"] { padding-left: 12px; }
+      main { padding: 32px 0 64px; }
+      .container { padding: 0 16px; }
+      .step { padding: 22px 18px; }
+      .two, .type-cards { grid-template-columns: 1fr; }
+      .interview { grid-template-columns: auto 1fr; }
+      .interview .status { grid-column: 2; justify-self: start; }
+      .progress { grid-template-columns: 1fr 1fr; gap: 18px 0; }
+      .progress::before { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="nav">
+    <div class="container">
+      <a href="/index.html" class="logo">UX<span>A</span></a>
+      <nav aria-label="에이전트 메뉴">
+        <ul class="menu">
+          <li><a href="/guide/index.html">인터뷰 가이드</a></li>
+          <li><a href="/moderator/index.html">인터뷰 모더레이터</a></li>
+          <li><a href="/persona/index.html" aria-current="page">페르소나</a></li>
+          <li><a href="/journey/index.html">저니맵</a></li>
+          <li><a href="/scenario/index.html">시나리오 보드</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="wrap">
+        <p class="crumb"><a href="/persona/index.html">페르소나</a> · 새 페르소나 만들기</p>
+        <div class="page-head">
+          <h1>새 페르소나 만들기</h1>
+          <p>모더레이터로 진행한 인터뷰 기록을 고르면, 핵심 사용자 유형을 페르소나 문서로 정리해 드려요.</p>
+        </div>
+
+        <form id="form" novalidate>
+          <!-- Step 1 -->
+          <section class="card step" aria-labelledby="s1">
+            <div class="step-head"><span class="n">1</span><h2 id="s1">데이터 선택</h2></div>
+            <p class="step-desc">페르소나의 바탕이 될 인터뷰를 고르세요. 같은 서비스에 대한 인터뷰끼리 묶는 것이 좋아요.</p>
+            <div class="pick-bar">
+              <span id="pickCount">선택 0건</span>
+              <span><button type="button" class="btn-link" id="pickAll">모두 선택</button> · <button type="button" class="btn-link" id="pickNone">모두 해제</button></span>
+            </div>
+            <div class="interviews" id="interviews"></div>
+          </section>
+
+          <!-- Step 2 -->
+          <section class="card step" aria-labelledby="s2">
+            <div class="step-head"><span class="n">2</span><h2 id="s2">옵션</h2></div>
+            <p class="step-desc">어떤 서비스의, 어떤 용도의 페르소나인지 알려주세요.</p>
+
+            <div class="field">
+              <label for="service">서비스 한 줄 설명 <span class="req">*</span></label>
+              <input id="service" class="text-input" type="text" maxlength="120" placeholder="예) 취향에 맞는 콘텐츠를 지인과 함께 찾는 OTT 추천 서비스" />
+              <p class="hint">페르소나의 Lifestyle·Needs가 이 서비스 맥락에 맞춰 쓰여요.</p>
+            </div>
+
+            <div class="two">
+              <div class="field">
+                <span class="label">페르소나 유형</span>
+                <div class="type-cards">
+                  <label class="type-card"><input type="radio" name="kind" value="design" checked /><span><b>Design</b><small>행동·페인포인트·니즈 중심. UX 설계용</small></span></label>
+                  <label class="type-card"><input type="radio" name="kind" value="marketing" /><span><b>Marketing</b><small>라이프스타일·채널·구매 동기 중심</small></span></label>
+                </div>
+              </div>
+              <div class="field">
+                <span class="label">생성 개수</span>
+                <div class="segmented count" role="radiogroup" aria-label="생성 개수">
+                  <input type="radio" name="count" id="c2" value="2" /><label for="c2">2</label>
+                  <input type="radio" name="count" id="c3" value="3" checked /><label for="c3">3</label>
+                  <input type="radio" name="count" id="c4" value="4" /><label for="c4">4</label>
+                  <input type="radio" name="count" id="c5" value="5" /><label for="c5">5</label>
+                </div>
+                <p class="hint">Primary 1명 + Secondary·Tertiary 순으로 만들어요.</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Step 3 -->
+          <section class="card step" aria-labelledby="s3">
+            <div class="step-head"><span class="n">3</span><h2 id="s3">생성</h2></div>
+            <p class="step-desc">생성을 시작하면 아래 단계 순서로 진행돼요. 보통 1~2분 걸려요.</p>
+
+            <ol class="progress" id="progress" aria-label="생성 진행 상태">
+              <li class="stage" data-state="pending"><span class="dot">1</span><b>분석 중</b><small>인터뷰 기록에서 패턴 추출</small></li>
+              <li class="stage" data-state="pending"><span class="dot">2</span><b>작성 중</b><small>페르소나 문서 작성</small></li>
+              <li class="stage" data-state="pending"><span class="dot">3</span><b>이미지 생성 중</b><small>프로필 사진 만들기</small></li>
+              <li class="stage" data-state="pending"><span class="dot">4</span><b>완료</b><small>문서 열기</small></li>
+            </ol>
+            <div class="progress-log" id="log">
+              <div class="row"><time>--:--</time><span>아직 시작하지 않았어요. 위에서 인터뷰를 고르고 생성을 시작하세요.</span></div>
+            </div>
+
+            <div class="submit">
+              <button type="submit" class="btn-primary" id="startBtn" disabled>페르소나 생성 시작</button>
+              <p class="hint" id="submitHint">인터뷰를 1건 이상 고르고 서비스 설명을 적으면 시작할 수 있어요.</p>
+            </div>
+          </section>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <span class="logo">UXA · UX Agents</span>
+      <span>만든 사람 [내 이름] · © 2026</span>
+    </div>
+  </footer>
+
+  <script src="/js/auth.js"></script>
+  <script>
+    // ── 더미: 모더레이터 인터뷰 목록 5건 ──
+    // TODO(API): GET /api/sessions → 각 세션의 interviews (status=ended, transcript 있음) 로 바꾼다
+    const DUMMY_INTERVIEWS = [
+      { id: "i1", session: "OTT 콘텐츠 추천 서비스", code: "P-01", date: "2026-10-21", minutes: 28, status: "ended" },
+      { id: "i2", session: "OTT 콘텐츠 추천 서비스", code: "P-02", date: "2026-10-21", minutes: 31, status: "ended" },
+      { id: "i3", session: "OTT 콘텐츠 추천 서비스", code: "P-03", date: "2026-10-22", minutes: 24, status: "ended" },
+      { id: "i4", session: "OTT 콘텐츠 추천 서비스", code: "P-04", date: "2026-10-23", minutes: 35, status: "ended" },
+      { id: "i5", session: "동네 중고거래 앱", code: "P-01", date: "2026-10-14", minutes: 19, status: "open" },
+    ];
+
+    const $ = (id) => document.getElementById(id);
+    const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+    $("interviews").innerHTML = DUMMY_INTERVIEWS.map((it) => `
+      <label class="interview">
+        <input type="checkbox" name="interview" value="${esc(it.id)}" ${it.status !== "ended" ? "disabled" : ""} />
+        <span>
+          <span class="title">${esc(it.session)} · 참가자 ${esc(it.code)}</span>
+          <span class="sub"><span>${esc(it.date)}</span><span>${esc(it.minutes)}분</span></span>
+        </span>
+        <span class="status ${it.status === "ended" ? "" : "open"}">${it.status === "ended" ? "전사 완료" : "진행 중"}</span>
+      </label>`).join("");
+
+    const boxes = () => [...document.querySelectorAll('input[name="interview"]:not(:disabled)')];
+    function refresh() {
+      const n = boxes().filter((b) => b.checked).length;
+      $("pickCount").textContent = `선택 ${n}건`;
+      const ok = n > 0 && $("service").value.trim().length > 0;
+      $("startBtn").disabled = !ok;
+      $("submitHint").textContent = ok ? "아직 생성 기능은 연결 전이에요. 레이아웃만 확인할 수 있어요." : "인터뷰를 1건 이상 고르고 서비스 설명을 적으면 시작할 수 있어요.";
+    }
+    $("pickAll").addEventListener("click", () => { boxes().forEach((b) => (b.checked = true)); refresh(); });
+    $("pickNone").addEventListener("click", () => { boxes().forEach((b) => (b.checked = false)); refresh(); });
+    $("form").addEventListener("change", refresh);
+    $("service").addEventListener("input", refresh);
+
+    // 아직 동작 없음: 제출을 막고 안내만 한다. 나중에 POST /api/personas/generate 로 연결
+    $("form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      $("log").innerHTML = `<div class="row"><time>${new Date().toTimeString().slice(0, 5)}</time><span>생성 기능은 다음 단계에서 연결돼요. (선택 ${boxes().filter((b) => b.checked).length}건 · ${document.querySelector('input[name="kind"]:checked').value} · ${document.querySelector('input[name="count"]:checked').value}명)</span></div>`;
+    });
+
+    // 목록에서 "이 프로젝트에 추가"로 들어오면 그 프로젝트 인터뷰를 미리 체크해 둔다 (더미)
+    const project = new URLSearchParams(location.search).get("project");
+    if (project === "s_ott") boxes().slice(0, 4).forEach((b) => (b.checked = true));
+    refresh();
+  </script>
+</body>
+</html>
