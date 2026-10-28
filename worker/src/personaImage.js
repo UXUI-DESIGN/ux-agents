@@ -72,7 +72,7 @@ export async function createPersonaImage(env, request, user, row, sceneText) {
   const { bytes, mime } = await generateImage(env, model, prompt);
   if (bytes.byteLength > 900_000) throw new Error("image too large");
   const now = Math.floor(Date.now() / 1000);
-  const imageId = crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "").slice(0, 8);
+  const imageId = newImageId();
   const url = `${new URL(request.url).origin}/api/personas/image/${imageId}`;
   await env.DB.batch([
     env.DB.prepare("INSERT INTO persona_images (id, persona_id, user_id, mime, bytes, prompt, model, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
@@ -85,16 +85,21 @@ export async function createPersonaImage(env, request, user, row, sceneText) {
 }
 
 // 로그인 없이 읽는다 (id 가 열쇠). CORS 헤더 없이도 <img> 는 읽을 수 있다
-export async function servePersonaImage(env, imageId) {
+export async function servePersonaImage(env, imageId, table = "persona_images") {
   if (!/^[0-9a-f]{40}$/.test(imageId)) return new Response("not found", { status: 404 });
-  const img = await env.DB.prepare("SELECT mime, bytes FROM persona_images WHERE id = ?").bind(imageId).first();
+  const img = await env.DB.prepare(`SELECT mime, bytes FROM ${table} WHERE id = ?`).bind(imageId).first();
   if (!img) return new Response("not found", { status: 404 });
-  // D1 은 BLOB 을 ArrayBuffer 로 주지만, 환경에 따라 숫자 배열로 올 때가 있어 둘 다 받는다
-  const body = img.bytes instanceof ArrayBuffer || ArrayBuffer.isView(img.bytes) ? img.bytes : Uint8Array.from(img.bytes || []);
-  return new Response(body, {
+  return new Response(blobBytes(img.bytes), {
     headers: { "Content-Type": img.mime, "Cache-Control": "public, max-age=31536000, immutable", "X-Content-Type-Options": "nosniff" },
   });
 }
+
+// D1 은 BLOB 을 ArrayBuffer 로 주지만, 환경에 따라 숫자 배열로 올 때가 있어 둘 다 받는다
+export function blobBytes(v) {
+  return v instanceof ArrayBuffer || ArrayBuffer.isView(v) ? v : Uint8Array.from(v || []);
+}
+
+export const newImageId = () => crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "").slice(0, 8);
 
 // ── 장면 추출 (Chat API) ──
 const SCENE_SCHEMA = {
@@ -166,19 +171,29 @@ function josa(word, withBatchim, without) {
 
 // ── 이미지 생성 (Images API) ──
 //   설정한 모델을 이 키로 쓸 수 없으면(does not exist / not found) 다음 후보로 넘어간다. /health/images 로 쓸 수 있는 모델을 볼 수 있다
+//   reference({ bytes, mime }) 를 주면 /images/edits 로 보내 그 사진 속 인물을 같은 사람으로 그리게 한다 (시나리오 보드 컷)
+//   던지는 오류에는 status(HTTP)와 code(OpenAI 오류 코드)를 붙여 부르는 쪽이 재시도 여부를 고를 수 있게 한다
 const MODEL_FALLBACKS = ["gpt-image-2.5-flare", "gpt-image-2", "gpt-image-1.5", "gpt-image-1"];
-async function generateImage(env, model, prompt) {
+export async function generateImage(env, model, prompt, { size = IMAGE_SIZE, reference } = {}) {
   const candidates = [model, ...MODEL_FALLBACKS.filter((m) => m !== model)];
   let lastErr;
   for (const m of candidates) {
-    const res = await fetch("https://api.openai.com/v1/images/generations", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${env.OPENAI_API_KEY}` },
-      body: JSON.stringify({ model: m, prompt, n: 1, size: IMAGE_SIZE, quality: "medium", output_format: "jpeg", output_compression: 75 }),
-    });
+    let res;
+    if (reference) {
+      const form = new FormData();
+      for (const [k, v] of Object.entries({ model: m, prompt, n: "1", size, quality: "medium", output_format: "jpeg", output_compression: "75" })) form.append(k, v);
+      form.append("image[]", new Blob([reference.bytes], { type: reference.mime }), reference.mime === "image/png" ? "reference.png" : "reference.jpg");
+      res = await fetch("https://api.openai.com/v1/images/edits", { method: "POST", headers: { Authorization: `Bearer ${env.OPENAI_API_KEY}` }, body: form });
+    } else {
+      res = await fetch("https://api.openai.com/v1/images/generations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${env.OPENAI_API_KEY}` },
+        body: JSON.stringify({ model: m, prompt, n: 1, size, quality: "medium", output_format: "jpeg", output_compression: 75 }),
+      });
+    }
     const data = await res.json().catch(() => ({}));
-    if (res.ok) return decodeImage(data);
-    lastErr = new Error(`OpenAI images ${res.status} (${m}): ${data?.error?.message || ""}`);
+    if (res.ok) return { ...decodeImage(data), model: m };
+    lastErr = Object.assign(new Error(`OpenAI images ${res.status} (${m}): ${data?.error?.message || ""}`), { status: res.status, code: data?.error?.code || "" });
     const msg = String(data?.error?.message || "");
     if (!(res.status === 400 || res.status === 404) || !/does not exist|not found|unknown model|unsupported model/i.test(msg)) throw lastErr;
     console.warn("image model unavailable, trying next", m, msg);

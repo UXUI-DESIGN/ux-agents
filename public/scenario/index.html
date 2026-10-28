@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>시나리오 보드 생성 · UXA</title>
-  <meta name="description" content="저니맵을 바탕으로 개선된 사용 시나리오 보드를 만듭니다." />
+  <meta name="description" content="저니맵의 페인포인트를 개선한 TO-BE 시나리오를 콘티와 컷 보드로 만듭니다." />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
   <style>
     :root {
@@ -12,9 +12,17 @@
       --bg-soft: #f6f7fb;
       --text: #14161f;
       --text-sub: #5b6072;
+      --text-faint: #a3a7b7;
       --line: #e4e6ee;
       --accent: #4f46e5;
       --accent-soft: #eef0ff;
+      --good: #12805c;
+      --good-soft: #e6f6ef;
+      --warn: #9a5b00;
+      --warn-soft: #fff4e0;
+      --danger: #d33a3a;
+      --danger-soft: #fdeeee;
+      --danger-line: #f5c2c2;
       --radius: 16px;
       --max: 1160px;
     }
@@ -22,92 +30,269 @@
     body {
       display: flex; flex-direction: column; min-height: 100vh;
       font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-      word-break: keep-all;
+      background: var(--bg); color: var(--text); line-height: 1.6; word-break: keep-all;
     }
     a { color: inherit; text-decoration: none; }
+    button, input, textarea, select { font: inherit; color: inherit; }
+    [hidden] { display: none !important; }
     .container { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
 
     /* 내비게이션 (랜딩과 동일) */
-    .nav {
-      position: sticky; top: 0; z-index: 10;
-      background: rgba(255, 255, 255, 0.9);
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid var(--line);
-    }
-    .nav .container {
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 24px; height: 64px;
-    }
+    .nav { position: sticky; top: 0; z-index: 10; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+    .nav .container { display: flex; align-items: center; justify-content: space-between; gap: 24px; height: 64px; }
     .logo { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
     .logo span { color: var(--accent); }
     .nav nav { min-width: 0; }
     .menu { display: flex; gap: 4px; list-style: none; overflow-x: auto; }
-    .menu a {
-      display: block; padding: 8px 14px; border-radius: 999px;
-      font-size: 14px; font-weight: 500; color: var(--text-sub); white-space: nowrap;
-    }
+    .menu a { display: block; padding: 8px 14px; border-radius: 999px; font-size: 14px; font-weight: 500; color: var(--text-sub); white-space: nowrap; }
     .menu a:hover { background: var(--accent-soft); color: var(--accent); }
     .menu a[aria-current="page"] { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
 
-    /* 본문 */
-    main { flex: 1; padding: 100px 0; background: var(--bg-soft); }
-    .page-head { text-align: center; margin-bottom: 48px; }
-    .page-head .num {
-      display: inline-grid; place-items: center; width: 44px; height: 44px; margin-bottom: 16px;
-      border-radius: 50%; background: var(--accent); color: #fff; font-weight: 800; font-size: 18px;
-    }
+    main { flex: 1; padding: 72px 0 100px; background: var(--bg-soft); }
+    .page-head { text-align: center; margin-bottom: 36px; }
+    .page-head .num { display: inline-grid; place-items: center; width: 44px; height: 44px; margin-bottom: 16px; border-radius: 50%; background: var(--accent); color: #fff; font-weight: 800; font-size: 18px; }
     .page-head h1 { font-size: clamp(28px, 4vw, 40px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.3; }
     .page-head p { margin-top: 12px; font-size: 17px; color: var(--text-sub); }
-    .notice {
-      max-width: 560px; margin: 0 auto; padding: 48px 32px; text-align: center;
-      background: #fff; border: 1px dashed var(--accent); border-radius: var(--radius);
-    }
-    .notice .badge {
-      display: inline-block; margin-bottom: 16px; padding: 6px 14px; border-radius: 999px;
-      background: var(--accent-soft); color: var(--accent); font-size: 13px; font-weight: 600;
-    }
-    .notice h2 { font-size: 22px; font-weight: 700; }
-    .notice p { margin-top: 8px; color: var(--text-sub); font-size: 15px; }
 
-    /* 저니맵에서 불러올 TO-BE 장면 */
-    .from-journey { max-width: 820px; margin: 40px auto 0; }
-    .from-journey h2 { font-size: 18px; font-weight: 800; }
-    .from-journey > p { margin-top: 4px; font-size: 14px; color: var(--text-sub); }
-    .from-journey > p a { color: var(--accent); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
-    .scene-groups { display: grid; gap: 14px; margin-top: 16px; }
-    .scene-group { padding: 18px 20px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); }
-    .scene-group.on { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
-    .scene-group h3 { font-size: 15px; font-weight: 700; }
-    .scene-group h3 a:hover { color: var(--accent); }
-    .scene-group .meta { font-size: 12.5px; color: var(--text-sub); }
-    .scene-group .st { margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: var(--bg-soft); font-size: 11.5px; font-weight: 700; }
-    .scene-group .st.confirmed { background: #e6f6ef; color: #12805c; }
-    .scene-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; margin-top: 12px; }
-    .scene { padding: 12px 14px; border: 1px dashed #c9cdf5; border-radius: 12px; font-size: 13.5px; }
-    .scene .no { font-size: 11.5px; font-weight: 800; color: var(--accent); }
-    .scene b { display: block; font-size: 14.5px; }
-    .scene p { margin-top: 4px; color: var(--text-sub); line-height: 1.55; }
-    .scene .hyp { display: inline-block; margin-top: 6px; padding: 0 6px; border-radius: 5px; background: #fff4e0; color: #9a5b00; font-size: 11px; font-weight: 700; }
-    .scene .hmw { margin-top: 6px; font-size: 12.5px; color: var(--accent); }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 15px; border: 1px solid var(--line); border-radius: 10px; background: #fff; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: background .15s, border-color .15s; }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn:disabled { opacity: .5; cursor: not-allowed; border-color: var(--line); color: inherit; }
+    .btn-sm { padding: 5px 10px; border-radius: 8px; font-size: 12.5px; }
+    .btn-solid { border-color: var(--accent); background: var(--accent); color: #fff; }
+    .btn-solid:hover { background: #4338ca; color: #fff; }
+    .btn-solid:disabled { background: #c7c9d9; border-color: #c7c9d9; color: #fff; }
+    .btn-danger:hover { border-color: var(--danger); color: var(--danger); }
+    .btn-link { padding: 0; border: 0; background: none; color: var(--accent); font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 
-    /* 푸터 (랜딩과 동일) */
+    .card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); }
+    .card + .card, .card + .stack-gap { margin-top: 20px; }
+    .section { padding: 26px 28px; }
+    .section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .section-head h2 { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; display: flex; align-items: center; gap: 8px; }
+    .section-head .desc { margin-top: 2px; font-size: 13.5px; color: var(--text-sub); }
+    .step-no { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-size: 12.5px; font-weight: 800; }
+    .pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px; border-radius: 999px; background: var(--bg-soft); font-size: 12px; font-weight: 700; color: var(--text-sub); white-space: nowrap; }
+    .pill.ok { background: var(--good-soft); color: var(--good); }
+    .pill.warn { background: var(--warn-soft); color: var(--warn); }
+    .pill.accent { background: var(--accent-soft); color: var(--accent); }
+    .pill.danger { background: var(--danger-soft); color: var(--danger); }
+
+    /* 일하는 방식 (프롬프트 체이닝) */
+    .how { margin-bottom: 20px; padding: 0; overflow: hidden; }
+    .how summary { display: flex; align-items: center; gap: 10px; padding: 16px 22px; cursor: pointer; list-style: none; font-weight: 700; font-size: 15px; }
+    .how summary::-webkit-details-marker { display: none; }
+    .how summary::after { content: "펼치기"; margin-left: auto; font-size: 12.5px; font-weight: 600; color: var(--accent); }
+    .how[open] summary::after { content: "접기"; }
+    .how .body { padding: 0 22px 22px; font-size: 14px; color: var(--text-sub); }
+    .chain { display: flex; flex-wrap: wrap; align-items: stretch; gap: 6px; margin: 4px 0 16px; }
+    .chain .node { flex: 1 1 120px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-soft); }
+    .chain .node b { display: block; font-size: 13.5px; color: var(--text); }
+    .chain .node small { display: block; font-size: 12px; line-height: 1.5; }
+    .chain .arrow { display: grid; place-items: center; color: var(--text-faint); font-weight: 800; }
+    .chain .gate { flex: 0 0 auto; display: grid; place-items: center; padding: 6px 10px; border: 1.5px dashed var(--warn); border-radius: 12px; background: var(--warn-soft); color: var(--warn); font-size: 12px; font-weight: 800; text-align: center; line-height: 1.35; }
+    .how h3 { margin: 14px 0 4px; font-size: 14px; color: var(--text); }
+    .how ul { padding-left: 18px; }
+    .how li + li { margin-top: 3px; }
+
+    /* 입력 */
+    .inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 18px; }
+    .field > .label { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; margin-bottom: 8px; font-size: 14px; font-weight: 600; }
+    .field > .label small { font-weight: 500; font-size: 12.5px; color: var(--text-sub); }
+    .text-input { display: block; width: 100%; padding: 9px 12px; border: 1px solid var(--line); border-radius: 10px; background: #fff; font-size: 14.5px; line-height: 1.6; }
+    textarea.text-input { resize: vertical; min-height: 84px; }
+    .text-input::placeholder { color: var(--text-faint); }
+    .text-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .hint { margin-top: 6px; font-size: 12.5px; color: var(--text-sub); }
+    .hint a, .hint .btn-link { color: var(--accent); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+    .stack > * + * { margin-top: 10px; }
+    .segmented { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; padding: 4px; background: var(--bg-soft); border-radius: 12px; }
+    .segmented input { position: absolute; opacity: 0; pointer-events: none; }
+    .segmented label { padding: 7px 10px; border-radius: 9px; text-align: center; cursor: pointer; font-size: 14px; font-weight: 500; color: var(--text-sub); white-space: nowrap; }
+    .segmented input:checked + label { background: #fff; color: var(--accent); font-weight: 700; box-shadow: 0 1px 3px rgba(20, 22, 31, .08); }
+    .segmented input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .pains { display: grid; gap: 6px; max-height: 240px; overflow-y: auto; }
+    .pain-pick { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; padding: 9px 12px; border: 1px solid var(--line); border-radius: 12px; cursor: pointer; font-size: 13.5px; }
+    .pain-pick:has(input:checked) { border-color: var(--danger); background: var(--danger-soft); }
+    .pain-pick input { margin-top: 4px; accent-color: var(--danger); }
+    .pain-pick .stage { display: inline-block; margin-right: 6px; padding: 0 7px; border-radius: 6px; background: #fff; border: 1px solid var(--line); font-size: 11.5px; font-weight: 700; color: var(--text-sub); }
+    .person { display: grid; grid-template-columns: 56px 1fr; gap: 12px; align-items: center; padding: 12px; border: 1px solid var(--line); border-radius: 12px; }
+    .avatar { width: 56px; height: 56px; border-radius: 50%; overflow: hidden; background: #e7e9f3; color: #b9bdd0; display: grid; place-items: center; }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .avatar svg { width: 70%; height: 70%; }
+    .person b { font-size: 15px; }
+    .person .sub { display: block; font-size: 12.5px; color: var(--text-sub); }
+    .person .link { font-size: 12px; font-weight: 600; }
+    .person .link.ok { color: var(--good); }
+    .person .link.no { color: var(--warn); }
+    .count-row { display: flex; align-items: center; gap: 12px; }
+    .count-row input[type="range"] { flex: 1; accent-color: var(--accent); }
+    .count-row output { min-width: 44px; padding: 4px 0; border-radius: 8px; background: var(--accent-soft); color: var(--accent); font-weight: 800; text-align: center; }
+    .generate { display: flex; align-items: center; gap: 14px; margin-top: 22px; flex-wrap: wrap; }
+    .generate .btn-solid { padding: 13px 28px; font-size: 16px; border-radius: 12px; }
+    .generate .why { font-size: 13px; color: var(--text-sub); }
+
+    /* 결과: 보드 머리 */
+    .board-head { padding: 22px 28px; }
+    .board-head .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .title-input { flex: 1 1 280px; min-width: 0; padding: 4px 8px; margin-left: -8px; border: 1px solid transparent; border-radius: 8px; background: none; font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
+    .title-input:hover { border-color: var(--line); }
+    .title-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .lineage { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .lineage a, .lineage span.chip { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; padding: 5px 11px; border: 1px solid var(--line); border-radius: 999px; background: #fff; font-size: 13px; }
+    .lineage a:hover { border-color: var(--accent); color: var(--accent); }
+    .lineage .k { flex: none; font-size: 11.5px; font-weight: 800; color: var(--text-sub); }
+    .lineage .v { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .lineage .pain .k { color: var(--danger); }
+    .save-state { font-size: 12.5px; color: var(--text-sub); }
+    .save-state.dirty { color: var(--warn); font-weight: 700; }
+
+    /* 캐릭터 시트 */
+    .sheet { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 22px; margin-top: 16px; align-items: start; }
+    .sheet-text .person { border: 0; padding: 0; margin-bottom: 12px; }
+    .sheet-text textarea { min-height: 110px; }
+
+    /* 시나리오 */
+    .scenario-text { min-height: 180px; font-size: 15px; line-height: 1.8; }
+    .gatebar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 14px; padding: 12px 14px; border: 1.5px dashed var(--warn); border-radius: 12px; background: var(--warn-soft); font-size: 13.5px; }
+    .gatebar.done { border-style: solid; border-color: #b8e2cf; background: var(--good-soft); }
+    .gatebar .msg { flex: 1 1 260px; color: var(--text); }
+    .gatebar .msg b { color: var(--warn); }
+    .gatebar.done .msg b { color: var(--good); }
+
+    /* 콘티 표 */
+    .curve { margin-top: 16px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-soft); }
+    .curve-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 13px; }
+    .curve-head b { font-size: 14px; }
+    .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: var(--text-sub); }
+    .legend i { display: inline-block; width: 18px; height: 0; margin-right: 5px; vertical-align: middle; border-top: 2.5px solid; }
+    .curve svg { display: block; width: 100%; height: 150px; margin-top: 8px; overflow: visible; }
+    .curve .note { margin-top: 6px; font-size: 12.5px; color: var(--text-sub); }
+    .table-wrap { margin-top: 16px; overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; }
+    table.conti { width: 100%; min-width: 1320px; border-collapse: collapse; font-size: 13px; }
+    .conti th { position: sticky; top: 0; padding: 9px 8px; background: var(--bg-soft); border-bottom: 1px solid var(--line); text-align: left; font-size: 12px; font-weight: 700; color: var(--text-sub); white-space: nowrap; }
+    .conti td { padding: 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    .conti tr:last-child td { border-bottom: 0; }
+    .conti td.no { width: 44px; text-align: center; font-weight: 800; color: var(--accent); padding-top: 12px; }
+    .conti textarea, .conti input, .conti select { width: 100%; padding: 6px 8px; border: 1px solid transparent; border-radius: 8px; background: transparent; font-size: 13px; line-height: 1.55; resize: vertical; }
+    .conti textarea { min-height: 64px; }
+    .conti textarea:hover, .conti input:hover, .conti select:hover { border-color: var(--line); background: #fff; }
+    .conti textarea:focus, .conti input:focus, .conti select:focus { outline: none; border-color: var(--accent); background: #fff; box-shadow: 0 0 0 3px var(--accent-soft); }
+    .conti [disabled] { color: var(--text-sub); cursor: not-allowed; }
+    .conti td.scene { background: #fbfbff; }
+    .conti td.scene.bad textarea { border-color: var(--danger); background: var(--danger-soft); }
+    .conti .warn { margin-top: 4px; font-size: 11.5px; font-weight: 600; color: var(--danger); }
+    .conti .emo { display: flex; align-items: center; gap: 4px; }
+    .conti .emo span { font-size: 18px; }
+    .col-title { width: 130px; } .col-sit { width: 190px; } .col-act { width: 160px; } .col-line { width: 170px; }
+    .col-emo { width: 100px; } .col-place { width: 130px; } .col-cam { width: 110px; } .col-scene { width: 240px; }
+    .problems { margin-top: 12px; padding: 10px 14px; border-radius: 10px; background: var(--danger-soft); color: var(--danger); font-size: 13px; }
+    .problems li { margin-left: 16px; }
+
+    /* 컷 보드 */
+    .progress { margin-top: 16px; }
+    .progress .bar { display: flex; height: 10px; overflow: hidden; border-radius: 999px; background: #e9ebf3; }
+    .progress .bar span { height: 100%; transition: width .4s; }
+    .progress .bar .done { background: var(--good); }
+    .progress .bar .running { background: var(--accent); background-image: linear-gradient(90deg, rgba(255,255,255,.0) 0, rgba(255,255,255,.45) 50%, rgba(255,255,255,0) 100%); background-size: 200% 100%; animation: shimmer 1.4s linear infinite; }
+    .progress .bar .failed { background: var(--danger); }
+    .progress .label { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; font-size: 14px; font-weight: 600; }
+    .progress .label .sub { font-weight: 500; font-size: 12.5px; color: var(--text-sub); }
+    .done-banner { display: flex; align-items: center; gap: 10px; margin-top: 14px; padding: 12px 16px; border-radius: 12px; background: var(--good-soft); color: var(--good); font-weight: 700; font-size: 14px; }
+    .board-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+    .cut-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-top: 18px; }
+    @media (max-width: 1100px) { .cut-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    @media (max-width: 860px) { .cut-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 640px) { .cut-grid { grid-template-columns: 1fr; } }
+    .cut { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 14px; background: #fff; overflow: hidden; transition: box-shadow .15s, opacity .15s, border-color .15s; }
+    .cut.dragging { opacity: .4; }
+    .cut.drop-before { box-shadow: -4px 0 0 var(--accent); }
+    .cut.drop-after { box-shadow: 4px 0 0 var(--accent); }
+    .cut-top { display: flex; align-items: center; gap: 6px; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+    .cut-top .handle { cursor: grab; padding: 2px 4px; border: 0; background: none; color: var(--text-faint); font-size: 16px; line-height: 1; }
+    .cut-top .handle:active { cursor: grabbing; }
+    .cut-top .no { font-weight: 800; color: var(--accent); font-size: 13px; }
+    .cut-top .tools { margin-left: auto; display: flex; gap: 2px; }
+    .icon-btn { display: grid; place-items: center; width: 26px; height: 26px; border: 0; border-radius: 7px; background: none; color: var(--text-sub); cursor: pointer; font-size: 13px; }
+    .icon-btn:hover { background: var(--bg-soft); color: var(--accent); }
+    .icon-btn.del:hover { color: var(--danger); background: var(--danger-soft); }
+    .icon-btn:disabled { opacity: .3; cursor: not-allowed; background: none; }
+
+    .shot { position: relative; aspect-ratio: 3 / 2; background: var(--bg-soft); display: grid; place-items: center; overflow: hidden; }
+    .sheet .shot { aspect-ratio: 3 / 2; border-radius: 12px; border: 1px solid var(--line); }
+    .shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .shot .ph { display: grid; justify-items: center; gap: 6px; padding: 12px; text-align: center; font-size: 12.5px; color: var(--text-sub); }
+    .shot .ph svg { width: 34px; height: 34px; color: #c4c8d8; }
+    .shot.idle, .shot.queued { background: repeating-linear-gradient(45deg, #f3f4f9 0 10px, #f8f9fc 10px 20px); border-bottom: 1px dashed var(--line); }
+    .shot.running { background: linear-gradient(100deg, #eceefa 20%, #f8f8ff 40%, #eceefa 60%); background-size: 220% 100%; animation: shimmer 1.3s linear infinite; }
+    .shot.running .ph svg { color: var(--accent); animation: pulse 1.2s ease-in-out infinite; }
+    .shot.failed { background: var(--danger-soft); }
+    .shot.failed .ph { color: var(--danger); }
+    .status { position: absolute; top: 8px; left: 8px; }
+    .status .pill { box-shadow: 0 1px 3px rgba(20,22,31,.12); background: #fff; }
+    .status .pill.ok { background: var(--good-soft); }
+    .status .pill.accent { background: var(--accent-soft); }
+    .status .pill.danger { background: var(--danger-soft); }
+    @keyframes shimmer { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+    @keyframes pulse { 0%, 100% { transform: scale(1); opacity: .6; } 50% { transform: scale(1.12); opacity: 1; } }
+    @media (prefers-reduced-motion: reduce) { .shot.running, .progress .bar .running, .shot.running .ph svg { animation: none; } }
+
+    .shot-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 7px 10px; border-bottom: 1px solid var(--line); font-size: 11.5px; color: var(--text-sub); }
+    .shot-meta .ref { display: inline-flex; align-items: center; gap: 4px; padding: 1px 7px; border-radius: 999px; background: var(--good-soft); color: var(--good); font-weight: 700; }
+    .shot-meta .ref.no { background: var(--warn-soft); color: var(--warn); }
+    .shot-meta .ver { margin-left: auto; display: inline-flex; align-items: center; gap: 2px; }
+    .shot-meta .ver .icon-btn { width: 22px; height: 22px; }
+    .cut-body { display: grid; gap: 4px; padding: 10px; }
+    .cut-body .plain { width: 100%; padding: 4px 6px; border: 1px solid transparent; border-radius: 7px; background: none; resize: none; font-size: 13px; line-height: 1.55; }
+    .cut-body .plain:hover { border-color: var(--line); }
+    .cut-body .plain:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .cut-body .t { font-size: 14.5px; font-weight: 700; }
+    .cut-body .s { color: var(--text-sub); }
+    .cut-body .line-row { display: grid; grid-template-columns: 22px 1fr; align-items: start; }
+    .cut-body .line-row span { padding-top: 4px; font-size: 14px; }
+    .cut-body .emo-row { display: flex; align-items: center; gap: 6px; padding: 0 6px; font-size: 12.5px; color: var(--text-sub); }
+    .cut-body .emo-row .big { font-size: 20px; }
+    .cut-foot { margin-top: auto; display: flex; gap: 6px; flex-wrap: wrap; padding: 0 10px 10px; }
+    .fail-box { margin: 0 10px 10px; padding: 9px 10px; border-radius: 10px; background: var(--danger-soft); font-size: 12.5px; color: var(--danger); }
+    .fail-box.retrying { background: var(--warn-soft); color: var(--warn); }
+    .fail-box textarea { margin-top: 6px; min-height: 70px; font-size: 12.5px; border-color: var(--danger-line); }
+    .add-cut { display: grid; place-items: center; gap: 4px; min-height: 200px; border: 1.5px dashed #c9cdf5; border-radius: 14px; background: none; color: var(--accent); font-weight: 700; cursor: pointer; }
+    .add-cut:hover { background: var(--accent-soft); }
+    .add-cut small { font-weight: 500; color: var(--text-sub); }
+
+    #result, #loadingBoard { margin-top: 20px; }
+    .empty-result { padding: 48px 28px; text-align: center; color: var(--text-sub); }
+    .empty-result b { display: block; margin-bottom: 4px; font-size: 17px; color: var(--text); }
+
+    dialog { width: min(640px, calc(100vw - 32px)); margin: auto; padding: 0; border: 0; border-radius: 16px; box-shadow: 0 20px 60px rgba(20,22,31,.25); }
+    dialog::backdrop { background: rgba(20, 22, 31, .4); }
+    .dlg-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 16px 20px; border-bottom: 1px solid var(--line); }
+    .dlg-head h3 { font-size: 16px; }
+    .dlg-body { padding: 16px 20px 20px; font-size: 13.5px; }
+    .dlg-body pre { margin-top: 8px; padding: 12px 14px; border-radius: 10px; background: var(--bg-soft); white-space: pre-wrap; word-break: break-word; font-family: inherit; font-size: 13px; line-height: 1.7; }
+    .dlg-body .meta { color: var(--text-sub); font-size: 12.5px; }
+
+    .toast { position: fixed; left: 50%; bottom: 24px; z-index: 50; transform: translateX(-50%); padding: 11px 18px; border-radius: 12px; background: #1f2233; color: #fff; font-size: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.2); }
+    .toast.error { background: var(--danger); }
+
     footer { padding: 40px 0; border-top: 1px solid var(--line); }
-    footer .container {
-      display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px;
-      font-size: 14px; color: var(--text-sub);
-    }
+    footer .container { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font-size: 14px; color: var(--text-sub); }
     footer .logo { font-size: 18px; color: var(--text); }
 
+    @media (max-width: 860px) {
+      .inputs, .sheet { grid-template-columns: 1fr; }
+    }
     @media (max-width: 640px) {
+      .container { padding: 0 16px; }
       .nav .container { flex-direction: column; align-items: flex-start; height: auto; padding-top: 12px; padding-bottom: 8px; gap: 6px; }
       .nav nav { width: 100%; }
       .menu a { padding: 8px 12px 8px 0; }
       .menu a[aria-current="page"] { padding-left: 12px; }
-      main { padding: 72px 0; }
-      .notice { padding: 40px 24px; }
+      main { padding: 48px 0 72px; }
+      .section, .board-head { padding: 20px 16px; }
+      .generate .btn-solid { width: 100%; }
+      .title-input { font-size: 19px; }
+      .chain .arrow { display: none; }
     }
   </style>
 </head>
@@ -133,21 +318,193 @@
       <div class="page-head">
         <span class="num">5</span>
         <h1>시나리오 보드 생성</h1>
-        <p>저니맵을 바탕으로 개선된 사용 시나리오 보드를 만듭니다.</p>
-      </div>
-      <div class="notice">
-        <span class="badge">Coming soon</span>
-        <h2>준비 중입니다</h2>
-        <p>이 에이전트는 현재 개발 중이에요. 곧 만나보실 수 있습니다.</p>
+        <p>저니맵의 페인포인트 하나를 개선한 TO-BE 시나리오를 콘티와 컷 보드로 그려요.</p>
       </div>
 
-      <section class="from-journey" aria-labelledby="fjTitle">
-        <h2 id="fjTitle">저니맵에서 불러올 TO-BE 핵심 장면</h2>
-        <p id="fjNote">4단계 저니맵에서 TO-BE를 만들면, 개선이 가장 크게 체감되는 장면이 여기에 모여요.</p>
-        <div class="scene-groups" id="sceneGroups"></div>
+      <!-- 일하는 방식: 프롬프트 체이닝 + 사람이 확인하는 지점 -->
+      <details class="card how" id="how">
+        <summary><span class="step-no">?</span> 이 에이전트가 일하는 방식 — 프롬프트 체이닝과 확인 지점</summary>
+        <div class="body">
+          <div class="chain" aria-label="단계 흐름">
+            <div class="node"><b>저니맵 (4단계)</b><small>단계·감정·페인포인트</small></div><span class="arrow">→</span>
+            <div class="node"><b>TO-BE 시나리오</b><small>고른 페인포인트를 푼 이야기</small></div><span class="arrow">→</span>
+            <div class="gate">✋ 확인 1<br>시나리오 확정</div><span class="arrow">→</span>
+            <div class="node"><b>콘티 표</b><small>컷마다 장면·감정·구도·장면 묘사</small></div><span class="arrow">→</span>
+            <div class="gate">✋ 확인 2<br>콘티 확정</div><span class="arrow">→</span>
+            <div class="node"><b>컷 이미지</b><small>스타일 + 장면 묘사 + 구도<br>+ 페르소나 사진 참조</small></div>
+          </div>
+          <h3>프롬프트 체이닝이란</h3>
+          <p>한 번에 “보드를 다 만들어 줘”라고 시키지 않고, 일을 작은 단계로 나눠 <b>앞 단계의 결과를 다음 단계의 입력으로</b> 넘기는 방식이에요. 저니맵 → 시나리오 → 콘티 → 이미지 설명 → 이미지가 사슬처럼 이어지고, 각 단계는 자기 일 하나에만 집중하니 결과가 더 정확하고, 어디서 틀어졌는지도 찾기 쉬워요.</p>
+          <h3>왜 중간에 사람이 확인하나요</h3>
+          <ul>
+            <li><b>잘못이 뒤로 갈수록 커져요.</b> 시나리오가 페인포인트를 비껴가면 콘티 8컷과 이미지 8장이 모두 엇나가요. 앞에서 한 번 고치는 게 가장 싸요.</li>
+            <li><b>이미지는 비싸고 느려요.</b> 컷마다 이미지 호출이 들어가니, 글 단계에서 충분히 다듬고 ‘확정’한 뒤에만 그려요. 그래서 콘티를 확정해야만 보드 생성 버튼이 열려요.</li>
+            <li><b>판단은 리서처의 몫이에요.</b> 어떤 장면이 개선을 가장 잘 보여 주는지, 감정 곡선이 저니맵과 맞는지는 사람이 근거를 보고 정해요.</li>
+            <li><b>지금은 AI 연결 전이에요.</b> 시나리오와 콘티는 저니맵 내용을 규칙대로 이어 붙인 예시이고, 이미지는 확정한 콘티로 Worker 를 거쳐 만들어요.</li>
+          </ul>
+        </div>
+      </details>
+
+      <!-- 입력 -->
+      <section class="card section" id="inputCard" aria-labelledby="inTitle">
+        <div class="section-head">
+          <div>
+            <h2 id="inTitle"><span class="step-no">1</span>무엇으로 보드를 만들까요</h2>
+            <p class="desc">저니맵과 페인포인트를 고르면 등장 인물(페르소나)과 프로필 사진이 자동으로 연결돼요.</p>
+          </div>
+          <a class="btn btn-sm" id="newBoardLink" href="/scenario/" hidden>+ 새 보드</a>
+        </div>
+        <div class="inputs">
+          <div class="stack">
+            <div class="field">
+              <div class="label">저니맵 <small>4단계에서 저장한 것</small></div>
+              <div class="segmented" role="radiogroup" aria-label="저니맵 불러오기 방식">
+                <input type="radio" name="jmode" id="jmMine" value="mine" checked /><label for="jmMine">내 저니맵 불러오기</label>
+                <input type="radio" name="jmode" id="jmManual" value="manual" /><label for="jmManual">직접 입력</label>
+              </div>
+            </div>
+            <div class="field" id="mineBox">
+              <select class="text-input" id="journeySelect" aria-label="저니맵 고르기"></select>
+              <p class="hint" id="journeyHint"></p>
+            </div>
+            <div class="field" id="manualBox" hidden>
+              <textarea class="text-input" id="manualScenario" placeholder="예: 늦은 밤 OTT 앱에서 쉬면서 볼 콘텐츠 고르기 — 앱 열기 → 추천 넘겨보기 → 예고편·리뷰 비교 → 결정 → 시청"></textarea>
+              <p class="hint">저니맵의 시나리오와 단계를 한두 줄로 적어 주세요.</p>
+            </div>
+            <div class="field">
+              <div class="label">개선할 페인포인트 <small id="painCount"></small></div>
+              <div class="pains" id="painList" role="radiogroup" aria-label="페인포인트 고르기"></div>
+              <textarea class="text-input" id="manualPain" placeholder="예: 예고편과 리뷰를 오가며 비교하느라 정작 볼 시간이 줄어든다" hidden></textarea>
+            </div>
+          </div>
+          <div class="stack">
+            <div class="field">
+              <div class="label">등장 인물 <small>3단계 페르소나</small></div>
+              <div id="personaBox"></div>
+              <div id="personaPickBox" hidden style="margin-top:8px">
+                <select class="text-input" id="personaSelect" aria-label="페르소나 고르기"></select>
+              </div>
+            </div>
+            <div class="field">
+              <div class="label">컷 수 <small>4~8컷</small></div>
+              <div class="count-row">
+                <input type="range" id="cutCount" min="4" max="8" step="1" value="8" aria-label="컷 수" />
+                <output id="cutCountOut" for="cutCount">8컷</output>
+              </div>
+            </div>
+            <div class="field">
+              <div class="label">그림 스타일 <small>모든 컷에 같은 스타일 문장이 붙어요</small></div>
+              <div class="segmented" role="radiogroup" aria-label="그림 스타일">
+                <input type="radio" name="style" id="stSketch" value="sketch" checked /><label for="stSketch">연필 스케치</label>
+                <input type="radio" name="style" id="stFlat" value="flat" /><label for="stFlat">플랫 일러스트</label>
+                <input type="radio" name="style" id="stPhoto" value="photo" /><label for="stPhoto">실사풍</label>
+              </div>
+              <p class="hint" id="styleText"></p>
+            </div>
+          </div>
+        </div>
+        <div class="generate">
+          <button class="btn btn-solid" type="button" id="generateBtn">시나리오 보드 생성</button>
+          <span class="why" id="generateWhy">AI 연결 전이라, 저니맵 내용을 이어 붙인 예시 시나리오와 콘티가 나와요.</span>
+        </div>
       </section>
+
+      <!-- 결과 -->
+      <div id="result" hidden>
+        <section class="card board-head" aria-label="보드 정보">
+          <div class="row">
+            <input class="title-input" id="boardTitle" aria-label="보드 제목" maxlength="80" />
+            <span class="pill" id="boardStatus"></span>
+          </div>
+          <div class="lineage" id="lineage" aria-label="이 보드가 나온 곳"></div>
+          <div class="row" style="margin-top:14px">
+            <span class="save-state" id="saveState"></span>
+            <span style="flex:1"></span>
+            <button class="btn btn-sm btn-danger" type="button" id="deleteBtn" hidden>보드 지우기</button>
+            <button class="btn btn-sm" type="button" id="saveBtn">저장</button>
+          </div>
+        </section>
+
+        <!-- 캐릭터 시트 -->
+        <section class="card section" aria-labelledby="sheetTitle">
+          <div class="section-head">
+            <div>
+              <h2 id="sheetTitle"><span class="step-no">2</span>캐릭터 시트</h2>
+              <p class="desc">페르소나 프로필 사진을 참조해 같은 사람으로 그려요. 컷도 같은 사진을 참조해요.</p>
+            </div>
+          </div>
+          <div class="sheet">
+            <div id="sheetShot"></div>
+            <div class="sheet-text">
+              <div id="sheetPerson"></div>
+              <label class="field"><span class="label">인물 설명 <small>페르소나에서 가져왔어요 · 고칠 수 있어요</small></span>
+                <textarea class="text-input" id="sheetDesc" maxlength="600"></textarea>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <!-- TO-BE 시나리오 -->
+        <section class="card section" aria-labelledby="scTitle">
+          <div class="section-head">
+            <div>
+              <h2 id="scTitle"><span class="step-no">3</span>TO-BE 시나리오</h2>
+              <p class="desc" id="scDesc">고른 페인포인트가 풀린 뒤의 이야기예요. 읽고 고친 뒤 확정해 주세요.</p>
+            </div>
+          </div>
+          <textarea class="text-input scenario-text" id="scenarioText" style="margin-top:14px" maxlength="4000"></textarea>
+          <div class="gatebar" id="scenarioGate"></div>
+        </section>
+
+        <!-- 콘티 -->
+        <section class="card section" aria-labelledby="ctTitle">
+          <div class="section-head">
+            <div>
+              <h2 id="ctTitle"><span class="step-no">4</span>장면 콘티</h2>
+              <p class="desc" id="ctDesc">확정한 시나리오를 컷 수만큼 장면으로 나눴어요. 모든 칸을 바로 고칠 수 있어요.</p>
+            </div>
+            <button class="btn btn-sm" type="button" id="addRowBtn">+ 컷 추가</button>
+          </div>
+          <div class="curve" id="curve"></div>
+          <div class="table-wrap">
+            <table class="conti" aria-label="장면 콘티 표">
+              <thead>
+                <tr>
+                  <th>컷</th><th class="col-title">장면 제목</th><th class="col-sit">상황 설명</th><th class="col-act">인물 행동</th><th class="col-line">대사·생각</th>
+                  <th class="col-emo">감정 (-2~+2)</th><th class="col-place">장소·소품</th><th class="col-cam">카메라 구도</th><th class="col-scene">이미지용 장면 묘사 <small style="font-weight:500">(외모 X · 행동과 상황만)</small></th>
+                </tr>
+              </thead>
+              <tbody id="contiBody"></tbody>
+            </table>
+          </div>
+          <div class="problems" id="problems" hidden></div>
+          <div class="gatebar" id="contiGate"></div>
+        </section>
+
+        <!-- 컷 보드 -->
+        <section class="card section" aria-labelledby="bdTitle">
+          <div class="section-head">
+            <div>
+              <h2 id="bdTitle"><span class="step-no">5</span>컷 보드</h2>
+              <p class="desc">컷은 완성되는 순서와 상관없이 콘티 순서대로 놓여요. 끌어서 순서를 바꾸고 제목·설명·대사를 바로 고칠 수 있어요.</p>
+            </div>
+            <div class="board-actions">
+              <button class="btn btn-solid" type="button" id="boardGenBtn">보드 생성</button>
+            </div>
+          </div>
+          <div class="progress" id="progress"></div>
+          <div class="cut-grid" id="cutGrid"></div>
+        </section>
+      </div>
+
+      <section class="card empty-result" id="loadingBoard" hidden><b>보드를 불러오는 중…</b></section>
     </div>
   </main>
+
+  <dialog id="promptDlg" aria-labelledby="dlgTitle">
+    <div class="dlg-head"><h3 id="dlgTitle">실제로 보낸 설명</h3><button class="icon-btn" type="button" id="dlgClose" aria-label="닫기">✕</button></div>
+    <div class="dlg-body" id="dlgBody"></div>
+  </dialog>
 
   <footer>
     <div class="container">
@@ -158,32 +515,890 @@
 
   <script src="/js/auth.js"></script>
   <script>
-    // GET /api/journeys/scenes → { scenes: [{ journeyId, persona, scenario, version, status, scene: { id, title, stageName, description, hmw, hmwText } }] }
+    // ─────────────────────────────────────────────────────────────
+    // 시나리오 보드 — 저니맵(4단계) → TO-BE 시나리오 → 콘티 → 컷 이미지
+    //   시나리오·콘티: 아직 AI 를 부르지 않고 저니맵 내용을 규칙대로 이어 붙인 예시를 만든다
+    //   이미지: 콘티를 확정·저장한 뒤 POST /api/boards/:id/generate → 202 '접수됨' → 컷마다 큐에서 처리 → GET 으로 상태를 읽어 채운다
+    //   API: worker/src/boards.js
+    // ─────────────────────────────────────────────────────────────
     const $ = (id) => document.getElementById(id);
     const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-    async function loadScenes() {
-      if (!UXA.getSession()) { $("fjNote").innerHTML = `내 저니맵의 장면을 불러오려면 <a href="${UXA.loginUrl("/scenario/")}">로그인</a>해 주세요.`; return; }
-      const { res, data } = await UXA.api("/api/journeys/scenes").catch(() => ({ res: { ok: false }, data: {} }));
-      if (!res.ok) { $("fjNote").textContent = data.error || "장면을 불러오지 못했어요."; return; }
-      const want = new URLSearchParams(location.search).get("journey");
-      const groups = new Map();
-      for (const x of data.scenes) {
-        if (!groups.has(x.journeyId)) groups.set(x.journeyId, { ...x, scenes: [] });
-        groups.get(x.journeyId).scenes.push(x.scene);
+    const fmtDate = (sec) => (sec ? new Date(sec * 1000).toLocaleString("ko-KR", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "");
+    const SILHOUETTE = `<svg viewBox="0 0 240 180" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="120" cy="72" r="38" fill="currentColor"/><path d="M40 190c0-46 36-78 80-78s80 32 80 78" fill="currentColor"/></svg>`;
+    const PIC = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="m4 18 5-5 4 4 3-3 4 4"/></svg>`;
+
+    // 그림 스타일 고정 문장 (Worker boards.js 의 STYLE_FIXED 와 같다 — 실제로 붙이는 것은 서버)
+    const STYLE = {
+      sketch: { label: "연필 스케치", text: "연필 스케치 스토리보드. 흰 종이 위 회색 흑연 선과 가벼운 해칭 명암, 색 없음. 선 굵기·필압·종이 질감을 모든 컷에서 똑같이 유지한다." },
+      flat: { label: "플랫 일러스트", text: "플랫 일러스트 스토리보드. 외곽선 없는 단순한 면, 그림자 최소, 남색·연보라·베이지·민트의 차분한 팔레트. 단순화 정도와 팔레트를 모든 컷에서 똑같이 유지한다." },
+      photo: { label: "실사풍", text: "실사풍 스토리보드 스틸. 자연광, 보정하지 않은 사실적인 색감, 35mm 렌즈의 얕은 심도. 색감·조명·입자를 모든 컷에서 똑같이 유지한다." },
+    };
+    const CAMERAS = ["전신", "상반신", "클로즈업", "화면 위주"];
+    const EMOJI = { "-2": "😣", "-1": "😟", "0": "😐", "1": "🙂", "2": "😄" };
+    const emoLabel = (n) => (n > 0 ? `+${n}` : String(n));
+    // 이미지용 장면 묘사에 쓰면 안 되는 외모 표현 (Worker boards.js 의 APPEARANCE 와 같은 목록)
+    const APPEARANCE = /머리카락|머리 ?모양|헤어|단발|장발|긴 ?머리|짧은 ?머리|곱슬|앞머리|포니테일|염색|안경|피부|얼굴형|눈매|쌍꺼풀|눈동자|수염|키가|키 ?큰|키 ?작은|체형|날씬|통통|뚱뚱|마른 ?체|근육질|외모|잘생|예쁜|미인|인종|금발|화장|메이크업|옷차림|정장|원피스|티셔츠|청바지|후드티|\d+대 ?(여성|남성|여자|남자)/g;
+    const appearanceWords = (t) => [...new Set(String(t || "").match(APPEARANCE) || [])];
+    const STATUS = { idle: ["대기", ""], queued: ["대기", ""], running: ["생성 중", "accent"], done: ["완료", "ok"], failed: ["실패", "danger"] };
+
+    // ── 예시 저니맵 (로그인 없이도 써 볼 수 있게) — 샘플 페르소나 '세은' ──
+    const EXAMPLE = {
+      id: "example", label: "예시 · 세은 × 늦은 밤 OTT에서 쉬면서 볼 콘텐츠 고르기", scenario: "늦은 밤 OTT에서 쉬면서 볼 콘텐츠 고르기",
+      personaId: "sample-seeun", persona: { name: "세은", role: "음악강사 · 32세", desc: "피곤한 하루 끝에 OTT로 쉬고 싶은데, 알고리즘 추천보다 지인의 추천과 감상 공유를 더 믿는 사람. 다양한 문화·예술에 관심이 많고 스마트폰·태블릿·노트북을 오가며 쓴다.", photoUrl: null },
+      asis: [
+        { id: "s1", name: "하루 마무리", actions: ["소파에 앉아 OTT 앱을 연다"], thought: "오늘은 뭐 보지…", score: 0, touch: ["OTT 앱 홈"], pains: [] },
+        { id: "s2", name: "탐색", actions: ["홈 추천을 끝없이 넘겨 본다", "다른 OTT 앱도 열어 본다"], thought: "다 본 것 같은 것만 나오네", score: -1, touch: ["홈 추천"], pains: [{ id: "P1", text: "추천이 취향과 맞지 않아 비슷한 작품만 계속 넘겨 보게 된다" }] },
+        { id: "s3", name: "비교", actions: ["예고편과 리뷰 사이트를 오가며 비교한다"], thought: "이러다 30분 지나겠다", score: -2, touch: ["예고편", "리뷰 사이트"], pains: [{ id: "P2", text: "예고편·리뷰를 오가며 비교하느라 정작 볼 시간이 줄어든다" }] },
+        { id: "s4", name: "결정", actions: ["대충 하나를 고른다"], thought: "재미없으면 어떡하지", score: -1, touch: ["재생 버튼"], pains: [{ id: "P3", text: "골라 놓고도 재미없을까 봐 불안하다" }] },
+        { id: "s5", name: "감상", actions: ["혼자 끝까지 본다"], thought: "누구랑 얘기하고 싶은데", score: 1, touch: ["재생 화면"], pains: [{ id: "P4", text: "감상을 나눌 사람이 없어 혼자 보는 게 아쉽다" }] },
+      ],
+      tobe: [
+        { id: "s1", name: "하루 마무리", actions: ["소파에 앉아 스마트폰으로 OTT 앱을 연다", "오늘 기분을 묻는 질문에 ‘가볍게 웃고 싶어’를 누른다"], thought: "오늘은 고민 없이 바로 보고 싶어", score: 1, touch: ["기분 고르기"], change: "기분을 한 번 고르면 홈이 그 기분에 맞춰 바뀐다" },
+        { id: "s2", name: "탐색", actions: ["지인들이 최근 좋게 본 작품 줄을 넘겨 본다", "친구가 남긴 한 줄 후기를 읽는다"], thought: "지수가 이걸 재밌다고 했네?", score: 1, touch: ["지인 추천 줄", "한 줄 후기"], change: "비슷한 추천 대신 지인의 실제 후기로 고른다" },
+        { id: "s3", name: "비교", actions: ["후보 두 개를 나란히 놓고 내 취향과 맞는 정도를 본다", "30초 하이라이트를 미리 본다"], thought: "이 정도면 실패는 없겠다", score: 1, touch: ["나란히 비교", "하이라이트"], change: "예고편과 리뷰 사이를 오가지 않고 한 화면에서 비교한다" },
+        { id: "s4", name: "결정", actions: ["‘오늘 이거 볼래’를 누른다", "친구에게 같이 보자고 초대를 보낸다"], thought: "같이 보면 더 재밌겠다", score: 1, touch: ["시청 시작", "같이 보기 초대"], change: "고른 이유가 남아 결정한 뒤의 불안이 줄어든다" },
+        { id: "s5", name: "감상·공유", actions: ["다 보고 별점과 한 줄 감상을 남긴다", "친구의 답글을 읽으며 소리 내 웃는다"], thought: "다음에도 이렇게 고르면 되겠다", score: 2, touch: ["감상 남기기", "친구 답글"], change: "감상을 지인과 나누며 하루를 기분 좋게 마무리한다" },
+      ],
+    };
+
+    // ── 상태 ──
+    const S = {
+      loggedIn: !!UXA.getSession(),
+      journeys: [],          // GET /api/journeys
+      journey: null,         // 고른 저니맵 (정규화: { id, label, scenario, persona, personaId, asis[], tobe[], tobeId, lens })
+      myPersonas: [],        // 직접 입력일 때 고를 페르소나
+      samplePersona: null,
+      // 보드 (저장 전에는 서버 id 가 없다)
+      board: null,           // { id?, title, source, style, scenario, scenarioConfirmed, contiStatus, status, sheet:{...}, cuts:[...], journeyCurve, referenceReady }
+      dirty: false,
+      saving: false,
+      pollTimer: null,
+    };
+
+    // ════════════════ 1. 입력 ════════════════
+    const jmode = () => document.querySelector('input[name="jmode"]:checked').value;
+    const styleVal = () => document.querySelector('input[name="style"]:checked').value;
+
+    function renderStyleHint() { $("styleText").textContent = `고정 문장: ${STYLE[styleVal()].text}`; }
+    document.querySelectorAll('input[name="style"]').forEach((r) => r.addEventListener("change", renderStyleHint));
+    $("cutCount").addEventListener("input", () => { $("cutCountOut").textContent = `${$("cutCount").value}컷`; });
+    document.querySelectorAll('input[name="jmode"]').forEach((r) => r.addEventListener("change", renderInputs));
+
+    async function loadInputs() {
+      renderStyleHint();
+      const tasks = [UXA.api("/api/personas/sample").then(({ res, data }) => { if (res.ok) S.samplePersona = data.persona; }).catch(() => {})];
+      if (S.loggedIn) {
+        tasks.push(UXA.api("/api/journeys").then(({ res, data }) => { if (res.ok) S.journeys = data.journeys; }).catch(() => {}));
+        tasks.push(UXA.api("/api/personas").then(({ res, data }) => { if (res.ok) S.myPersonas = (data.projects || []).flatMap((pj) => pj.personas.map((p) => ({ ...p, project: pj.name }))); }).catch(() => {}));
       }
-      if (!groups.size) { $("fjNote").innerHTML = `아직 불러올 장면이 없어요. <a href="/journey/">저니맵</a>에서 AS-IS를 확정하고 ‘TO-BE 만들기’를 눌러 보세요.`; return; }
-      $("sceneGroups").innerHTML = [...groups.values()].map((g) => `
-        <article class="scene-group ${g.journeyId === want ? "on" : ""}" id="j-${esc(g.journeyId)}">
-          <h3><a href="/journey/?id=${encodeURIComponent(g.journeyId)}">${esc(g.persona)} × ${esc(g.scenario)}</a></h3>
-          <p class="meta">TO-BE · 버전 ${esc(g.version)}<span class="st ${g.status}">${g.status === "confirmed" ? "확정" : "초안"}</span></p>
-          <div class="scene-list">${g.scenes.map((c) => `
-            <div class="scene"><span class="no">${esc(c.id)} · ${esc(c.stageName)}</span><b>${esc(c.title)}</b><p>${esc(c.description)}</p>
-              ${c.hmwText.length ? `<p class="hmw">${c.hmwText.map(esc).join("<br>")}</p>` : ""}<span class="hyp">가설 · 검증 전</span></div>`).join("")}
-          </div>
-        </article>`).join("");
-      if (want) document.getElementById(`j-${want}`)?.scrollIntoView({ block: "center" });
+      await Promise.all(tasks);
+      if (S.samplePersona) EXAMPLE.persona.photoUrl = S.samplePersona.photoUrl;
+      // 저니맵 고르기: 예시 + 내 저니맵 (TO-BE 가 있는 것을 먼저)
+      const opts = [`<option value="example">${esc(EXAMPLE.label)}</option>`];
+      const mine = [...S.journeys].sort((a, b) => (b.lens === "to-be") - (a.lens === "to-be") || b.updatedAt - a.updatedAt);
+      if (mine.length) opts.push(`<optgroup label="내 저니맵">${mine.map((j) => `<option value="${esc(j.id)}">${esc(j.persona.name)} × ${esc(j.scenario)} · ${j.lens === "to-be" ? "TO-BE" : "AS-IS"} ${esc(j.version)}${j.status === "confirmed" ? " (확정)" : " (초안)"}</option>`).join("")}</optgroup>`);
+      $("journeySelect").innerHTML = opts.join("");
+      const want = new URLSearchParams(location.search).get("journey");
+      if (want && mine.some((j) => j.id === want)) $("journeySelect").value = want;
+      $("journeySelect").addEventListener("change", () => pickJourney($("journeySelect").value));
+      // 직접 입력에서 고를 페르소나
+      const pOpts = [];
+      if (S.samplePersona) pOpts.push(`<option value="sample-seeun">샘플 · ${esc(S.samplePersona.profile.name)} (${esc(S.samplePersona.profile.job)})</option>`);
+      if (S.myPersonas.length) pOpts.push(`<optgroup label="내 페르소나">${S.myPersonas.map((p) => `<option value="${esc(p.id)}">${esc(p.name)} · ${esc(p.job)} · ${esc(p.project)}</option>`).join("")}</optgroup>`);
+      pOpts.push(`<option value="">페르소나 없이 (참조 사진 없음)</option>`);
+      $("personaSelect").innerHTML = pOpts.join("");
+      $("personaSelect").addEventListener("change", renderInputs);
+      await pickJourney($("journeySelect").value);
     }
-    loadScenes();
+
+    // 서버 저니맵 → 화면용 모양
+    function normStages(map) {
+      return (map?.stages || []).map((s) => ({
+        id: s.id, name: s.name, actions: s.actions?.items || [], thought: s.thought?.text || "", score: s.emotion?.score ?? 0,
+        touch: s.touchpoints?.items || [], change: s.change?.text || "", pains: (s.pains?.items || []).map((p) => ({ id: p.id, text: p.text })),
+      }));
+    }
+
+    async function pickJourney(id) {
+      if (id === "example") { S.journey = { ...EXAMPLE, lens: "example", tobeId: null }; renderInputs(); return; }
+      $("journeyHint").textContent = "저니맵을 불러오는 중…";
+      const { res, data } = await UXA.api(`/api/journeys/${encodeURIComponent(id)}`).catch(() => ({ res: { ok: false }, data: {} }));
+      if (!res.ok) { $("journeyHint").textContent = data.error || "저니맵을 불러오지 못했어요."; return; }
+      const j = data.journey;
+      let asis = null, tobe = null, tobeId = null;
+      if (j.lens === "to-be") { tobe = normStages(j.map); tobeId = j.id; asis = j.parent ? normStages(j.parent.map) : null; }
+      else {
+        asis = normStages(j.map);
+        // 이 AS-IS 로 만든 TO-BE 가 있으면 그것을 시나리오의 뼈대로 쓴다
+        const child = (j.children || [])[0];
+        if (child) {
+          const c = await UXA.api(`/api/journeys/${encodeURIComponent(child.id)}`).catch(() => ({ res: { ok: false } }));
+          if (c.res.ok) { tobe = normStages(c.data.journey.map); tobeId = child.id; }
+        }
+      }
+      S.journey = {
+        id: j.id, lens: j.lens, tobeId, asisId: j.lens === "to-be" ? j.parentId : j.id, label: `${j.persona.name} × ${j.scenario} · ${j.lens === "to-be" ? "TO-BE" : "AS-IS"} ${j.version}`, scenario: j.scenario,
+        persona: { name: j.persona.name, role: j.persona.role, desc: j.persona.desc, photoUrl: j.persona.photoUrl || null }, personaId: j.personaId,
+        asis: asis || [], tobe: tobe || null,
+      };
+      renderInputs();
+    }
+
+    function currentPains() {
+      const j = S.journey;
+      if (!j) return [];
+      return j.asis.flatMap((s) => s.pains.map((p) => ({ ...p, stage: s.name, stageId: s.id, score: s.score })));
+    }
+
+    function renderInputs() {
+      const manual = jmode() === "manual";
+      $("mineBox").hidden = manual;
+      $("manualBox").hidden = !manual;
+      $("manualPain").hidden = !manual;
+      $("painList").hidden = manual;
+      $("personaPickBox").hidden = !manual;
+      const j = S.journey;
+      if (!manual && j) {
+        $("journeyHint").innerHTML = j.lens === "example"
+          ? (S.loggedIn ? "예시 저니맵이에요. 내 저니맵은 목록 아래쪽에 있어요." : `로그인하면 내 저니맵을 불러올 수 있어요. <a href="${UXA.loginUrl("/scenario/")}">로그인</a>`)
+          : j.tobe ? `TO-BE ${j.tobe.length}단계를 시나리오의 뼈대로 써요. <a href="/journey/?id=${encodeURIComponent(j.tobeId || j.id)}">저니맵 열기</a>`
+          : `아직 TO-BE 가 없어 AS-IS 단계만 써요. <a href="/journey/?id=${encodeURIComponent(j.id)}">저니맵에서 TO-BE 만들기</a>`;
+        const pains = currentPains();
+        $("painCount").textContent = pains.length ? `${pains.length}개` : "";
+        const lowest = pains.reduce((m, p) => (m && m.score <= p.score ? m : p), null);
+        const prev = document.querySelector('input[name="pain"]:checked')?.value;
+        $("painList").innerHTML = pains.length ? pains.map((p) => `
+          <label class="pain-pick"><input type="radio" name="pain" value="${esc(p.id)}" ${(prev ? prev === p.id : lowest?.id === p.id) ? "checked" : ""} />
+            <span><span class="stage">${esc(p.stage)} · 감정 ${emoLabel(p.score)}</span>${esc(p.text)}</span></label>`).join("")
+          : `<p class="hint">이 저니맵에는 페인포인트가 없어요. 직접 입력으로 적어 주세요.</p>`;
+        if (!document.querySelector('input[name="pain"]:checked')) document.querySelector('input[name="pain"]')?.setAttribute("checked", "");
+      } else {
+        $("painCount").textContent = "";
+      }
+      const p = inputPersona();
+      $("personaBox").innerHTML = personaCard(p);
+    }
+
+    // 등장 인물: 저니맵에서 불러오면 그 페르소나, 직접 입력이면 고른 페르소나
+    function inputPersona() {
+      if (jmode() !== "manual") return S.journey ? { ...S.journey.persona, id: S.journey.personaId || null } : null;
+      const id = $("personaSelect").value;
+      if (id === "sample-seeun" && S.samplePersona) return { id, name: S.samplePersona.profile.name, role: `${S.samplePersona.profile.job} · ${S.samplePersona.profile.age}세`, desc: EXAMPLE.persona.desc, photoUrl: S.samplePersona.photoUrl };
+      const m = S.myPersonas.find((x) => x.id === id);
+      if (m) return { id: m.id, name: m.name, role: `${m.job} · ${m.age}세`, desc: String(m.tagline || "").replace(/\*\*/g, ""), photoUrl: m.photoUrl };
+      return { id: null, name: "인물", role: "", desc: "", photoUrl: null };
+    }
+
+    function personaCard(p, opts = {}) {
+      if (!p) return `<p class="hint">저니맵을 고르면 연결돼요.</p>`;
+      const link = p.id ? `/persona/view/?id=${encodeURIComponent(p.id)}` : null;
+      return `<div class="person">
+        <span class="avatar">${p.photoUrl ? `<img src="${esc(p.photoUrl)}" alt="${esc(p.name)} 프로필 사진" />` : SILHOUETTE}</span>
+        <span><b>${link && !opts.noLink ? `<a href="${link}">${esc(p.name)}</a>` : esc(p.name)}</b> <span class="sub">${esc(p.role)}</span>
+          <span class="link ${p.photoUrl ? "ok" : "no"}">${p.photoUrl ? "● 프로필 사진 연결됨 — 참조 이미지로 써요" : p.id ? "● 프로필 사진이 없어요 — 페르소나 문서에서 먼저 만들어 주세요" : "● 페르소나가 연결되지 않았어요"}</span></span>
+      </div>`;
+    }
+
+    // ════════════════ 2. 예시 시나리오와 콘티 만들기 (AI 연결 전: 규칙대로 이어 붙이기) ════════════════
+    $("generateBtn").addEventListener("click", () => {
+      if (S.board?.id && !confirm("지금 보드는 그대로 두고, 새 보드를 만들까요?")) return;
+      const manual = jmode() === "manual";
+      const persona = inputPersona();
+      let journey = S.journey, pain;
+      if (manual) {
+        const sc = $("manualScenario").value.trim();
+        const pt = $("manualPain").value.trim();
+        if (!sc || !pt) { toast("저니맵 내용과 페인포인트를 적어 주세요.", true); return; }
+        // 직접 입력: 예시 TO-BE 뼈대에 적은 내용을 얹는다
+        journey = { ...EXAMPLE, id: null, lens: "manual", label: sc.slice(0, 60), scenario: sc, persona, asis: [{ ...EXAMPLE.asis[2], name: "지금", pains: [{ id: "M1", text: pt }] }] };
+        pain = { id: "M1", text: pt, stage: "지금", stageId: "s3" };
+      } else {
+        const pid = document.querySelector('input[name="pain"]:checked')?.value;
+        pain = currentPains().find((p) => p.id === pid);
+        if (!pain) { toast("개선할 페인포인트를 하나 골라 주세요.", true); return; }
+      }
+      const n = Number($("cutCount").value);
+      S.board = buildDraft({ journey, pain, persona, n, style: styleVal() });
+      S.dirty = true;
+      history.replaceState(null, "", "/scenario/");
+      stopPolling();
+      renderAll();
+      $("result").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    function buildDraft({ journey, pain, persona, n, style }) {
+      const tobe = journey.tobe || journey.asis;
+      const asisStage = journey.asis.find((s) => s.pains.some((p) => p.id === pain.id)) || journey.asis[0] || tobe[0];
+      const nm = persona?.name || "인물";
+      const scenario = [
+        `${nm}${persona?.role ? `(${persona.role})` : ""}의 상황: ${journey.scenario}.`,
+        `지금은 ‘${pain.text}’ — ${asisStage.name} 단계에서 “${asisStage.thought || "이게 맞나…"}” 하고 멈칫한다.`,
+        "",
+        `개선된 뒤(TO-BE):`,
+        ...tobe.map((s, i) => `${i + 1}. ${s.name} — ${s.change || s.actions.join(", ")}. ${nm}${josa(nm, "은", "는")} ${s.actions[0] || "다음 단계로 넘어간다"}${s.thought ? ` “${s.thought}”` : ""}`),
+        "",
+        `마지막에 ${nm}${josa(nm, "은", "는")} “${tobe[tobe.length - 1]?.thought || "다음에도 이렇게 하면 되겠다"}”라고 느끼며 하루를 마무리한다.`,
+      ].join("\n");
+      return {
+        id: null, title: `${nm} × ${pain.text.slice(0, 24)}${pain.text.length > 24 ? "…" : ""} TO-BE`,
+        source: {
+          // 저니맵 링크는 시나리오의 뼈대(TO-BE)로, 페인포인트 링크는 그 페인포인트가 있는 AS-IS 로
+          journey: journey.lens === "example" ? { id: null, label: journey.label, lens: "to-be" } : journey.id ? { id: journey.tobeId || journey.id, label: journey.label, lens: journey.tobeId ? "to-be" : "as-is" } : null,
+          pain: { id: pain.id, text: pain.text, stage: pain.stage, journeyId: journey.asisId || null },
+          persona: persona ? { id: persona.id, name: persona.name, role: persona.role, desc: persona.desc, photoUrl: persona.photoUrl } : null,
+        },
+        journeyId: journey.lens === "example" || journey.lens === "manual" ? null : journey.tobeId || journey.id,
+        personaId: persona?.id || null,
+        style, scenario, scenarioConfirmed: false, contiStatus: "draft", status: "draft",
+        sheet: { kind: "sheet", conti: { title: "캐릭터 시트", desc: persona?.desc || "" }, status: "idle", versions: [], image: null },
+        cuts: splitConti({ tobe, asisStage, pain, n, nm }).map((conti) => ({ id: null, kind: "cut", conti, status: "idle", versions: [], image: null })),
+        curves: { asis: journey.asis.map((s) => ({ name: s.name, score: s.score })), tobe: journey.tobe ? journey.tobe.map((s) => ({ name: s.name, score: s.score })) : null },
+        referenceReady: !!persona?.photoUrl,
+      };
+    }
+
+    // 받침에 따라 은/는, 이/가
+    const josa = (w, a, b) => { const c = String(w).charCodeAt(String(w).length - 1); return c >= 0xac00 && c <= 0xd7a3 && (c - 0xac00) % 28 ? a : b; };
+    const sentence = (t) => { t = String(t || "").trim(); return t && !/[.!?…]$/.test(t) ? `${t}.` : t; };
+
+    // 확정한 시나리오(=TO-BE 단계)를 n컷으로 나눈다: 1컷은 지금의 불편, 나머지는 TO-BE 단계의 행동을 고르게 고른다
+    function splitConti({ tobe, asisStage, pain, n, nm }) {
+      const cams = ["상반신", "화면 위주", "전신", "클로즈업"];
+      const clean = (t) => String(t || "").replace(APPEARANCE, "").replace(/\s+/g, " ").trim();
+      const cuts = [{
+        title: "지금의 불편", situation: pain.text, action: asisStage.actions[0] || "", line: asisStage.thought ? `(생각) ${asisStage.thought}` : "",
+        emotion: Math.min(asisStage.score, -1), place: asisStage.touch[0] || "", camera: "클로즈업",
+        scene: clean(`${sentence(asisStage.actions[0] || "화면을 계속 넘겨 본다")} 그러다 잠시 멈추고, 지친 듯 손을 내려놓는다. 주변은 조용하고 화면 불빛만 켜져 있다.`),
+      }];
+      const pairs = tobe.flatMap((s) => (s.actions.length ? s.actions : [s.change || s.name]).map((a, k) => ({ s, a, k })));
+      const need = n - 1;
+      const picked = [];
+      for (let i = 0; i < need; i++) {
+        const idx = pairs.length >= need ? Math.round((i * (pairs.length - 1)) / Math.max(need - 1, 1)) : i % pairs.length;
+        picked.push(pairs[idx]);
+      }
+      const seen = new Map();
+      picked.forEach(({ s, a, k }, i) => {
+        const last = i === picked.length - 1;
+        const same = picked.filter((x) => x.s === s).length;
+        seen.set(s, (seen.get(s) || 0) + 1);
+        const touch = s.touch[k] || s.touch[0] || "";
+        cuts.push({
+          title: same > 1 ? `${s.name} ${seen.get(s)}` : s.name,
+          situation: s.change || `${s.name} 단계`,
+          action: a, line: s.thought ? (last ? `“${s.thought}”` : `(생각) ${s.thought}`) : "",
+          emotion: s.score, place: touch,
+          camera: last ? "상반신" : cams[i % cams.length],
+          scene: clean(`${sentence(a)}${touch ? ` 손에 든 기기 화면에 ‘${touch}’${josa(touch, "이", "가")} 떠 있다.` : ""}${s.score >= 2 ? " 편안하게 웃는다." : s.score >= 1 ? " 한결 가벼운 표정이다." : ""}`),
+        });
+      });
+      return cuts;
+    }
+
+    // ════════════════ 3. 그리기 ════════════════
+    function renderAll() {
+      const b = S.board;
+      $("result").hidden = !b;
+      if (!b) return;
+      $("boardTitle").value = b.title;
+      renderHead();
+      renderSheet();
+      $("scenarioText").value = b.scenario;
+      renderScenarioGate();
+      renderConti();
+      renderBoard();
+    }
+
+    function renderHead() {
+      const b = S.board;
+      const st = b.status === "done" ? ["보드 완성", "ok"] : b.status === "generating" ? ["만드는 중", "accent"] : b.status === "partial" ? ["확인 필요", "warn"] : b.contiStatus === "confirmed" ? ["콘티 확정", "accent"] : ["초안", ""];
+      $("boardStatus").className = `pill ${st[1]}`;
+      $("boardStatus").textContent = st[0];
+      const src = b.source || {};
+      const chips = [];
+      if (src.journey) chips.push(src.journey.id
+        ? `<a href="/journey/?id=${encodeURIComponent(src.journey.id)}" title="저니맵 열기"><span class="k">저니맵</span><span class="v">${esc(src.journey.label)}</span></a>`
+        : `<span class="chip"><span class="k">저니맵</span><span class="v">${esc(src.journey.label)}</span></span>`);
+      if (src.pain) {
+        const jid = src.pain.journeyId || (src.journey?.id ?? null);
+        chips.push(jid
+          ? `<a class="pain" href="/journey/?id=${encodeURIComponent(jid)}" title="이 페인포인트가 있는 저니맵 열기"><span class="k">페인포인트 ${esc(src.pain.stage)}</span><span class="v">${esc(src.pain.text)}</span></a>`
+          : `<span class="chip pain"><span class="k">페인포인트</span><span class="v">${esc(src.pain.text)}</span></span>`);
+      }
+      if (src.persona) chips.push(src.persona.id
+        ? `<a href="/persona/view/?id=${encodeURIComponent(src.persona.id)}" title="페르소나 문서 열기"><span class="k">페르소나</span><span class="v">${esc(src.persona.name)} · ${esc(src.persona.role)}</span></a>`
+        : `<span class="chip"><span class="k">인물</span><span class="v">${esc(src.persona.name)}</span></span>`);
+      $("lineage").innerHTML = chips.join("") || `<span class="chip"><span class="v">직접 입력</span></span>`;
+      $("deleteBtn").hidden = !b.id;
+      $("newBoardLink").hidden = !b.id;
+      renderSaveState();
+    }
+
+    function renderSaveState() {
+      const b = S.board;
+      const el = $("saveState");
+      el.className = `save-state${S.dirty ? " dirty" : ""}`;
+      el.textContent = S.saving ? "저장하는 중…" : !b.id ? (S.loggedIn ? "아직 저장하지 않았어요" : "로그인하면 저장하고 이미지를 만들 수 있어요") : S.dirty ? "저장하지 않은 변경이 있어요" : `저장됨 · ${fmtDate(b.updatedAt)}`;
+      $("saveBtn").disabled = S.saving || (!!b.id && !S.dirty);
+      $("saveBtn").textContent = b.id ? "변경 저장" : "저장";
+    }
+
+    // 이미지 자리: 상태별로 대기 / 생성 중 / 완료 / 실패
+    function shotHtml(c, label) {
+      const [stText, stCls] = STATUS[c.status] || STATUS.idle;
+      const retrying = c.status === "queued" && c.errorCode === "retrying";
+      let inner;
+      if (c.status === "done" && c.image) inner = `<img src="${esc(c.image.url)}" alt="${esc(label)} 이미지" loading="lazy" />`;
+      else if (c.status === "running") inner = `<div class="ph">${PIC}<span>그리는 중이에요…</span></div>`;
+      else if (c.status === "failed") inner = `<div class="ph">${PIC}<span>만들지 못했어요</span></div>`;
+      else if (c.status === "queued") inner = `<div class="ph">${PIC}<span>${retrying ? "다시 시도할 차례를 기다려요" : "차례를 기다리는 중"}</span></div>`;
+      else inner = `<div class="ph">${PIC}<span>${S.board.contiStatus === "confirmed" ? "보드 생성을 누르면 그려요" : "콘티를 확정하면 그릴 수 있어요"}</span></div>`;
+      return `<div class="shot ${c.status}" aria-busy="${c.status === "running"}">${inner}<span class="status"><span class="pill ${stCls}">${stText}${retrying ? " · 재시도" : ""}</span></span></div>`;
+    }
+
+    function shotMeta(c, idx) {
+      if (!c.image) return "";
+      const vi = c.versions.findIndex((v) => v.id === c.image.id);
+      return `<div class="shot-meta">
+        <span class="ref ${c.image.reference ? "" : "no"}">${c.image.reference ? "✓ 참조 이미지 사용" : "참조 이미지 없음"}</span>
+        <button class="btn-link" type="button" data-act="prompt" data-idx="${idx}">보낸 설명 보기</button>
+        ${c.versions.length > 1 ? `<span class="ver"><button class="icon-btn" type="button" data-act="ver" data-dir="-1" data-idx="${idx}" ${vi <= 0 ? "disabled" : ""} aria-label="이전 버전으로 되돌리기">◀</button>버전 ${vi + 1}/${c.versions.length}<button class="icon-btn" type="button" data-act="ver" data-dir="1" data-idx="${idx}" ${vi >= c.versions.length - 1 ? "disabled" : ""} aria-label="다음 버전으로">▶</button></span>` : ""}
+      </div>`;
+    }
+
+    function renderSheet() {
+      const b = S.board;
+      const sh = b.sheet;
+      $("sheetShot").innerHTML = `${shotHtml(sh, "캐릭터 시트")}${shotMeta(sh, -1)}
+        <div class="cut-foot" style="padding:10px 0 0">${failBox(sh, -1)}${regenBtn(sh, -1)}</div>`;
+      $("sheetPerson").innerHTML = personaCard(b.source?.persona, {});
+      $("sheetDesc").value = sh.conti.desc || "";
+    }
+
+    function regenBtn(c, idx) {
+      if (!S.board.id || S.board.contiStatus !== "confirmed") return "";
+      if (c.status === "done") return `<button class="btn btn-sm" type="button" data-act="regen" data-idx="${idx}">다시 만들기</button>`;
+      if (c.status === "failed" && c.errorCode !== "policy") return `<button class="btn btn-sm btn-solid" type="button" data-act="regen" data-idx="${idx}">이 컷만 다시 만들기</button>`;
+      if (c.status === "idle" && S.board.status !== "draft") return `<button class="btn btn-sm" type="button" data-act="regen" data-idx="${idx}">이 컷 만들기</button>`;
+      return "";
+    }
+    function failBox(c, idx) {
+      if (c.status === "queued" && c.errorCode === "retrying") return `<div class="fail-box retrying" style="margin:0 0 6px;width:100%">${esc(c.error)}</div>`;
+      if (c.status !== "failed") return "";
+      if (c.errorCode === "policy" && c.kind === "cut") {
+        return `<div class="fail-box" style="margin:0 0 6px;width:100%"><b>왜 실패했나요?</b> ${esc(c.error)}
+          <textarea class="text-input" data-fix="${idx}" aria-label="장면 묘사 고치기">${esc(c.conti.scene)}</textarea>
+          <button class="btn btn-sm btn-solid" type="button" data-act="fix" data-idx="${idx}" style="margin-top:6px">장면 묘사 고쳐서 다시 만들기</button></div>`;
+      }
+      return `<div class="fail-box" style="margin:0 0 6px;width:100%"><b>왜 실패했나요?</b> ${esc(c.error || "알 수 없는 이유로 실패했어요.")}</div>`;
+    }
+
+    // ── 시나리오 확인 지점 ──
+    function renderScenarioGate() {
+      const b = S.board;
+      const g = $("scenarioGate");
+      g.className = `gatebar${b.scenarioConfirmed ? " done" : ""}`;
+      g.innerHTML = b.scenarioConfirmed
+        ? `<span class="msg"><b>✓ 시나리오 확정</b> — 이 글을 ${b.cuts.length}컷 콘티로 나눴어요. 시나리오를 다시 고치면 콘티를 다시 나눠야 해요.</span>`
+        : `<span class="msg"><b>✋ 확인 1</b> — 시나리오가 고른 페인포인트를 제대로 푸는지 읽어 보세요. 확정하면 이 글이 콘티의 입력이 돼요.</span>
+           <button class="btn btn-sm btn-solid" type="button" id="scenarioConfirmBtn">시나리오 확정</button>`;
+      $("scDesc").textContent = "고른 페인포인트가 풀린 뒤의 이야기예요. (AI 연결 전 · 저니맵 TO-BE 단계를 이어 붙인 예시)";
+      $("scenarioConfirmBtn")?.addEventListener("click", () => {
+        b.scenarioConfirmed = true;
+        markDirty();
+        renderScenarioGate(); renderConti();
+      });
+    }
+    $("scenarioText").addEventListener("input", () => {
+      const b = S.board;
+      b.scenario = $("scenarioText").value;
+      if (b.scenarioConfirmed && b.contiStatus !== "confirmed") { b.scenarioConfirmed = false; renderScenarioGate(); renderConti(); }
+      markDirty();
+    });
+
+    // ── 콘티 표 ──
+    const FIELDS = ["title", "situation", "action", "line", "emotion", "place", "camera", "scene"];
+    function renderConti() {
+      const b = S.board;
+      const locked = b.contiStatus === "confirmed";
+      const blocked = !b.scenarioConfirmed;
+      $("ctDesc").textContent = blocked ? "시나리오를 확정하면 이 콘티가 다음 단계의 입력이 돼요. (미리 보기)" : `확정한 시나리오를 ${b.cuts.length}컷으로 나눴어요. 모든 칸을 바로 고칠 수 있어요.`;
+      $("contiBody").innerHTML = b.cuts.map((c, i) => {
+        const k = c.conti;
+        const bad = appearanceWords(k.scene);
+        const imgLock = locked ? "disabled" : ""; // 확정하면 이미지에 쓰는 칸(구도·장면 묘사)은 잠근다
+        return `<tr data-i="${i}">
+          <td class="no">${i + 1}</td>
+          <td><textarea data-f="title" rows="2" maxlength="60">${esc(k.title)}</textarea></td>
+          <td><textarea data-f="situation" maxlength="400">${esc(k.situation)}</textarea></td>
+          <td><textarea data-f="action" maxlength="300">${esc(k.action)}</textarea></td>
+          <td><textarea data-f="line" maxlength="300">${esc(k.line)}</textarea></td>
+          <td><div class="emo"><span aria-hidden="true">${EMOJI[k.emotion]}</span><select data-f="emotion" aria-label="${i + 1}컷 감정">${[-2, -1, 0, 1, 2].map((v) => `<option value="${v}" ${v === k.emotion ? "selected" : ""}>${emoLabel(v)}</option>`).join("")}</select></div></td>
+          <td><textarea data-f="place" maxlength="120">${esc(k.place)}</textarea></td>
+          <td><select data-f="camera" ${imgLock} aria-label="${i + 1}컷 카메라 구도">${CAMERAS.map((v) => `<option ${v === k.camera ? "selected" : ""}>${v}</option>`).join("")}</select></td>
+          <td class="scene ${bad.length ? "bad" : ""}"><textarea data-f="scene" ${imgLock} maxlength="600">${esc(k.scene)}</textarea>${bad.length ? `<p class="warn">외모 표현: ${esc(bad.join(", "))} — 행동과 상황만 적어 주세요</p>` : ""}</td>
+        </tr>`;
+      }).join("");
+      $("addRowBtn").disabled = b.cuts.length >= 12;
+      renderCurve();
+      renderContiGate();
+    }
+
+    $("contiBody").addEventListener("input", (e) => {
+      const f = e.target.dataset.f;
+      const tr = e.target.closest("tr");
+      if (!f || !tr) return;
+      const c = S.board.cuts[Number(tr.dataset.i)];
+      c.conti[f] = f === "emotion" ? Number(e.target.value) : e.target.value;
+      markDirty();
+      if (f === "emotion") { tr.querySelector(".emo span").textContent = EMOJI[c.conti.emotion]; renderCurve(); }
+      if (f === "scene") {
+        const bad = appearanceWords(c.conti.scene);
+        const td = e.target.closest("td");
+        td.classList.toggle("bad", !!bad.length);
+        td.querySelector(".warn")?.remove();
+        if (bad.length) td.insertAdjacentHTML("beforeend", `<p class="warn">외모 표현: ${esc(bad.join(", "))} — 행동과 상황만 적어 주세요</p>`);
+        renderContiGate();
+      }
+      syncCard(Number(tr.dataset.i));
+    });
+    $("contiBody").addEventListener("change", (e) => { if (e.target.tagName === "SELECT") e.target.dispatchEvent(new Event("input", { bubbles: true })); });
+
+    function contiProblems() {
+      const out = [];
+      S.board.cuts.forEach((c, i) => {
+        if (!c.conti.title.trim()) out.push(`${i + 1}컷의 장면 제목이 비어 있어요.`);
+        if (!c.conti.scene.trim()) out.push(`${i + 1}컷의 이미지용 장면 묘사가 비어 있어요.`);
+        const w = appearanceWords(c.conti.scene);
+        if (w.length) out.push(`${i + 1}컷 장면 묘사에 외모 표현(${w.join(", ")})이 있어요. 외모는 참조 이미지가 정하니 행동과 상황만 적어 주세요.`);
+      });
+      return out;
+    }
+
+    function renderContiGate() {
+      const b = S.board;
+      const g = $("contiGate");
+      const probs = contiProblems();
+      $("problems").hidden = b.contiStatus === "confirmed" || !probs.length;
+      $("problems").innerHTML = `<b>확정하기 전에 고칠 곳</b><ul>${probs.map((p) => `<li>${esc(p)}</li>`).join("")}</ul>`;
+      if (b.contiStatus === "confirmed") {
+        g.className = "gatebar done";
+        g.innerHTML = `<span class="msg"><b>✓ 콘티 확정</b> — 이미지에 쓰는 칸(구도·장면 묘사)을 잠갔어요. 컷 보드에서 이미지를 만들 수 있어요.</span>
+          <button class="btn btn-sm" type="button" id="contiUnlockBtn">콘티 고치기</button>`;
+        $("contiUnlockBtn").addEventListener("click", () => {
+          if (!confirm("콘티를 다시 열면 확정할 때까지 이미지를 새로 만들 수 없어요. 이미 만든 이미지는 그대로 남아요. 열까요?")) return;
+          b.contiStatus = "draft"; markDirty(); renderAllButInputs();
+        });
+        return;
+      }
+      g.className = "gatebar";
+      const why = !b.scenarioConfirmed ? "시나리오를 먼저 확정해 주세요." : probs.length ? "위에서 고칠 곳을 먼저 고쳐 주세요." : !S.loggedIn ? "확정한 콘티는 내 보드로 저장돼요. 로그인이 필요해요." : "확정하면 보드에 저장되고, 이미지 생성이 열려요.";
+      g.innerHTML = `<span class="msg"><b>✋ 확인 2</b> — 컷 순서·감정 곡선·장면 묘사를 확인하세요. ${esc(why)}</span>
+        <button class="btn btn-sm btn-solid" type="button" id="contiConfirmBtn" ${!b.scenarioConfirmed || probs.length ? "disabled" : ""}>${S.loggedIn ? "콘티 확정하고 저장" : "로그인하고 확정하기"}</button>`;
+      $("contiConfirmBtn").addEventListener("click", confirmConti);
+    }
+
+    async function confirmConti() {
+      if (!S.loggedIn) {
+        try { sessionStorage.setItem("uxa.boardDraft", JSON.stringify(S.board)); } catch {}
+        location.href = UXA.loginUrl("/scenario/?draft=1");
+        return;
+      }
+      S.board.contiStatus = "confirmed";
+      const ok = await save();
+      if (!ok) { S.board.contiStatus = "draft"; renderAllButInputs(); }
+    }
+
+    // 감정 곡선: 컷 점수를 이어 그리고, 저니맵 TO-BE·AS-IS 단계 곡선을 같은 폭에 겹쳐 비교한다
+    function renderCurve() {
+      const b = S.board;
+      const W = 640, H = 130, PADX = 18, top = 10, bottom = H - 16;
+      const y = (v) => top + ((2 - v) / 4) * (bottom - top);
+      const xs = (n, i) => PADX + (n <= 1 ? 0 : (i * (W - PADX * 2)) / (n - 1));
+      const path = (pts) => pts.map(([x, py], i) => `${i ? "L" : "M"}${x.toFixed(1)},${py.toFixed(1)}`).join(" ");
+      const line = (arr, color, dash, label) => {
+        if (!arr?.length) return "";
+        const pts = arr.map((v, i) => [xs(arr.length, i), y(v)]);
+        return `<path d="${path(pts)}" fill="none" stroke="${color}" stroke-width="${dash ? 2 : 3}" ${dash ? `stroke-dasharray="${dash}"` : ""} stroke-linejoin="round" stroke-linecap="round"><title>${label}</title></path>
+          ${pts.map(([x, py]) => `<circle cx="${x}" cy="${py}" r="${dash ? 2.5 : 4}" fill="#fff" stroke="${color}" stroke-width="2"/>`).join("")}`;
+      };
+      const cutScores = b.cuts.map((c) => c.conti.emotion);
+      const grid = [-2, -1, 0, 1, 2].map((v) => `<line x1="${PADX}" x2="${W - PADX}" y1="${y(v)}" y2="${y(v)}" stroke="${v === 0 ? "#c9ccd9" : "#e4e6ee"}" stroke-width="1"/><text x="0" y="${y(v) + 4}" font-size="10" fill="#a3a7b7">${emoLabel(v)}</text>`).join("");
+      const labels = b.cuts.map((c, i) => `<text x="${xs(b.cuts.length, i)}" y="${H}" font-size="10" text-anchor="middle" fill="#5b6072">${i + 1}</text>`).join("");
+      const has = { tobe: !!b.curves?.tobe?.length, asis: !!b.curves?.asis?.length };
+      const avg = (a) => (a.reduce((s, v) => s + v, 0) / a.length).toFixed(1);
+      const endCut = cutScores[cutScores.length - 1];
+      let note = has.tobe || has.asis
+        ? `컷 곡선 끝점 ${emoLabel(endCut)} · 평균 ${avg(cutScores)}${has.tobe ? ` / 저니맵 TO-BE 평균 ${avg(b.curves.tobe.map((s) => s.score))}` : ""}${has.asis ? ` / AS-IS 평균 ${avg(b.curves.asis.map((s) => s.score))}` : ""}. 가로는 처음→끝 비율로 맞췄어요.`
+        : "저니맵 곡선이 없어 컷 곡선만 보여 줘요.";
+      if (endCut <= 0) note += " 마지막 컷이 긍정이 아니에요 — 피크엔드 법칙상 마지막 장면의 감정이 경험의 기억을 좌우해요.";
+      $("curve").innerHTML = `
+        <div class="curve-head"><b>감정 곡선 비교</b>
+          <span class="legend"><span><i style="border-color:var(--accent)"></i>콘티 컷</span>${has.tobe ? `<span><i style="border-color:var(--good);border-top-style:dashed"></i>저니맵 TO-BE</span>` : ""}${has.asis ? `<span><i style="border-color:#9aa0b4;border-top-style:dotted"></i>저니맵 AS-IS</span>` : ""}</span></div>
+        <svg viewBox="0 0 ${W} ${H + 4}" preserveAspectRatio="none" role="img" aria-label="컷 감정 곡선과 저니맵 감정 곡선 비교">
+          ${grid}${has.asis ? line(b.curves.asis.map((s) => s.score), "#9aa0b4", "2 4", "저니맵 AS-IS") : ""}${has.tobe ? line(b.curves.tobe.map((s) => s.score), "#12805c", "6 4", "저니맵 TO-BE") : ""}${line(cutScores, "#4f46e5", "", "콘티 컷")}${labels}
+        </svg>
+        <p class="note">${esc(note)}</p>`;
+    }
+
+    $("addRowBtn").addEventListener("click", () => addCut(S.board.cuts.length));
+    function addCut(at) {
+      const b = S.board;
+      if (b.cuts.length >= 12) return;
+      b.cuts.splice(at, 0, { id: null, kind: "cut", status: "idle", versions: [], image: null, conti: { title: "새 장면", situation: "", action: "", line: "", emotion: 0, place: "", camera: "상반신", scene: "" } });
+      // 새 컷은 장면 묘사가 비어 있어 확정이 풀린다 (이미지는 확정한 콘티로만)
+      if (b.contiStatus === "confirmed") b.contiStatus = "draft";
+      markDirty(); renderAllButInputs();
+    }
+
+    // ── 컷 보드 ──
+    function renderBoard() {
+      const b = S.board;
+      const p = progressOf(b);
+      const canGen = !!b.id && b.contiStatus === "confirmed";
+      const idleLeft = b.cuts.filter((c) => c.status === "idle").length + (b.sheet.status === "idle" ? 1 : 0);
+      $("boardGenBtn").disabled = !canGen || !idleLeft || S.dirty;
+      $("boardGenBtn").textContent = b.status === "draft" || !b.id ? "보드 생성" : idleLeft ? `남은 ${idleLeft}개 만들기` : "보드 생성";
+      $("boardGenBtn").title = !b.id || b.contiStatus !== "confirmed" ? "콘티를 확정해야 이미지를 만들 수 있어요" : S.dirty ? "변경을 먼저 저장해 주세요" : "";
+      const pct = (n) => (p.total ? (n / p.total) * 100 : 0);
+      $("progress").innerHTML = `
+        <div class="bar" role="progressbar" aria-valuemin="0" aria-valuemax="${p.total}" aria-valuenow="${p.done}" aria-label="보드 생성 진행">
+          <span class="done" style="width:${pct(p.done)}%"></span><span class="running" style="width:${pct(p.running)}%"></span><span class="failed" style="width:${pct(p.failed)}%"></span>
+        </div>
+        <p class="label" aria-live="polite">${p.total}컷 중 ${p.done}컷 완료${p.running ? ` · ${p.running}컷 생성 중` : ""}${p.failed ? ` · ${p.failed}컷 실패` : ""}${p.waiting ? ` · ${p.waiting}컷 대기` : ""}
+          <span class="sub">${!b.id ? "콘티를 확정하고 저장하면 이미지를 만들 수 있어요" : b.contiStatus !== "confirmed" ? "콘티를 확정하면 보드 생성이 열려요" : b.status === "generating" ? "컷마다 따로 만들어요 · 이 페이지를 닫아도 계속 만들어져요" : ""}</span></p>
+        ${b.status === "done" ? `<div class="done-banner">✓ 보드 완성 — 모든 컷${b.sheet ? "과 캐릭터 시트" : ""}를 만들었어요${b.completedAt ? ` · ${fmtDate(b.completedAt)}` : ""}</div>` : ""}`;
+      $("cutGrid").innerHTML = b.cuts.map((c, i) => cutCard(c, i)).join("") +
+        (b.cuts.length < 12 ? `<button class="add-cut" type="button" data-act="add"><span style="font-size:24px">+</span>컷 추가<small>맨 뒤에 빈 컷을 더해요</small></button>` : "");
+    }
+
+    function progressOf(b) {
+      const c = b.cuts;
+      const n = (st) => c.filter((x) => st.includes(x.status)).length;
+      return { total: c.length, done: n(["done"]), running: n(["running"]), failed: n(["failed"]), waiting: n(["idle", "queued"]) };
+    }
+
+    function cutCard(c, i) {
+      const k = c.conti;
+      const busy = c.status === "running" || c.status === "queued";
+      return `<article class="cut" draggable="false" data-idx="${i}" aria-label="${i + 1}컷 ${esc(k.title)}">
+        <div class="cut-top">
+          <button class="handle" type="button" data-drag="${i}" aria-label="${i + 1}컷 끌어서 옮기기" title="끌어서 순서 바꾸기">⠿</button>
+          <span class="no">#${i + 1}</span>
+          <span class="tools">
+            <button class="icon-btn" type="button" data-act="left" data-idx="${i}" ${i === 0 ? "disabled" : ""} aria-label="앞으로 옮기기">←</button>
+            <button class="icon-btn" type="button" data-act="right" data-idx="${i}" ${i === S.board.cuts.length - 1 ? "disabled" : ""} aria-label="뒤로 옮기기">→</button>
+            <button class="icon-btn del" type="button" data-act="del" data-idx="${i}" ${S.board.cuts.length <= 1 ? "disabled" : ""} aria-label="${i + 1}컷 삭제">✕</button>
+          </span>
+        </div>
+        ${shotHtml(c, `${i + 1}컷`)}
+        ${shotMeta(c, i)}
+        <div class="cut-body">
+          <input class="plain t" data-card="title" data-idx="${i}" value="${esc(k.title)}" aria-label="${i + 1}컷 장면 제목" maxlength="60" />
+          <textarea class="plain s" data-card="situation" data-idx="${i}" rows="3" aria-label="${i + 1}컷 상황 설명" maxlength="400">${esc(k.situation)}</textarea>
+          <div class="line-row"><span aria-hidden="true">💬</span><textarea class="plain" data-card="line" data-idx="${i}" rows="2" aria-label="${i + 1}컷 대사·생각" maxlength="300" placeholder="대사·생각">${esc(k.line)}</textarea></div>
+          <div class="emo-row"><span class="big" aria-hidden="true">${EMOJI[k.emotion]}</span>감정 ${emoLabel(k.emotion)} · ${esc(k.camera)}</div>
+        </div>
+        <div class="cut-foot">${failBox(c, i)}${busy ? "" : regenBtn(c, i)}</div>
+      </article>`;
+    }
+
+    // 표와 카드가 같은 데이터를 본다: 한쪽을 고치면 다른 쪽 글자만 바꾼다 (포커스 유지)
+    function syncCard(i) {
+      const card = document.querySelector(`.cut[data-idx="${i}"]`);
+      const k = S.board.cuts[i].conti;
+      if (!card) return;
+      for (const f of ["title", "situation", "line"]) { const el = card.querySelector(`[data-card="${f}"]`); if (el && el !== document.activeElement) el.value = k[f]; }
+      card.querySelector(".emo-row").innerHTML = `<span class="big" aria-hidden="true">${EMOJI[k.emotion]}</span>감정 ${emoLabel(k.emotion)} · ${esc(k.camera)}`;
+    }
+    function syncRow(i) {
+      const tr = document.querySelector(`#contiBody tr[data-i="${i}"]`);
+      const k = S.board.cuts[i].conti;
+      if (!tr) return;
+      for (const f of ["title", "situation", "line"]) { const el = tr.querySelector(`[data-f="${f}"]`); if (el && el !== document.activeElement) el.value = k[f]; }
+    }
+
+    $("cutGrid").addEventListener("input", (e) => {
+      const f = e.target.dataset.card;
+      if (!f) return;
+      const i = Number(e.target.dataset.idx);
+      S.board.cuts[i].conti[f] = e.target.value;
+      markDirty();
+      syncRow(i);
+    });
+
+    $("cutGrid").addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-act]");
+      if (!btn) return;
+      const i = Number(btn.dataset.idx);
+      const b = S.board;
+      const act = btn.dataset.act;
+      if (act === "add") return addCut(b.cuts.length);
+      if (act === "left" || act === "right") return moveCut(i, act === "left" ? i - 1 : i + 1);
+      if (act === "del") {
+        const c = b.cuts[i];
+        if (c.versions.length && !confirm(`${i + 1}컷을 지울까요? 이 컷의 이미지 버전 ${c.versions.length}개도 함께 지워져요.`)) return;
+        b.cuts.splice(i, 1);
+        markDirty(); renderAllButInputs();
+        return;
+      }
+      handleCutAction(act, i, btn);
+    });
+    $("sheetShot").addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-act]");
+      if (btn) handleCutAction(btn.dataset.act, -1, btn);
+    });
+    $("sheetDesc").addEventListener("input", () => { S.board.sheet.conti.desc = $("sheetDesc").value; markDirty(); });
+    $("boardTitle").addEventListener("input", () => { S.board.title = $("boardTitle").value; markDirty(); });
+
+    const cutAt = (i) => (i === -1 ? S.board.sheet : S.board.cuts[i]);
+
+    async function handleCutAction(act, i, btn) {
+      const c = cutAt(i);
+      if (act === "prompt") return showPrompt(c, i);
+      if (act === "ver") {
+        const vi = c.versions.findIndex((v) => v.id === c.image.id) + Number(btn.dataset.dir);
+        const v = c.versions[vi];
+        if (!v) return;
+        return boardCall(`/api/boards/${S.board.id}/cuts/${c.id}/revert`, { imageId: v.id }, `버전 ${vi + 1}(으)로 바꿨어요.`);
+      }
+      if (act === "regen") {
+        if (S.dirty) { toast("변경을 먼저 저장해 주세요.", true); return; }
+        if (c.status === "done" && !confirm(`${i === -1 ? "캐릭터 시트" : `${i + 1}컷`}만 다시 만들까요? 지금 이미지는 이전 버전으로 남아 되돌릴 수 있어요.`)) return;
+        return boardCall(`/api/boards/${S.board.id}/cuts/${c.id}/generate`, {}, "접수됐어요. 이 컷만 다시 만들어요.");
+      }
+      if (act === "fix") {
+        if (S.dirty) { toast("변경을 먼저 저장해 주세요.", true); return; }
+        const scene = document.querySelector(`[data-fix="${i}"]`).value.trim();
+        const bad = appearanceWords(scene);
+        if (!scene || bad.length) { toast(bad.length ? `외모 표현(${bad.join(", ")})은 빼 주세요.` : "장면 묘사를 적어 주세요.", true); return; }
+        return boardCall(`/api/boards/${S.board.id}/cuts/${c.id}/generate`, { scene }, "고친 장면 묘사로 다시 만들어요.");
+      }
+    }
+
+    async function boardCall(path, body, okMsg) {
+      const { res, data } = await UXA.api(path, { method: "POST", body }).catch(() => ({ res: { ok: false }, data: { error: "서버에 연결하지 못했어요." } }));
+      if (!res.ok) { toast(data.error || "요청하지 못했어요.", true); return; }
+      applyServer(data.board);
+      toast(okMsg);
+      startPolling();
+    }
+
+    function showPrompt(c, i) {
+      const img = c.image;
+      $("dlgTitle").textContent = `${i === -1 ? "캐릭터 시트" : `${i + 1}컷`} — 실제로 보낸 설명`;
+      $("dlgBody").innerHTML = `
+        <p class="meta">${img ? `${esc(img.model || "")} · ${fmtDate(img.createdAt)} · ${img.reference ? "페르소나 프로필 사진을 참조 이미지로 함께 보냈어요" : "참조 이미지 없이 보냈어요"}` : ""}</p>
+        <pre>${esc(img?.prompt || c.nextPrompt || "")}</pre>
+        <p class="meta" style="margin-top:10px">이미지 설명 = <b>고정 스타일 문장</b> + <b>콘티의 장면 묘사</b> + <b>구도</b>. 인물의 외모는 글로 쓰지 않고 참조 이미지가 정해요.</p>`;
+      $("promptDlg").showModal();
+    }
+    $("dlgClose").addEventListener("click", () => $("promptDlg").close());
+    $("promptDlg").addEventListener("click", (e) => { if (e.target === $("promptDlg")) $("promptDlg").close(); });
+
+    // ── 순서 바꾸기: 끌어서 놓기 (손잡이) + ←/→ 버튼 ──
+    function moveCut(from, to) {
+      const cuts = S.board.cuts;
+      if (to < 0 || to >= cuts.length || from === to) return;
+      const [c] = cuts.splice(from, 1);
+      cuts.splice(to, 0, c);
+      markDirty(); renderAllButInputs();
+      document.querySelector(`.cut[data-idx="${to}"] [data-act="${from < to ? "right" : "left"}"]`)?.focus();
+    }
+    let dragFrom = null;
+    $("cutGrid").addEventListener("pointerdown", (e) => {
+      const h = e.target.closest("[data-drag]");
+      if (h) h.closest(".cut").setAttribute("draggable", "true");
+    });
+    $("cutGrid").addEventListener("dragstart", (e) => {
+      const card = e.target.closest(".cut");
+      if (!card || card.getAttribute("draggable") !== "true") { e.preventDefault(); return; }
+      dragFrom = Number(card.dataset.idx);
+      card.classList.add("dragging");
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", String(dragFrom));
+    });
+    $("cutGrid").addEventListener("dragover", (e) => {
+      const card = e.target.closest(".cut");
+      if (dragFrom === null || !card) return;
+      e.preventDefault();
+      document.querySelectorAll(".cut").forEach((c) => c.classList.remove("drop-before", "drop-after"));
+      const r = card.getBoundingClientRect();
+      card.classList.add(e.clientX < r.left + r.width / 2 ? "drop-before" : "drop-after");
+    });
+    $("cutGrid").addEventListener("drop", (e) => {
+      const card = e.target.closest(".cut");
+      if (dragFrom === null || !card) return;
+      e.preventDefault();
+      const r = card.getBoundingClientRect();
+      let to = Number(card.dataset.idx) + (e.clientX < r.left + r.width / 2 ? 0 : 1);
+      if (to > dragFrom) to -= 1;
+      const from = dragFrom;
+      dragFrom = null;
+      moveCut(from, to);
+    });
+    $("cutGrid").addEventListener("dragend", () => {
+      dragFrom = null;
+      document.querySelectorAll(".cut").forEach((c) => { c.classList.remove("dragging", "drop-before", "drop-after"); c.setAttribute("draggable", "false"); });
+    });
+
+    function renderAllButInputs() { renderHead(); renderScenarioGate(); renderConti(); renderBoard(); }
+    function markDirty() { S.dirty = true; renderSaveState(); const g = $("boardGenBtn"); if (g) { g.disabled = true; g.title = "변경을 먼저 저장해 주세요"; } }
+
+    // ════════════════ 4. 저장 · 생성 · 진행 상황 ════════════════
+    function payload() {
+      const b = S.board;
+      return {
+        title: b.title, source: b.source, style: b.style, scenario: b.scenario, contiStatus: b.contiStatus,
+        journeyId: b.journeyId, personaId: b.personaId, sheet: { desc: b.sheet.conti.desc },
+        cuts: b.cuts.map((c) => ({ id: c.id || undefined, conti: c.conti })),
+      };
+    }
+
+    $("saveBtn").addEventListener("click", () => {
+      if (!S.loggedIn) {
+        try { sessionStorage.setItem("uxa.boardDraft", JSON.stringify(S.board)); } catch {}
+        location.href = UXA.loginUrl("/scenario/?draft=1");
+        return;
+      }
+      save();
+    });
+
+    async function save() {
+      const b = S.board;
+      S.saving = true; renderSaveState();
+      const { res, data } = await (b.id ? UXA.api(`/api/boards/${b.id}`, { method: "PUT", body: payload() }) : UXA.api("/api/boards", { method: "POST", body: payload() }))
+        .catch(() => ({ res: { ok: false }, data: { error: "서버에 연결하지 못했어요. 인터넷 연결을 확인해 주세요." } }));
+      S.saving = false;
+      if (res.status === 401) { UXA.clearSession(); S.loggedIn = false; toast("로그인이 끝났어요. 다시 로그인해 주세요.", true); renderSaveState(); return false; }
+      if (!res.ok) {
+        toast(data.error || "저장하지 못했어요.", true);
+        if (data.problems) { $("problems").hidden = false; $("problems").innerHTML = `<b>${esc(data.error)}</b><ul>${data.problems.map((p) => `<li>${esc(p.message)}</li>`).join("")}</ul>`; }
+        renderSaveState();
+        return false;
+      }
+      S.dirty = false;
+      applyServer(data.board, { full: true }); // 새 컷 id 를 받아야 하므로 전부 다시 그린다
+      history.replaceState(null, "", `/scenario/?id=${encodeURIComponent(data.board.id)}`);
+      toast(b.contiStatus === "confirmed" ? "콘티를 확정하고 저장했어요. 이제 보드를 생성할 수 있어요." : "저장했어요.");
+      return true;
+    }
+
+    // 서버 보드 → 화면 상태. 같은 보드의 같은 컷 구성이면 상태·이미지만 받아 합친다
+    //   (폴링 중에 표와 카드를 다시 그리지 않아 편집 중인 칸·포커스·저장하지 않은 글이 지켜진다)
+    function applyServer(sb, extra = {}) {
+      const prev = S.board;
+      const fromServer = (c) => ({ ...c });
+      const sameCuts = prev?.id === sb.id && prev.cuts.map((c) => c.id).join() === sb.cuts.map((c) => c.id).join() && prev.contiStatus === sb.contiStatus;
+      if (S.dirty && prev?.id === sb.id || sameCuts && !extra.full) {
+        const byId = new Map([...sb.cuts, sb.sheet].filter(Boolean).map((c) => [c.id, c]));
+        for (const c of [...prev.cuts, prev.sheet]) {
+          const n = c.id && byId.get(c.id);
+          if (n) Object.assign(c, { status: n.status, image: n.image, versions: n.versions, error: n.error, errorCode: n.errorCode, attempts: n.attempts, nextPrompt: n.nextPrompt });
+        }
+        Object.assign(prev, { status: sb.status, completedAt: sb.completedAt, referenceReady: sb.referenceReady, ...(S.dirty ? {} : { updatedAt: sb.updatedAt }) });
+        renderBoard(); renderSheetShot(); renderHead();
+        return;
+      }
+      S.board = {
+        id: sb.id, title: sb.title, source: sb.source, style: sb.style, scenario: sb.scenario, scenarioConfirmed: true, contiStatus: sb.contiStatus, status: sb.status,
+        journeyId: sb.journeyId, personaId: sb.personaId, referenceReady: sb.referenceReady, updatedAt: sb.updatedAt, completedAt: sb.completedAt,
+        sheet: fromServer(sb.sheet), cuts: sb.cuts.map(fromServer), curves: prev?.id === sb.id || !prev?.id ? prev?.curves || null : null,
+      };
+      if (!S.board.curves) loadCurves();
+      renderAll();
+    }
+    function renderSheetShot() {
+      const sh = S.board.sheet;
+      $("sheetShot").innerHTML = `${shotHtml(sh, "캐릭터 시트")}${shotMeta(sh, -1)}<div class="cut-foot" style="padding:10px 0 0">${failBox(sh, -1)}${regenBtn(sh, -1)}</div>`;
+    }
+
+    // 다시 연 보드: 연결된 저니맵의 감정 곡선을 불러와 비교한다
+    async function loadCurves() {
+      const b = S.board;
+      if (!b.journeyId) { if (b.source?.journey && !b.source.journey.id) b.curves = { asis: EXAMPLE.asis.map((s) => ({ name: s.name, score: s.score })), tobe: EXAMPLE.tobe.map((s) => ({ name: s.name, score: s.score })) }; renderCurve(); return; }
+      const { res, data } = await UXA.api(`/api/journeys/${encodeURIComponent(b.journeyId)}`).catch(() => ({ res: { ok: false } }));
+      if (!res.ok || S.board !== b) return;
+      const j = data.journey;
+      const map = (m) => normStages(m).map((s) => ({ name: s.name, score: s.score }));
+      b.curves = j.lens === "to-be" ? { tobe: map(j.map), asis: j.parent ? map(j.parent.map) : null } : { asis: map(j.map), tobe: null };
+      renderCurve();
+    }
+
+    $("boardGenBtn").addEventListener("click", async () => {
+      const b = S.board;
+      if (!b.id || b.contiStatus !== "confirmed") return;
+      $("boardGenBtn").disabled = true;
+      const { res, data } = await UXA.api(`/api/boards/${b.id}/generate`, { method: "POST" }).catch(() => ({ res: { ok: false }, data: { error: "서버에 연결하지 못했어요." } }));
+      if (!res.ok) { toast(data.error || "보드 생성을 요청하지 못했어요.", true); renderBoard(); return; }
+      applyServer(data.board);
+      toast(data.duplicate ? "이미 접수된 작업이 있어요. 진행 상황을 이어서 보여 드려요." : `접수됐어요. ${data.queued}개를 컷마다 따로 만들어요.`);
+      startPolling();
+    });
+
+    // 진행 상황: 만드는 중인 동안 3초마다 다시 읽는다 (페이지를 닫았다 와도 서버 상태로 이어진다)
+    function busy(b) { return b && (b.status === "generating" || [...b.cuts, b.sheet].some((c) => c.status === "queued" || c.status === "running")); }
+    function startPolling() {
+      stopPolling();
+      if (!busy(S.board)) return;
+      S.pollTimer = setTimeout(async () => {
+        const id = S.board?.id;
+        if (!id) return;
+        const { res, data } = await UXA.api(`/api/boards/${id}`).catch(() => ({ res: { ok: false } }));
+        if (res.ok && S.board?.id === id) {
+          const wasBusy = busy(S.board);
+          applyServer(data.board);
+          if (wasBusy && data.board.status === "done") toast("보드 완성! 모든 컷을 만들었어요.");
+        }
+        startPolling();
+      }, document.hidden ? 8000 : 3000);
+    }
+    function stopPolling() { clearTimeout(S.pollTimer); S.pollTimer = null; }
+
+    $("deleteBtn").addEventListener("click", async () => {
+      if (!confirm("이 보드를 지울까요? 컷 이미지와 모든 버전도 함께 지워져요.")) return;
+      const { res, data } = await UXA.api(`/api/boards/${S.board.id}`, { method: "DELETE" });
+      if (!res.ok) { toast(data.error || "지우지 못했어요.", true); return; }
+      stopPolling();
+      location.href = "/mypage/#boards";
+    });
+
+    window.addEventListener("beforeunload", (e) => { if (S.dirty && S.board) { e.preventDefault(); e.returnValue = ""; } });
+
+    let toastTimer;
+    function toast(msg, error) {
+      document.querySelector(".toast")?.remove();
+      const el = Object.assign(document.createElement("div"), { className: `toast${error ? " error" : ""}`, textContent: msg, role: "status" });
+      document.body.appendChild(el);
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.remove(), 3200);
+    }
+
+    // ════════════════ 시작 ════════════════
+    (async () => {
+      const q = new URLSearchParams(location.search);
+      const id = q.get("id");
+      if (id && S.loggedIn) {
+        $("loadingBoard").hidden = false;
+        loadInputs();
+        const { res, data } = await UXA.api(`/api/boards/${encodeURIComponent(id)}`).catch(() => ({ res: { ok: false }, data: {} }));
+        $("loadingBoard").hidden = true;
+        if (!res.ok) { toast(data.error || "보드를 불러오지 못했어요.", true); return; }
+        applyServer(data.board);
+        startPolling();
+        return;
+      }
+      if (id && !S.loggedIn) { location.replace(UXA.loginUrl()); return; }
+      await loadInputs();
+      // 로그인하러 갔다 온 초안
+      if (q.get("draft")) {
+        try {
+          const d = JSON.parse(sessionStorage.getItem("uxa.boardDraft") || "null");
+          sessionStorage.removeItem("uxa.boardDraft");
+          if (d) { S.board = d; S.dirty = true; renderAll(); toast("만들던 보드를 이어서 보여 드려요. 확정하거나 저장해 주세요."); }
+        } catch {}
+      }
+    })();
   </script>
 </body>
 </html>

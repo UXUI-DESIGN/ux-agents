@@ -15,6 +15,8 @@
 //   /api/personas/:id/image-prompt|image, GET /api/personas/image/:imageId  프로필 사진 프롬프트 조립·생성·제공 (personaImage.js)
 //   /api/personas/:id/index|chat  근거 노트 벡터 색인(rag_chunks)과 페르소나 채팅 (personaChat.js)
 //   /api/journeys[/generate|scenes|:id[/rewrite|confirm|tobe]]  페르소나×시나리오 저니맵: AI 생성 · 검수 · 확정 · TO-BE (journeys.js)
+//   /api/boards[/:id[/generate|cuts/:cid/(generate|revert)]], GET /api/boards/image/:imageId  시나리오 보드: 콘티 저장 · 컷별 이미지 생성(큐) · 버전 (boards.js)
+//   queue(uxa-board-cuts)  컷 1개 = 메시지 1개. 보드 생성 요청은 바로 202, 컷은 이 소비자가 하나씩 만든다
 //   /api/p/:token[/interviews[/me[/messages|pause|resume|end|withdraw]]] 참가자 링크: 세션 정보·동의하고 시작·다시 열기·AI 모더레이터 대화
 
 import { signup, login, logout, me } from "./auth.js";
@@ -25,6 +27,7 @@ import { myDebriefs } from "./debrief.js";
 import { personas } from "./personas.js";
 import { servePersonaImage } from "./personaImage.js";
 import { journeys } from "./journeys.js";
+import { boards, serveBoardImage, consumeCuts } from "./boards.js";
 
 const MAX_INPUT_CHARS = 20000;
 const MAX_OUTPUT_TOKENS = 4000;
@@ -39,6 +42,10 @@ export default {
       console.error("unhandled", String(err?.message || err));
       return json({ error: "서버에서 문제가 생겼어요. 잠시 후 다시 시도해 주세요." }, 500, cors);
     }
+  },
+  async queue(batch, env) {
+    if (batch.queue.startsWith("uxa-board-cuts")) return consumeCuts(batch, env);
+    batch.ackAll();
   },
 };
 
@@ -86,10 +93,13 @@ async function route(request, env, cors) {
   // 페르소나 사진은 <img src> 로 읽으므로 Origin 검사 전에 처리한다 (id 가 열쇠, 로그인 없음)
   const imagePath = url.pathname.match(/^\/api\/personas\/image\/([0-9a-f]+)$/);
   if (imagePath && request.method === "GET") return servePersonaImage(env, imagePath[1]);
+  const boardImagePath = url.pathname.match(/^\/api\/boards\/image\/([0-9a-f]+)$/);
+  if (boardImagePath && request.method === "GET") return serveBoardImage(env, boardImagePath[1]);
 
   const personaPath = url.pathname.match(/^\/api\/personas(?:\/([^/]+))?(?:\/(image-prompt|image|index|chat|photo))?$/);
   const journeyPath = url.pathname.match(/^\/api\/journeys(?:\/([^/]+))?(?:\/(rewrite|confirm|tobe))?$/);
-  if (url.pathname.startsWith("/api/auth/") || journeyPath || guidePath || participantPath || detailPath || personaPath || url.pathname === "/api/sessions" || url.pathname === "/api/debriefs") {
+  const boardPath = url.pathname.match(/^\/api\/boards(?:\/([0-9a-f-]{36})(?:\/(generate|cuts)(?:\/([0-9a-f-]{36})\/(generate|revert))?)?)?$/);
+  if (url.pathname.startsWith("/api/auth/") || journeyPath || boardPath || guidePath || participantPath || detailPath || personaPath || url.pathname === "/api/sessions" || url.pathname === "/api/debriefs") {
     if (!cors["Access-Control-Allow-Origin"]) return json({ error: "허용되지 않은 사이트에서 온 요청이에요." }, 403, cors);
     const reply = (data, status = 200) => json(data, status, cors);
     const routes = {
@@ -102,6 +112,7 @@ async function route(request, env, cors) {
     if (url.pathname === "/api/sessions") return sessions(request, env, reply);
     if (detailPath) return sessionDetail(request, env, reply, ...detailPath.slice(1));
     if (url.pathname === "/api/debriefs" && request.method === "GET") return myDebriefs(request, env, reply);
+    if (boardPath) return boards(request, env, reply, ...boardPath.slice(1));
     if (journeyPath) return journeys(request, env, reply, journeyPath[1], journeyPath[2]);
     if (personaPath) return personas(request, env, reply, personaPath[1], personaPath[2]);
     if (participantPath) return participant(request, env, reply, participantPath[1], participantPath[2], participantPath[3], participantPath[4]);

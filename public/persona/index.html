@@ -82,6 +82,15 @@
 
     /* 카드 그리드 */
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+    /* 프로젝트에서 나온 시나리오 보드 */
+    .boards { margin-top: 16px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+    .boards h3 { font-size: 14px; font-weight: 700; }
+    .boards ul { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; margin-top: 10px; list-style: none; }
+    .boards a { display: grid; grid-template-columns: 72px 1fr; gap: 10px; align-items: center; padding: 8px; border: 1px solid var(--line); border-radius: 10px; font-size: 13px; }
+    .boards a:hover { border-color: var(--accent); }
+    .boards .bthumb { width: 72px; aspect-ratio: 3 / 2; border-radius: 6px; background: var(--bg-soft) center / cover no-repeat; }
+    .boards b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13.5px; }
+    .boards small { color: var(--text-sub); }
     .card {
       display: flex; flex-direction: column; overflow: hidden;
       background: #fff; border: 1px solid var(--line); border-radius: var(--radius);
@@ -191,6 +200,7 @@
         </div>
         <div class="grid" id="sampleGrid"></div>
         <p class="sample-note" id="sampleNote"></p>
+        <div id="sampleBoards"></div>
       </section>
     </div>
   </main>
@@ -229,7 +239,18 @@
         </a>`;
     }
 
-    function render(projects) {
+    const BOARD_STATUS = { done: "보드 완성", generating: "만드는 중", partial: "확인 필요", draft: "초안" };
+    function boardsOf(pj, boards) {
+      const mine = boards.filter((b) => b.analysisId && b.analysisId === pj.analysis_id);
+      if (!mine.length) return "";
+      return `<div class="boards"><h3>이 프로젝트의 시나리오 보드 ${mine.length}개</h3><ul>${mine.map((b) => `
+        <li><a href="/scenario/?id=${encodeURIComponent(b.id)}">
+          <span class="bthumb" ${b.thumb ? `style="background-image:url('${esc(b.thumb)}')"` : ""}></span>
+          <span><b>${esc(b.title)}</b><small>${esc(BOARD_STATUS[b.status] || "초안")} · ${esc(b.source.persona?.name || "")} · ${b.done}/${b.cuts}컷</small></span>
+        </a></li>`).join("")}</ul></div>`;
+    }
+
+    function render(projects, boards = []) {
       const total = projects.reduce((n, pj) => n + pj.personas.length, 0);
       $("total").innerHTML = `프로젝트 <b>${projects.length}</b>개 · 페르소나 <b>${total}</b>명`;
       if (!projects.length) {
@@ -255,6 +276,7 @@
               <small>같은 인터뷰로 다른 조건의 페르소나 만들기</small>
             </a>
           </div>
+          ${boardsOf(pj, boards)}
         </section>`).join("");
     }
 
@@ -280,10 +302,14 @@
         return;
       }
       $("total").textContent = "불러오는 중…";
-      const [{ res, data }] = await Promise.all([UXA.api("/api/personas"), loadSample(true)]);
+      const [{ res, data }, , boards] = await Promise.all([
+        UXA.api("/api/personas"), loadSample(true),
+        UXA.api("/api/boards").then(({ res, data }) => (res.ok ? data.boards : [])).catch(() => []),
+      ]);
       if (res.status === 401) { UXA.clearSession(); load(); return; }
       if (!res.ok) { $("total").textContent = ""; $("projects").innerHTML = `<div class="empty"><h2>목록을 불러오지 못했어요</h2><p>${esc(data.error || "잠시 후 다시 시도해 주세요.")}</p></div>`; return; }
-      render(data.projects || []);
+      render(data.projects || [], boards);
+      $("sampleBoards").innerHTML = boardsOf({ analysis_id: "sample-analysis-ott" }, boards);
     }
     load();
   </script>
