@@ -346,6 +346,7 @@
         <div class="crumb"><a href="/persona/index.html">페르소나</a> · <span id="crumbName">불러오는 중…</span></div>
         <div class="actions">
           <span class="edit-hint" id="editHint" hidden>글자를 클릭해 고치고, 슬라이더는 끌어서 옮기세요.</span>
+          <a class="btn" id="chatBtn" hidden>대화하기</a>
           <button type="button" class="btn" id="photoBtn" hidden>사진 만들기</button>
           <button type="button" class="btn" id="editBtn" aria-pressed="false">편집</button>
           <button type="button" class="btn btn-accent" id="saveBtn" hidden>저장</button>
@@ -503,7 +504,7 @@
       const q = new URLSearchParams(location.search).get("id");
       if (q) return q;
       const m = location.pathname.match(/\/persona\/([^/]+)\/?$/);
-      return m && !["view", "new"].includes(m[1]) ? decodeURIComponent(m[1]) : "";
+      return m && !["view", "new", "chat"].includes(m[1]) ? decodeURIComponent(m[1]) : "";
     }
 
     const $ = (id) => document.getElementById(id);
@@ -910,6 +911,8 @@
       render(persona);
       renderEvidence(persona);
       $("photoBtn").hidden = isDemo; // 예시 문서는 서버에 없어 사진을 만들 수 없다
+      $("chatBtn").hidden = isDemo || !persona.analysisId; // 인터뷰 분석에서 나온 페르소나만 대화할 수 있다
+      $("chatBtn").href = `/persona/chat/?id=${encodeURIComponent(persona.id)}`;
       if (!isDemo) $("photoBtn").textContent = persona.photoUrl ? "사진 바꾸기" : "사진 만들기";
       // 생성 화면에서 '사진 만들기'로 바로 들어온 경우
       if (!isDemo && new URLSearchParams(location.search).get("photo") === "1") openPhoto();

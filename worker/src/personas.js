@@ -7,6 +7,7 @@
 //   PUT  /api/personas/:id                { ...PersonaContent } 화면에서 고친 내용 저장
 //   DELETE /api/personas/:id
 //   /api/personas/:id/image-prompt · /api/personas/:id/image · /api/personas/image/:imageId  프로필 사진 (personaImage.js)
+//   /api/personas/:id/index · /api/personas/:id/chat  근거 노트 벡터 색인 · 페르소나와 채팅 (personaChat.js)
 //
 // 방법은 두 스킬을 따른다.
 //   어피니티 매핑: 전사를 '한 장에 한 사실' 노트로 분해(참가자 ID 코딩) → 사전 카테고리 없이 상향식 1차 군집 → 라벨을 묶어 상위 테마(2차 군집)
@@ -20,6 +21,7 @@ import { materialOf, transcriptText } from "./debrief.js";
 import { stagesOf } from "./moderator.js";
 import { firstJson } from "./json.js";
 import { personaImage } from "./personaImage.js";
+import { personaChat } from "./personaChat.js";
 
 const KINDS = ["design", "marketing"];
 const PRIORITIES = ["primary", "secondary", "tertiary"];
@@ -37,6 +39,7 @@ export async function personas(request, env, json, id, action) {
   if (id && action) {
     const row = await env.DB.prepare("SELECT * FROM personas WHERE id = ? AND user_id = ?").bind(id, user.id).first();
     if (!row) return json(NOT_FOUND, 404);
+    if (action === "chat" || action === "index") return personaChat(request, env, json, user, row, action);
     return personaImage(request, env, json, user, row, action);
   }
 

@@ -1,0 +1,388 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>페르소나와 대화 · UXA</title>
+  <meta name="robots" content="noindex" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-soft: #f6f7fb;
+      --text: #14161f;
+      --text-sub: #5b6072;
+      --text-faint: #a3a7b7;
+      --line: #e4e6ee;
+      --accent: #4f46e5;
+      --accent-soft: #eef0ff;
+      --good: #12805c;
+      --good-soft: #e6f6ef;
+      --warn: #8a5a00;
+      --warn-soft: #fff8e6;
+      --radius: 16px;
+      --max: 1160px;
+      --persona-badge-bg: #d9f7a3;
+      --persona-badge-text: #2d4a12;
+      --persona-photo-bg: #3b3b41;
+      --persona-photo-fg: #6a6a72;
+      --note-n: #eef0ff; --note-n-text: #3730a3;
+      --note-t: #e6f6ef; --note-t-text: #12805c;
+      --note-u: #fff4e5; --note-u-text: #9a5b00;
+      --note-d: #f1f3f7; --note-d-text: #4b4f5c;
+      --infer: #fde8e8; --infer-text: #9f1239;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      display: flex; flex-direction: column; min-height: 100vh;
+      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      background: var(--bg-soft); color: var(--text); line-height: 1.6; word-break: keep-all;
+    }
+    a { color: inherit; text-decoration: none; }
+    button, textarea { font: inherit; color: inherit; }
+    [hidden] { display: none !important; }
+    .container { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+
+    /* 내비게이션 (랜딩과 동일) */
+    .nav { position: sticky; top: 0; z-index: 10; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+    .nav .container { display: flex; align-items: center; justify-content: space-between; gap: 24px; height: 64px; }
+    .logo { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
+    .logo span { color: var(--accent); }
+    .nav nav { min-width: 0; }
+    .menu { display: flex; gap: 4px; list-style: none; overflow-x: auto; }
+    .menu a { display: block; padding: 8px 14px; border-radius: 999px; font-size: 14px; font-weight: 500; color: var(--text-sub); white-space: nowrap; }
+    .menu a:hover { background: var(--accent-soft); color: var(--accent); }
+    .menu a[aria-current="page"] { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
+
+    main { flex: 1; display: flex; flex-direction: column; padding: 24px 0 32px; }
+    main .container { flex: 1; display: flex; flex-direction: column; width: 100%; }
+    .wrap { flex: 1; display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 20px; max-width: 1040px; width: 100%; margin: 0 auto; min-height: 0; }
+
+    /* 왼쪽: 페르소나 카드 + 색인 상태 */
+    .side { display: flex; flex-direction: column; gap: 14px; }
+    .pcard { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+    .pcard .photo { position: relative; aspect-ratio: 4 / 3; background: var(--persona-photo-bg); }
+    .pcard .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .pcard .photo svg { width: 100%; height: 100%; color: var(--persona-photo-fg); display: block; }
+    .pcard .badge { position: absolute; top: 10px; left: 10px; padding: 2px 9px; border-radius: 999px; font-size: 11px; font-weight: 700; background: var(--persona-badge-bg); color: var(--persona-badge-text); text-transform: capitalize; }
+    .pcard .body { padding: 14px 16px 16px; }
+    .pcard h1 { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; }
+    .pcard .sub { font-size: 13px; color: var(--text-sub); }
+    .pcard .tag { margin-top: 8px; font-size: 13.5px; color: var(--text-sub); line-height: 1.5; }
+    .pcard .tag strong { color: var(--text); }
+    .pcard .links { display: flex; gap: 10px; margin-top: 12px; font-size: 13px; font-weight: 600; color: var(--accent); }
+    .pcard .links a:hover { text-decoration: underline; }
+
+    .index { padding: 14px 16px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); font-size: 13px; }
+    .index h2 { font-size: 13.5px; font-weight: 700; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
+    .index .state { padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; }
+    .index .state.ok { background: var(--good-soft); color: var(--good); }
+    .index .state.no { background: var(--warn-soft); color: var(--warn); }
+    .index p { color: var(--text-sub); line-height: 1.55; }
+    .index .counts { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+    .index .counts span { padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 600; }
+    .k-note { background: var(--note-n); color: var(--note-n-text); }
+    .k-theme { background: var(--note-t); color: var(--note-t-text); }
+    .k-utterance { background: var(--note-u); color: var(--note-u-text); }
+    .k-persona { background: var(--note-d); color: var(--note-d-text); }
+    .k-infer { background: var(--infer); color: var(--infer-text); }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 14px; border: 1px solid var(--line); border-radius: 10px; background: #fff;
+      font-size: 13.5px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: background .15s, border-color .15s;
+    }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-accent { border-color: var(--accent); background: var(--accent); color: #fff; }
+    .btn-accent:hover { background: #4338ca; color: #fff; }
+    .btn:disabled { opacity: .55; cursor: not-allowed; }
+    .index .btn { width: 100%; margin-top: 10px; }
+    .legend { font-size: 12px; color: var(--text-faint); line-height: 1.6; padding: 0 4px; }
+
+    /* 오른쪽: 대화 */
+    .chat { display: flex; flex-direction: column; min-height: 560px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+    .chat-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 18px; border-bottom: 1px solid var(--line); font-size: 14px; }
+    .chat-head b { font-weight: 700; }
+    .chat-head .btn-link { padding: 0; border: 0; background: none; color: var(--text-sub); font-size: 13px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+    .msgs { flex: 1; overflow: auto; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+    .msg { display: flex; gap: 10px; max-width: 86%; }
+    .msg.user { align-self: flex-end; flex-direction: row-reverse; }
+    .msg .av { flex: none; width: 32px; height: 32px; border-radius: 50%; background: var(--persona-photo-bg); overflow: hidden; display: grid; place-items: center; color: #fff; font-size: 13px; font-weight: 700; }
+    .msg .av img { width: 100%; height: 100%; object-fit: cover; }
+    .msg.user .av { background: var(--accent); }
+    .bubble { padding: 10px 14px; border-radius: 14px; background: var(--bg-soft); font-size: 14.5px; line-height: 1.65; white-space: pre-wrap; }
+    .msg.user .bubble { background: var(--accent); color: #fff; border-bottom-right-radius: 4px; }
+    .msg.assistant .bubble { border-bottom-left-radius: 4px; }
+    .bubble .cite { display: inline-block; padding: 0 6px; margin: 0 1px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; vertical-align: 1px; }
+    .bubble .cite.k-note { background: var(--note-n); color: var(--note-n-text); }
+    .bubble .cite.k-theme { background: var(--note-t); color: var(--note-t-text); }
+    .bubble .cite.k-utterance { background: var(--note-u); color: var(--note-u-text); }
+    .bubble .cite.k-persona { background: var(--note-d); color: var(--note-d-text); }
+    .bubble .infer { display: inline-block; padding: 0 6px; margin: 0 1px; border-radius: 6px; font-size: 12px; font-weight: 700; background: var(--infer); color: var(--infer-text); }
+    .msg .meta { margin-top: 6px; font-size: 12px; color: var(--text-faint); }
+    .notes { margin-top: 8px; display: grid; gap: 6px; }
+    .note { padding: 8px 10px; border-radius: 10px; background: #fff; border: 1px solid var(--line); font-size: 12.5px; line-height: 1.5; color: var(--text-sub); }
+    .note b { display: inline-block; margin-right: 6px; padding: 0 6px; border-radius: 6px; font-size: 11.5px; }
+    .note .src { color: var(--text-faint); margin-left: 4px; }
+    .typing .bubble { color: var(--text-faint); }
+    .typing .bubble::after { content: "…"; animation: dots 1.2s steps(3, end) infinite; }
+    @keyframes dots { 0% { content: "."; } 33% { content: ".."; } 66% { content: "..."; } }
+
+    .starter { padding: 0 18px 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+    .starter button { padding: 6px 11px; border: 1px solid var(--line); border-radius: 999px; background: #fff; font-size: 12.5px; color: var(--text-sub); cursor: pointer; }
+    .starter button:hover { border-color: var(--accent); color: var(--accent); }
+    .composer { display: flex; gap: 8px; padding: 12px 14px; border-top: 1px solid var(--line); }
+    .composer textarea { flex: 1; min-height: 44px; max-height: 160px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; resize: none; font-size: 14.5px; line-height: 1.5; }
+    .composer textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .composer .btn { align-self: flex-end; }
+    .error { padding: 8px 18px; font-size: 13px; color: #d92d20; }
+    .error:empty { display: none; }
+    .blocked { padding: 40px 24px; text-align: center; color: var(--text-sub); font-size: 14px; }
+    .blocked b { display: block; color: var(--text); font-size: 16px; margin-bottom: 6px; }
+
+    /* 푸터 (랜딩과 동일) */
+    footer { padding: 28px 0; border-top: 1px solid var(--line); background: #fff; }
+    footer .container { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font-size: 14px; color: var(--text-sub); }
+    footer .logo { font-size: 18px; color: var(--text); }
+
+    @media (max-width: 860px) {
+      .wrap { grid-template-columns: 1fr; }
+      .side { flex-direction: row; flex-wrap: wrap; }
+      .pcard { flex: 1 1 260px; }
+      .index { flex: 1 1 240px; }
+      .pcard .photo { aspect-ratio: 16 / 7; }
+      .chat { min-height: 480px; }
+      .msg { max-width: 94%; }
+    }
+    @media (max-width: 640px) {
+      .nav .container { flex-direction: column; align-items: flex-start; height: auto; padding-top: 12px; padding-bottom: 8px; gap: 6px; }
+      .nav nav { width: 100%; }
+      .menu a { padding: 8px 12px 8px 0; }
+      .menu a[aria-current="page"] { padding-left: 12px; }
+      .container { padding: 0 12px; }
+      main { padding: 12px 0 20px; }
+    }
+  </style>
+</head>
+<body data-auth="required">
+
+  <header class="nav">
+    <div class="container">
+      <a href="/index.html" class="logo">UX<span>A</span></a>
+      <nav aria-label="에이전트 메뉴">
+        <ul class="menu">
+          <li><a href="/guide/index.html">인터뷰 가이드</a></li>
+          <li><a href="/moderator/index.html">인터뷰 모더레이터</a></li>
+          <li><a href="/persona/index.html" aria-current="page">페르소나</a></li>
+          <li><a href="/journey/index.html">저니맵</a></li>
+          <li><a href="/scenario/index.html">시나리오 보드</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="wrap">
+        <aside class="side">
+          <section class="pcard" id="pcard">
+            <div class="photo" id="photo"></div>
+            <div class="body">
+              <h1 id="pname">불러오는 중…</h1>
+              <p class="sub" id="psub"></p>
+              <p class="tag" id="ptag"></p>
+              <p class="links"><a id="docLink" href="/persona/">문서 보기</a><a href="/persona/">목록</a></p>
+            </div>
+          </section>
+          <section class="index" id="index">
+            <h2>근거 노트 <span class="state no" id="indexState">확인 중</span></h2>
+            <p id="indexDesc">이 페르소나가 나온 인터뷰 분석(어피니티 노트·테마·참가자 발화)을 벡터로 색인해 대화의 근거로 씁니다.</p>
+            <div class="counts" id="indexCounts"></div>
+            <button type="button" class="btn btn-accent" id="indexBtn" hidden>근거 노트 색인하기</button>
+          </section>
+          <p class="legend">답변의 <span class="cite k-note" style="padding:0 5px;border-radius:5px;font-weight:700">N012</span> 같은 표시는 사용한 근거 노트예요. 눌러서 원문을 볼 수 있어요. <span class="cite k-infer" style="padding:0 5px;border-radius:5px;font-weight:700">추론 중간</span>은 근거 없이 페르소나 성향으로 추론한 부분입니다.</p>
+        </aside>
+
+        <section class="chat" aria-label="페르소나와 대화">
+          <div class="chat-head"><span><b id="chatWith">페르소나</b>와 대화</span><button type="button" class="btn-link" id="clearBtn">대화 지우기</button></div>
+          <div class="msgs" id="msgs"></div>
+          <div class="starter" id="starter"></div>
+          <p class="error" id="chatError"></p>
+          <form class="composer" id="composer">
+            <textarea id="input" rows="1" placeholder="페르소나에게 물어보세요. 예) 요즘 콘텐츠는 주로 언제, 어디서 보세요?" maxlength="2000"></textarea>
+            <button type="submit" class="btn btn-accent" id="sendBtn" disabled>보내기</button>
+          </form>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <span class="logo">UXA · UX Agents</span>
+      <span>만든 사람 [내 이름] · © 2026</span>
+    </div>
+  </footer>
+
+  <script src="/js/auth.js"></script>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const emph = (s) => esc(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+    const KIND = { N: "note", T: "theme", U: "utterance", D: "persona" };
+    const KIND_LABEL = { note: "관찰 노트", theme: "테마", utterance: "원 발화", persona: "페르소나 문서" };
+    const SILHOUETTE = `<svg viewBox="0 0 240 180" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="120" cy="72" r="38" fill="currentColor"/><path d="M40 190c0-46 36-78 80-78s80 32 80 78" fill="currentColor"/></svg>`;
+    const STARTERS = ["요즘 콘텐츠는 주로 언제, 어디서 보세요?", "최근에 가장 불편했던 순간은요?", "주변 사람 추천은 얼마나 믿으세요?", "이 서비스에서 꼭 있었으면 하는 기능은?"];
+
+    const personaId = new URLSearchParams(location.search).get("id") || "";
+    const api = (path, opt) => UXA.api(`/api/personas/${encodeURIComponent(personaId)}${path}`, opt);
+    const HIST_KEY = `uxa.persona.chat.${personaId}`;
+    let persona = null, ready = false, busy = false;
+    let history = [];
+    try { history = JSON.parse(sessionStorage.getItem(HIST_KEY) || "[]"); } catch {}
+    let noteCache = {};
+
+    function renderPersona(p) {
+      persona = p;
+      document.title = `${p.name}와(과) 대화 · 페르소나 · UXA`;
+      $("pname").textContent = p.name;
+      $("psub").textContent = `${p.job} · ${p.age}세`;
+      $("ptag").innerHTML = emph(p.tagline);
+      $("photo").innerHTML = `<span class="badge">${esc(p.priority)}</span>${p.photoUrl ? `<img src="${esc(p.photoUrl)}" alt="" />` : SILHOUETTE}`;
+      $("docLink").href = `/persona/view/?id=${encodeURIComponent(p.id)}`;
+      $("chatWith").textContent = p.name;
+      $("input").placeholder = `${p.name}에게 물어보세요.`;
+    }
+
+    function renderIndex(st) {
+      ready = !!st.ready;
+      $("indexState").textContent = ready ? "색인됨" : st.reason === "no_analysis" ? "불가" : "아직 없음";
+      $("indexState").className = `state ${ready ? "ok" : "no"}`;
+      if (st.reason === "no_analysis") {
+        $("indexDesc").textContent = "이 페르소나는 인터뷰 분석 묶음이 없어 근거 노트를 만들 수 없어요. 인터뷰에서 생성한 페르소나만 대화할 수 있습니다.";
+        $("indexBtn").hidden = true;
+      } else if (ready) {
+        $("indexDesc").textContent = `"${st.service || ""}" 인터뷰 분석에서 근거 노트 ${st.total}개를 색인했어요. (${new Date(st.indexed_at * 1000).toLocaleString("ko-KR")})`;
+        $("indexCounts").innerHTML = Object.entries(st.counts || {}).map(([k, n]) => `<span class="k-${esc(k)}">${esc(KIND_LABEL[k] || k)} ${n}</span>`).join("");
+        $("indexBtn").hidden = false; $("indexBtn").textContent = "다시 색인"; $("indexBtn").classList.remove("btn-accent");
+      } else {
+        $("indexDesc").textContent = "아직 근거 노트를 색인하지 않았어요. 색인하면 인터뷰 분석 노트·테마·참가자 발화를 벡터로 저장하고 대화에 씁니다. (보통 10~30초)";
+        $("indexCounts").innerHTML = "";
+        $("indexBtn").hidden = false; $("indexBtn").textContent = "근거 노트 색인하기"; $("indexBtn").classList.add("btn-accent");
+      }
+      updateSend();
+      if (!ready && !$("msgs").children.length) $("msgs").innerHTML = `<div class="blocked"><b>${st.reason === "no_analysis" ? "대화할 수 없는 페르소나예요" : "먼저 근거 노트를 색인해 주세요"}</b>${st.reason === "no_analysis" ? "" : "왼쪽의 '근거 노트 색인하기'를 누르면 바로 대화를 시작할 수 있어요."}</div>`;
+      else if (ready && $("msgs").querySelector(".blocked")) { $("msgs").innerHTML = ""; renderHistory(); }
+    }
+
+    async function index() {
+      if (busy) return;
+      busy = true; $("indexBtn").disabled = true; $("indexBtn").textContent = "색인 중…"; updateSend();
+      const { res, data } = await api("/index", { method: "POST", body: {} });
+      busy = false; $("indexBtn").disabled = false;
+      if (res.status === 401) { UXA.clearSession(); location.replace(UXA.loginUrl()); return; }
+      if (!res.ok) { $("chatError").textContent = data.error || "색인하지 못했어요."; renderIndex({ ready, reason: ready ? null : "not_indexed" }); return; }
+      $("chatError").textContent = "";
+      noteCache = {};
+      await loadStatus();
+    }
+
+    async function loadStatus() {
+      const { res, data } = await api("/chat");
+      if (res.status === 401) { UXA.clearSession(); location.replace(UXA.loginUrl()); return; }
+      if (!res.ok) { $("pname").textContent = "찾을 수 없음"; $("msgs").innerHTML = `<div class="blocked"><b>${esc(data.error || "페르소나를 찾을 수 없어요.")}</b><a href="/persona/" style="color:var(--accent);text-decoration:underline">목록으로</a></div>`; return; }
+      renderPersona(data.persona);
+      renderIndex(data);
+    }
+
+    // ── 대화 ──
+    function updateSend() { $("sendBtn").disabled = !ready || busy || !$("input").value.trim(); }
+    $("input").addEventListener("input", () => { updateSend(); autoGrow(); });
+    $("input").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); $("composer").requestSubmit(); } });
+    function autoGrow() { const t = $("input"); t.style.height = "auto"; t.style.height = Math.min(160, t.scrollHeight) + "px"; }
+
+    function renderStarters() {
+      $("starter").innerHTML = history.length ? "" : STARTERS.map((q) => `<button type="button">${esc(q)}</button>`).join("");
+      $("starter").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { $("input").value = b.textContent; updateSend(); $("input").focus(); }));
+    }
+
+    function renderHistory() {
+      $("msgs").innerHTML = "";
+      history.forEach((m) => appendMsg(m));
+      renderStarters();
+      scrollDown();
+    }
+
+    // [N012] → 근거 칩, [추론 높음] → 추론 칩
+    function richText(text) {
+      return esc(text)
+        .replace(/\[([NTUD]\d{2,3})\]/g, (m, id) => `<button type="button" class="cite k-${KIND[id[0]]}" data-ref="${id}">${id}</button>`)
+        .replace(/\[추론\s*(높음|중간|낮음|낮은)\]/g, (m, lv) => `<span class="infer">추론 ${lv.replace("낮은", "낮음")}</span>`);
+    }
+
+    function appendMsg(m, opts = {}) {
+      const el = document.createElement("div");
+      el.className = `msg ${m.role}${opts.typing ? " typing" : ""}`;
+      const av = m.role === "user" ? `<span class="av">나</span>` : `<span class="av">${persona?.photoUrl ? `<img src="${esc(persona.photoUrl)}" alt="" />` : esc((persona?.name || "P")[0])}</span>`;
+      el.innerHTML = `${av}<div><div class="bubble">${opts.typing ? "생각 중" : m.role === "assistant" ? richText(m.content) : esc(m.content)}</div>${m.role === "assistant" && !opts.typing ? `<div class="meta">${m.cited?.length ? `근거 ${m.cited.length}개` : "근거 표기 없음"}${m.inference?.length ? ` · 추론 ${m.inference.join("/")}` : ""}${m.ms ? ` · ${(m.ms / 1000).toFixed(1)}초` : ""}</div><div class="notes" hidden></div>` : ""}</div>`;
+      if (m.cited) for (const c of m.cited) noteCache[c.ref_id] = c;
+      el.querySelectorAll(".cite").forEach((b) => b.addEventListener("click", () => toggleNote(el, b.dataset.ref)));
+      $("msgs").appendChild(el);
+      return el;
+    }
+
+    function toggleNote(msgEl, ref) {
+      const box = msgEl.querySelector(".notes");
+      const existing = box.querySelector(`[data-note="${ref}"]`);
+      if (existing) { existing.remove(); box.hidden = !box.children.length; return; }
+      const c = noteCache[ref];
+      const div = document.createElement("div");
+      div.className = "note"; div.dataset.note = ref;
+      div.innerHTML = c
+        ? `<b class="k-${esc(c.kind)}">${esc(ref)}</b>${esc(c.text)}${c.source_ref ? `<span class="src">(${esc(c.source_ref)})</span>` : ""}`
+        : `<b>${esc(ref)}</b>이 노트의 원문을 찾지 못했어요.`;
+      box.appendChild(div); box.hidden = false;
+    }
+
+    function scrollDown() { const m = $("msgs"); m.scrollTop = m.scrollHeight; }
+    function save() { try { sessionStorage.setItem(HIST_KEY, JSON.stringify(history.slice(-40))); } catch {} }
+
+    $("composer").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const q = $("input").value.trim();
+      if (!q || !ready || busy) return;
+      $("input").value = ""; autoGrow(); $("chatError").textContent = "";
+      const userMsg = { role: "user", content: q };
+      history.push(userMsg); save();
+      $("starter").innerHTML = "";
+      const userEl = appendMsg(userMsg);
+      const typing = appendMsg({ role: "assistant", content: "" }, { typing: true });
+      scrollDown();
+      busy = true; updateSend();
+      const { res, data } = await api("/chat", { method: "POST", body: { messages: history.slice(-12).map((m) => ({ role: m.role, content: m.content })) } });
+      busy = false; updateSend();
+      typing.remove();
+      if (res.status === 401) { UXA.clearSession(); location.replace(UXA.loginUrl()); return; }
+      if (!res.ok) {
+        history.pop(); save(); userEl.remove(); renderStarters();
+        $("chatError").textContent = data.error || "답을 받지 못했어요.";
+        if (data.code === "not_indexed") renderIndex({ ready: false, reason: "not_indexed" });
+        $("input").value = q; updateSend();
+        return;
+      }
+      const reply = { role: "assistant", content: data.reply, cited: data.cited || [], inference: data.inference || [], ms: data.ms };
+      history.push(reply); save();
+      appendMsg(reply); scrollDown();
+      $("input").focus();
+    });
+
+    $("clearBtn").addEventListener("click", () => {
+      if (history.length && !confirm("이 페르소나와의 대화 기록을 지울까요? (브라우저에만 저장돼 있어요)")) return;
+      history = []; save(); renderHistory();
+    });
+    $("indexBtn").addEventListener("click", index);
+
+    if (!personaId) { $("msgs").innerHTML = `<div class="blocked"><b>페르소나를 고르세요</b><a href="/persona/" style="color:var(--accent);text-decoration:underline">목록으로</a></div>`; }
+    else loadStatus().then(() => { if (ready) renderHistory(); });
+  </script>
+</body>
+</html>

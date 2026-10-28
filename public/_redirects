@@ -5,4 +5,5 @@
 # /persona/<id> → 페르소나 1장 보기 (public/persona/view/index.html 이 경로에서 id 를 읽는다)
 /persona/new   /persona/new/   200
 /persona/view  /persona/view/  200
+/persona/chat  /persona/chat/  200
 /persona/:id   /persona/view/  200

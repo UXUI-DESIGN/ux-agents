@@ -13,6 +13,7 @@
 //   GET  /api/debriefs            내 확정 디브리핑 (debrief.js)
 //   /api/personas[/sources|analyze|compose|:id]  인터뷰 전사 → 어피니티 매핑 → 페르소나 문서 (personas.js)
 //   /api/personas/:id/image-prompt|image, GET /api/personas/image/:imageId  프로필 사진 프롬프트 조립·생성·제공 (personaImage.js)
+//   /api/personas/:id/index|chat  근거 노트 벡터 색인(rag_chunks)과 페르소나 채팅 (personaChat.js)
 //   /api/p/:token[/interviews[/me[/messages|pause|resume|end|withdraw]]] 참가자 링크: 세션 정보·동의하고 시작·다시 열기·AI 모더레이터 대화
 
 import { signup, login, logout, me } from "./auth.js";
@@ -70,7 +71,7 @@ async function route(request, env, cors) {
   const imagePath = url.pathname.match(/^\/api\/personas\/image\/([0-9a-f]+)$/);
   if (imagePath && request.method === "GET") return servePersonaImage(env, imagePath[1]);
 
-  const personaPath = url.pathname.match(/^\/api\/personas(?:\/([^/]+))?(?:\/(image-prompt|image))?$/);
+  const personaPath = url.pathname.match(/^\/api\/personas(?:\/([^/]+))?(?:\/(image-prompt|image|index|chat))?$/);
   if (url.pathname.startsWith("/api/auth/") || guidePath || participantPath || detailPath || personaPath || url.pathname === "/api/sessions" || url.pathname === "/api/debriefs") {
     if (!cors["Access-Control-Allow-Origin"]) return json({ error: "허용되지 않은 사이트에서 온 요청이에요." }, 403, cors);
     const reply = (data, status = 200) => json(data, status, cors);
