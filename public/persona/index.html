@@ -116,6 +116,13 @@
     .card.add b { font-size: 15px; font-weight: 700; }
     .card.add small { font-size: 13px; }
 
+    /* 샘플 */
+    .sample-badge { display: inline-block; margin-left: 8px; padding: 2px 10px; border-radius: 999px; background: var(--persona-badge-bg); color: var(--persona-badge-text); font-size: 12px; font-weight: 700; vertical-align: 3px; }
+    .sample-note { margin-top: 12px; font-size: 13.5px; color: var(--text-sub); }
+    .sample-note a { color: var(--accent); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+    .card .chatlink { margin-top: 10px; display: inline-block; font-size: 13px; font-weight: 600; color: var(--accent); }
+    .card .chatlink:hover { text-decoration: underline; }
+
     /* 비었을 때 */
     .empty { padding: 56px 24px; text-align: center; background: #fff; border: 1px dashed var(--line); border-radius: var(--radius); }
     .empty h2 { font-size: 18px; font-weight: 700; }
@@ -144,7 +151,7 @@
     }
   </style>
 </head>
-<body data-auth="required">
+<body>
 
   <header class="nav">
     <div class="container">
@@ -175,6 +182,16 @@
       </div>
 
       <div id="projects"></div>
+
+      <!-- 로그인 없이 써 보는 샘플 -->
+      <section class="project sample" id="sample" hidden aria-labelledby="sampleTitle">
+        <div class="project-head">
+          <h2 id="sampleTitle">샘플 페르소나 <span class="sample-badge">로그인 없이 체험</span></h2>
+          <p class="meta"><span>OTT 콘텐츠 추천 서비스</span><span>가상 인터뷰 4명</span><span>문서 · 대화 체험</span></p>
+        </div>
+        <div class="grid" id="sampleGrid"></div>
+        <p class="sample-note" id="sampleNote"></p>
+      </section>
     </div>
   </main>
 
@@ -207,7 +224,7 @@
           </div>
           <div class="card-body">
             <p class="tagline">${emph(p.tagline)}</p>
-            <div class="card-foot"><span>${p.share ? esc(p.share) + " · " : ""}${fmtDate(p.updatedAt)}</span><span>문서 · 대화 →</span></div>
+            <div class="card-foot"><span>${p.share ? esc(p.share) + " · " : ""}${fmtDate(p.updatedAt)}</span><span>문서 열기 →</span></div>
           </div>
         </a>`;
     }
@@ -241,10 +258,30 @@
         </section>`).join("");
     }
 
+    // 샘플 (로그인 없이) — GET /api/personas/sample
+    async function loadSample(loggedIn) {
+      const { res, data } = await UXA.api("/api/personas/sample");
+      if (!res.ok) return;
+      const p = data.persona;
+      $("sample").hidden = false;
+      $("sampleGrid").innerHTML = card({ id: p.id, priority: p.priority, photoUrl: p.photoUrl, name: p.profile.name, job: p.profile.job, age: p.profile.age, tagline: p.tagline, share: p.share, updatedAt: p.updatedAt });
+      $("sampleNote").innerHTML = loggedIn
+        ? "샘플은 고칠 수 없지만 문서 보기와 대화는 자유롭게 써 볼 수 있어요."
+        : `샘플 문서를 열어 보고 페르소나와 대화해 보세요. 내 인터뷰로 페르소나를 만들려면 <a href="${UXA.loginUrl("/persona/")}">로그인</a>이 필요해요.`;
+    }
+
     async function load() {
+      const loggedIn = !!UXA.getSession();
+      if (!loggedIn) {
+        $("total").innerHTML = `로그인하면 내 인터뷰로 만든 페르소나가 여기에 모여요.`;
+        $("projects").innerHTML = "";
+        document.querySelector(".listbar .btn").href = UXA.loginUrl("/persona/new/");
+        loadSample(false);
+        return;
+      }
       $("total").textContent = "불러오는 중…";
-      const { res, data } = await UXA.api("/api/personas");
-      if (res.status === 401) { UXA.clearSession(); location.replace(UXA.loginUrl()); return; }
+      const [{ res, data }] = await Promise.all([UXA.api("/api/personas"), loadSample(true)]);
+      if (res.status === 401) { UXA.clearSession(); load(); return; }
       if (!res.ok) { $("total").textContent = ""; $("projects").innerHTML = `<div class="empty"><h2>목록을 불러오지 못했어요</h2><p>${esc(data.error || "잠시 후 다시 시도해 주세요.")}</p></div>`; return; }
       render(data.projects || []);
     }

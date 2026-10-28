@@ -210,6 +210,10 @@
     .doc.editing .points li:has(.point-add) { display: block; padding: 0; }
     .point-del { display: none; position: absolute; right: 0; top: 2px; width: 16px; height: 16px; border: 0; border-radius: 50%; background: var(--persona-chip-bg); color: var(--text-sub); font-size: 11px; line-height: 16px; cursor: pointer; }
     .doc.editing .points li:hover .point-del { display: block; }
+    .sample-badge { display: inline-block; margin-left: 6px; padding: 2px 9px; border-radius: 999px; background: var(--persona-badge-bg); color: var(--persona-badge-text); font-size: 12px; font-weight: 700; }
+    .sample-bar { margin-bottom: 14px; padding: 10px 14px; border-radius: 10px; background: #fff; border: 1px solid var(--line); font-size: 13.5px; color: var(--text-sub); }
+    .sample-bar b { color: var(--text); }
+    .sample-bar a { color: var(--accent); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
     .evidence { margin-top: 16px; padding: 16px 20px; border: 1px dashed var(--line); border-radius: 12px; background: #fff; font-size: 13.5px; color: var(--text-sub); }
     .evidence h2 { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
     .evidence ul { list-style: none; display: grid; gap: 4px; }
@@ -300,7 +304,7 @@
     @page { size: A4 landscape; margin: 10mm; }
     @media print {
       html, body { background: #fff; }
-      .nav, footer, .toolbar, .toast, .evidence, .modal-back, .chip-add, .point-add, .point-del { display: none !important; }
+      .nav, footer, .toolbar, .toast, .evidence, .modal-back, .sample-bar, .chip-add, .point-add, .point-del { display: none !important; }
       .doc.editing [data-edit] { outline: none; }
       main { padding: 0; background: #fff; }
       .container { max-width: none; padding: 0; }
@@ -353,6 +357,8 @@
           <button type="button" class="btn" id="printBtn">인쇄 · PDF 저장</button>
         </div>
       </div>
+
+      <p class="sample-bar" id="sampleBar" hidden>이 페르소나는 체험용 샘플이에요. 문서 보기와 대화는 자유롭게 써 볼 수 있지만 고칠 수는 없어요.</p>
 
       <article class="doc" id="doc" aria-labelledby="personaTitle">
         <header class="doc-head">
@@ -452,52 +458,9 @@
 
   <script src="/js/auth.js"></script>
   <script>
-    // ── 더미 Persona (shared/persona.ts 의 Persona 타입과 같은 모양) ──
-    // 아직 API 연결 전. /persona/[id] 의 id 는 경로 또는 ?id= 에서 읽어 두기만 한다.
     const PRIORITY_LABEL = { primary: "Primary Persona", secondary: "Secondary Persona", tertiary: "Tertiary Persona" };
+    const SAMPLE_ID = "sample"; // 로그인 없이 보는 샘플 (서버가 sample-seeun 으로 돌려준다)
 
-    const DUMMY_PERSONA = {
-      id: "p_demo",
-      userId: "u_demo",
-      sessionId: null,
-      priority: "primary",
-      tagline: "다양한 콘텐츠를 감상하며 **지인과 소통**하고 **피드백을 공유**하고 싶어요",
-      photoUrl: null,
-      profile: { name: "세은", gender: "여성", age: 32, hobbies: ["여행", "요리"], job: "음악강사" },
-      context: {
-        environment: "스마트폰, 태블릿, 노트북을 자주 사용",
-        personality: "열정적이면서도 평화로운 성향, 창의적이고 다양한 예술과 문화에 관심이 많은 유형",
-        motivation: "일상 생활에서의 스트레스 해소와 새로운 문화 및 예술 경험을 위해 이용",
-      },
-      lifestyle: "밤, 세은은 피곤한 하루 끝에 가장 좋아하는 온라인 OTT 서비스를 열어 휴식을 취하려 합니다. 세은은 다양한 콘텐츠를 즐기기 위해 여러 서비스를 이용하고 있습니다. 그러나 기존의 추천 시스템은 세은에게 만족스러운 결과를 제공하지 않았습니다. 세은은 자주 검색을 통해 새로운 콘텐츠를 찾는 편이며, 이를 통해 지인들의 추천도 확인합니다. 지인들과의 소통을 통해 세은은 새로운 문화와 예술에 대한 통찰력을 얻고, 지인들과 함께 콘텐츠에 대해 토론하는 경험을 즐깁니다. 세은은 자발적으로 좋아하는 콘텐츠를 지인들에게 추천하고, 받은 피드백을 통해 계속해서 새로운 콘텐츠를 탐험하고자 합니다. 추천에 대한 피드백을 받은 후에도 세은은 더 많은 추천을 받는 것을 원하고, 다양한 경험을 지속적으로 쌓고 싶어 합니다.",
-      behavior: {
-        tagGroups: [
-          { title: "콘텐츠 이용 행태", tags: ["밤", "휴식 목적", "상황과 목적에 따라 다른 콘텐츠", "검색으로 콘텐츠 선택", "검색으로 정보 수집", "콘텐츠 관련 정보가 선택에 많은 영향", "서비스 교차 활용"] },
-        ],
-        scales: [
-          { label: "추천시스템을 활용한 콘텐츠 탐색 선호도", value: 22 },
-          { label: "지인을 통한 콘텐츠 탐색 선호도", value: 86 },
-          { label: "콘텐츠를 활용한 공유, 공감 경험 만족도", value: 86 },
-        ],
-      },
-      painpoints: [
-        { title: "부족한 추천 시스템", description: "이전에 사용한 추천 시스템이 기대에 못 미치며, 세은은 많은 만족스러운 콘텐츠를 찾지 못해 실망하고 있습니다." },
-        { title: "콘텐츠 다양성에 대한 어려움", description: "콘텐츠를 찾아보려면 다양한 선택 속에서 어떤 것을 골라야 할지 결정하는 데 어려움을 겪고 있습니다." },
-        { title: "취향을 고려하지 않는 추천", description: "이전 추천 시스템은 세은의 기호나 평가를 고려하지 않고 단순한 콘텐츠 추천만을 제공했습니다." },
-        { title: "혼자 감상하는 외로움", description: "지인들이 추천을 통해 함께 감상하고 토론하는 경험을 얻고 싶어 하는데, 현재는 혼자서만 콘텐츠를 감상하고 있습니다." },
-        { title: "소통의 부재", description: "새로운 지인들과의 소통이 적어서 콘텐츠 추천을 통한 소통의 기회가 부족하다고 느낍니다." },
-      ],
-      needs: [
-        { title: "풍부한 추천 경험", description: "콘텐츠 추천 시스템이 세은의 취향과 기호를 고려하여 풍부한 경험을 제공해줄 것을 원합니다." },
-        { title: "다양한 콘텐츠 선택의 도움", description: "다양한 콘텐츠 중에서 자신에게 맞는 것을 선택하는 데 도움을 주는 시스템을 원합니다." },
-        { title: "지인들과 추천을 통한 취향의 확장", description: "지인들이 추천한 콘텐츠도 함께 탐색하며 새로운 경험을 즐기고 싶어 합니다." },
-        { title: "소통과 토론의 기회", description: "지인들과 함께 감상하고 토론하는 경험을 통해 소통의 기회를 얻고 싶어 합니다." },
-        { title: "감상의 공동체 참여", description: "콘텐츠를 함께 즐기며 소통하는 즐거움을 경험하고 싶어 합니다." },
-      ],
-      quote: "나에게 딱 맞는 콘텐츠를 찾아 추천해주는 시스템과 함께 **지인들과 감상하며 소통하는 경험**을 원해요.",
-      createdAt: 0,
-      updatedAt: 0,
-    };
 
     // /persona/<id> 또는 /persona/view/?id=<id>
     function personaIdFromUrl() {
@@ -740,14 +703,6 @@
     $("saveBtn").addEventListener("click", async () => {
       if (document.activeElement?.matches("[data-edit]")) commit(document.activeElement);
       $("saveBtn").disabled = true; $("saveBtn").textContent = "저장 중…";
-      if (isDemo) {
-        persona.updatedAt = Math.floor(Date.now() / 1000);
-        try { localStorage.setItem(DRAFT_KEY(persona.id), JSON.stringify(persona)); } catch {}
-        lastSaved = structuredClone(persona);
-        dirty = false; $("saveBtn").textContent = "저장됨";
-        toast("예시 문서라 이 브라우저에만 저장했어요.");
-        return;
-      }
       const { res, data } = await UXA.api(`/api/personas/${encodeURIComponent(persona.id)}`, { method: "PUT", body: persona });
       if (res.status === 401) { UXA.clearSession(); location.replace(UXA.loginUrl()); return; }
       if (!res.ok) { $("saveBtn").disabled = false; $("saveBtn").textContent = "저장"; toast(data.error || "저장하지 못했어요. 잠시 후 다시 시도해 주세요."); return; }
@@ -863,14 +818,14 @@
     $("photoGenerate").addEventListener("click", generatePhoto);
     $("photoRemove").addEventListener("click", removePhoto);
 
-    // id 가 없거나 p_demo 면 예시 문서(레이아웃 미리보기), 그 밖에는 GET /api/personas/:id
-    const personaId = personaIdFromUrl() || DUMMY_PERSONA.id;
-    const isDemo = personaId === DUMMY_PERSONA.id;
+    // id 가 없으면 샘플. 샘플은 로그인 없이 읽고 대화할 수 있지만 고칠 수 없다
+    const personaId = personaIdFromUrl() || SAMPLE_ID;
+    let isSample = personaId === SAMPLE_ID || personaId === "sample-seeun";
 
     function renderEvidence(p) {
       const ev = p.evidence;
       const box = $("evidence");
-      if (!ev || isDemo) { box.hidden = true; return; }
+      if (!ev) { box.hidden = true; return; }
       const hyp = (ev.hypotheses || []).filter(Boolean);
       const refs = new Set([...(ev.painpoints || []), ...(ev.needs || [])].flatMap((x) => x.refs || []));
       const items = [];
@@ -884,14 +839,7 @@
     }
 
     async function loadPersona() {
-      if (isDemo) {
-        const base = structuredClone(DUMMY_PERSONA);
-        try {
-          const draft = JSON.parse(localStorage.getItem(DRAFT_KEY(personaId)) || "null");
-          return draft && draft.id === personaId ? draft : base;
-        } catch { return base; }
-      }
-      if (!UXA.getSession()) { location.replace(UXA.loginUrl()); return null; }
+      if (!isSample && !UXA.getSession()) { location.replace(UXA.loginUrl()); return null; }
       const { res, data } = await UXA.api(`/api/personas/${encodeURIComponent(personaId)}`);
       if (res.status === 401) { UXA.clearSession(); location.replace(UXA.loginUrl()); return null; }
       if (!res.ok) {
@@ -907,15 +855,24 @@
       const p = await loadPersona();
       if (!p) return;
       persona = p;
+      isSample = isSample || !!p.isSample;
       lastSaved = structuredClone(p);
       render(persona);
       renderEvidence(persona);
-      $("photoBtn").hidden = isDemo; // 예시 문서는 서버에 없어 사진을 만들 수 없다
-      $("chatBtn").hidden = isDemo || !persona.analysisId; // 인터뷰 분석에서 나온 페르소나만 대화할 수 있다
-      $("chatBtn").href = `/persona/chat/?id=${encodeURIComponent(persona.id)}`;
-      if (!isDemo) $("photoBtn").textContent = persona.photoUrl ? "사진 바꾸기" : "사진 만들기";
-      // 생성 화면에서 '사진 만들기'로 바로 들어온 경우
-      if (!isDemo && new URLSearchParams(location.search).get("photo") === "1") openPhoto();
+      $("chatBtn").hidden = !persona.analysisId; // 인터뷰 분석에서 나온 페르소나만 대화할 수 있다
+      $("chatBtn").href = `/persona/chat/?id=${encodeURIComponent(isSample ? SAMPLE_ID : persona.id)}`;
+      if (isSample) {
+        // 샘플: 읽기와 대화만. 편집·사진 만들기는 숨긴다
+        $("editBtn").hidden = true; $("photoBtn").hidden = true;
+        $("crumbName").insertAdjacentHTML("afterend", ` <span class="sample-badge">샘플 · 로그인 없이 체험</span>`);
+        $("sampleBar").hidden = false;
+        if (!UXA.getSession()) $("sampleBar").innerHTML = `이 페르소나는 체험용 샘플이에요. 가상 인터뷰 4명의 어피니티 노트를 바탕으로 만들어졌고, <b>대화하기</b>에서 근거 노트를 인용하며 답해요. 내 인터뷰로 만들려면 <a href="${UXA.loginUrl("/persona/new/")}">로그인</a>하세요.`;
+      } else {
+        $("photoBtn").hidden = false;
+        $("photoBtn").textContent = persona.photoUrl ? "사진 바꾸기" : "사진 만들기";
+        // 생성 화면에서 '사진 만들기'로 바로 들어온 경우
+        if (new URLSearchParams(location.search).get("photo") === "1") openPhoto();
+      }
     })();
   </script>
 </body>

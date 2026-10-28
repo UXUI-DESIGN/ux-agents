@@ -24,41 +24,32 @@ const HISTORY_TURNS = 12;
 const MAX_QUESTION_CHARS = 2000;
 const REPLY_TOKENS = 1200;
 
-export async function personaChat(request, env, json, user, row, action) {
+export async function personaChat(request, env, json, user, row, action, opts = {}) {
   const method = request.method;
   const a = row.analysis_id ? await env.DB.prepare("SELECT * FROM persona_analyses WHERE id = ? AND user_id = ?").bind(row.analysis_id, user.id).first() : null;
+  const isSample = user.id === "sample";
 
-  if (action === "chat" && method === "GET") return json({ ...(await status(env, a)), persona: brief(row) });
+  if (action === "chat" && method === "GET") return json({ ...(await status(env, a)), persona: brief(row), isSample, autoIndex: isSample });
 
   if (action === "index" && method === "POST") {
     if (!a) return json({ error: "이 페르소나는 인터뷰 분석 묶음이 없어 근거 노트를 만들 수 없어요.", code: "no_analysis" }, 409);
     if (!env.OPENAI_API_KEY) return json({ error: "AI를 부르지 못했어요. 잠시 후 다시 시도해 주세요." }, 502);
-    const started = Date.now();
-    let chunks;
     try {
-      chunks = await buildChunks(env, user, a);
-      const vectors = await embedAll(env, chunks.map((c) => c.text));
-      chunks.forEach((c, i) => (c.embedding = vectors[i]));
+      const r = await indexAnalysis(env, user, a);
+      return json({ ok: true, ...r });
     } catch (err) {
       console.error("persona index failed", String(err?.message || err));
       return json({ error: "근거 노트를 색인하지 못했어요. 잠시 후 다시 시도해 주세요." }, 502);
     }
-    const now = Math.floor(Date.now() / 1000);
-    const counts = {};
-    for (const c of chunks) counts[c.kind] = (counts[c.kind] || 0) + 1;
-    const meta = { model: embedModel(env), dims: EMBED_DIMS, total: chunks.length, counts, ms: Date.now() - started };
-    // 이전 색인을 지우고 새로 넣는다 (한 번에 50개씩)
-    await env.DB.prepare("DELETE FROM rag_chunks WHERE analysis_id = ?").bind(a.id).run();
-    const ins = env.DB.prepare("INSERT INTO rag_chunks (id, analysis_id, user_id, kind, ref_id, code, source_ref, text, embedding, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    for (let i = 0; i < chunks.length; i += 50) {
-      await env.DB.batch(chunks.slice(i, i + 50).map((c) => ins.bind(crypto.randomUUID(), a.id, user.id, c.kind, c.ref_id, c.code || null, c.source_ref || null, c.text, toBlob(c.embedding), now)));
-    }
-    await env.DB.prepare("UPDATE persona_analyses SET indexed_at = ?, index_meta = ? WHERE id = ?").bind(now, JSON.stringify(meta), a.id).run();
-    return json({ ok: true, indexed_at: now, counts, total: chunks.length, ms: meta.ms });
   }
 
   if (action === "chat" && method === "POST") {
     if (!a) return json({ error: "이 페르소나는 인터뷰 분석 묶음이 없어 대화할 수 없어요.", code: "no_analysis" }, 409);
+    if (!a.indexed_at && opts.autoIndex && env.OPENAI_API_KEY) {
+      // 샘플: 첫 질문 때 한 번만 색인한다
+      try { await indexAnalysis(env, user, a); a.indexed_at = Math.floor(Date.now() / 1000); }
+      catch (err) { console.error("sample auto index failed", String(err?.message || err)); return json({ error: "근거 노트를 준비하지 못했어요. 잠시 후 다시 시도해 주세요." }, 502); }
+    }
     if (!a.indexed_at) return json({ error: "먼저 근거 노트를 색인해 주세요.", code: "not_indexed" }, 409);
     let body;
     try { body = await request.json(); } catch { return json({ error: "JSON 본문이 필요해요." }, 400); }
@@ -107,6 +98,25 @@ async function status(env, a) {
   if (!a) return { ready: false, reason: "no_analysis", indexed_at: null, counts: null };
   const meta = a.index_meta ? JSON.parse(a.index_meta) : null;
   return { ready: !!a.indexed_at, reason: a.indexed_at ? null : "not_indexed", indexed_at: a.indexed_at, counts: meta?.counts || null, total: meta?.total || 0, model: meta?.model || null, analysis_id: a.id, service: a.service };
+}
+
+// 분석 묶음 하나를 임베딩해 rag_chunks 에 넣는다 (이전 색인은 지운다)
+async function indexAnalysis(env, user, a) {
+  const started = Date.now();
+  const chunks = await buildChunks(env, user, a);
+  const vectors = await embedAll(env, chunks.map((c) => c.text));
+  chunks.forEach((c, i) => (c.embedding = vectors[i]));
+  const now = Math.floor(Date.now() / 1000);
+  const counts = {};
+  for (const c of chunks) counts[c.kind] = (counts[c.kind] || 0) + 1;
+  const meta = { model: embedModel(env), dims: EMBED_DIMS, total: chunks.length, counts, ms: Date.now() - started };
+  await env.DB.prepare("DELETE FROM rag_chunks WHERE analysis_id = ?").bind(a.id).run();
+  const ins = env.DB.prepare("INSERT INTO rag_chunks (id, analysis_id, user_id, kind, ref_id, code, source_ref, text, embedding, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+  for (let i = 0; i < chunks.length; i += 50) {
+    await env.DB.batch(chunks.slice(i, i + 50).map((c) => ins.bind(crypto.randomUUID(), a.id, user.id, c.kind, c.ref_id, c.code || null, c.source_ref || null, c.text, toBlob(c.embedding), now)));
+  }
+  await env.DB.prepare("UPDATE persona_analyses SET indexed_at = ?, index_meta = ? WHERE id = ?").bind(now, JSON.stringify(meta), a.id).run();
+  return { indexed_at: now, counts, total: chunks.length, ms: meta.ms };
 }
 
 // ── 근거 노트 만들기 ──

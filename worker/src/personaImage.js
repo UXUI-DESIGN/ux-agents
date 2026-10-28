@@ -41,31 +41,16 @@ export async function personaImage(request, env, json, user, row, action) {
     try { body = await request.json(); } catch { return json({ error: "JSON 본문이 필요해요." }, 400); }
     const sceneText = typeof body.scene === "string" ? body.scene.trim().slice(0, MAX_SCENE_CHARS) : "";
     if (!sceneText) return json({ error: "장면 설명이 비어 있어요." }, 400);
-    const prompt = fullPrompt(sceneText);
-    const model = env.OPENAI_IMAGE_MODEL || "gpt-image-1";
-
     const started = Date.now();
-    let bytes, mime;
+    let made;
     try {
-      ({ bytes, mime } = await generateImage(env, model, prompt));
+      made = await createPersonaImage(env, request, user, row, sceneText);
     } catch (err) {
       console.error("image generate failed", String(err?.message || err));
-      const msg = /safety|moderation|content_policy/i.test(String(err?.message)) ? "이 프롬프트로는 이미지를 만들 수 없었어요. 장면 설명을 바꿔 다시 시도해 주세요." : "이미지를 만들지 못했어요. 잠시 후 다시 시도해 주세요.";
+      const msg = /safety|moderation|content_policy/i.test(String(err?.message)) ? "이 프롬프트로는 이미지를 만들 수 없었어요. 장면 설명을 바꿔 다시 시도해 주세요." : /too large/.test(String(err?.message)) ? "만들어진 이미지가 너무 커서 저장하지 못했어요. 다시 시도해 주세요." : "이미지를 만들지 못했어요. 잠시 후 다시 시도해 주세요.";
       return json({ error: msg }, 502);
     }
-    if (bytes.byteLength > 900_000) return json({ error: "만들어진 이미지가 너무 커서 저장하지 못했어요. 다시 시도해 주세요." }, 502);
-
-    const now = Math.floor(Date.now() / 1000);
-    const imageId = crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "").slice(0, 8);
-    const url = `${new URL(request.url).origin}/api/personas/image/${imageId}`;
-    await env.DB.batch([
-      env.DB.prepare("INSERT INTO persona_images (id, persona_id, user_id, mime, bytes, prompt, model, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
-        .bind(imageId, row.id, user.id, mime, bytes, prompt, model, now),
-      // 이전 사진은 지운다 (한 페르소나에 사진 하나)
-      env.DB.prepare("DELETE FROM persona_images WHERE persona_id = ? AND id != ?").bind(row.id, imageId),
-      env.DB.prepare("UPDATE personas SET photo_url = ?, image_prompt = ?, updated_at = ? WHERE id = ?").bind(url, sceneText, now, row.id),
-    ]);
-    return json({ photoUrl: url, prompt, scene: sceneText, model, ms: Date.now() - started });
+    return json({ ...made, ms: Date.now() - started });
   }
 
   if (action === "image" && method === "DELETE") {
@@ -78,6 +63,25 @@ export async function personaImage(request, env, json, user, row, action) {
   }
 
   return json({ error: "없는 경로예요." }, 404);
+}
+
+// 장면 + 고정 스타일로 만들어 D1 에 저장하고 photo_url 을 바꾼다 (사용자 생성과 샘플 시딩이 함께 쓴다)
+export async function createPersonaImage(env, request, user, row, sceneText) {
+  const prompt = fullPrompt(sceneText);
+  const model = env.OPENAI_IMAGE_MODEL || "gpt-image-1";
+  const { bytes, mime } = await generateImage(env, model, prompt);
+  if (bytes.byteLength > 900_000) throw new Error("image too large");
+  const now = Math.floor(Date.now() / 1000);
+  const imageId = crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "").slice(0, 8);
+  const url = `${new URL(request.url).origin}/api/personas/image/${imageId}`;
+  await env.DB.batch([
+    env.DB.prepare("INSERT INTO persona_images (id, persona_id, user_id, mime, bytes, prompt, model, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+      .bind(imageId, row.id, user.id, mime, bytes, prompt, model, now),
+    // 이전 사진은 지운다 (한 페르소나에 사진 하나)
+    env.DB.prepare("DELETE FROM persona_images WHERE persona_id = ? AND id != ?").bind(row.id, imageId),
+    env.DB.prepare("UPDATE personas SET photo_url = ?, image_prompt = ?, updated_at = ? WHERE id = ?").bind(url, sceneText, now, row.id),
+  ]);
+  return { photoUrl: url, prompt, scene: sceneText, model };
 }
 
 // 로그인 없이 읽는다 (id 가 열쇠). CORS 헤더 없이도 <img> 는 읽을 수 있다

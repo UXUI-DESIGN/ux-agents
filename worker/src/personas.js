@@ -6,6 +6,7 @@
 //   GET  /api/personas/:id                문서 1장 (+ 근거)
 //   PUT  /api/personas/:id                { ...PersonaContent } 화면에서 고친 내용 저장
 //   DELETE /api/personas/:id
+//   GET  /api/personas/sample · GET/POST /api/personas/sample/chat · POST /api/personas/sample/photo  로그인 없는 샘플 (sampleData.js)
 //   /api/personas/:id/image-prompt · /api/personas/:id/image · /api/personas/image/:imageId  프로필 사진 (personaImage.js)
 //   /api/personas/:id/index · /api/personas/:id/chat  근거 노트 벡터 색인 · 페르소나와 채팅 (personaChat.js)
 //
@@ -16,12 +17,13 @@
 //                 → 근거 없는 항목은 '(가설)' 표기 → Primary/Secondary/Tertiary 우선순위 + 비중(추정)
 // 전사는 디브리핑과 같은 규칙으로 읽는다: 완료된 참가자만, '분석 제외' 발화는 빼고, 개인정보는 [REDACTED]로 가린 뒤.
 
-import { currentUser } from "./auth.js";
+import { currentUser, rateLimit } from "./auth.js";
 import { materialOf, transcriptText } from "./debrief.js";
 import { stagesOf } from "./moderator.js";
 import { firstJson } from "./json.js";
-import { personaImage } from "./personaImage.js";
+import { personaImage, createPersonaImage } from "./personaImage.js";
 import { personaChat } from "./personaChat.js";
+import { SAMPLE_USER_ID, SAMPLE_PERSONA_ID, SAMPLE_ANALYSIS_ID, SAMPLE_SERVICE, SAMPLE_PHOTO_SCENE, SAMPLE_PERSONA, SAMPLE_ANALYSIS, SAMPLE_SOURCES } from "./sampleData.js";
 
 const KINDS = ["design", "marketing"];
 const PRIORITIES = ["primary", "secondary", "tertiary"];
@@ -32,9 +34,26 @@ const COMPOSE_TOKENS = 16000;
 const NOT_FOUND = { error: "페르소나를 찾을 수 없어요.", code: "not_found" };
 
 export async function personas(request, env, json, id, action) {
+  const method = request.method;
+
+  // ── 샘플 페르소나: 로그인 없이 읽기·채팅만 ──
+  if (id === "sample" || id === SAMPLE_PERSONA_ID) {
+    const row = await ensureSample(env);
+    const sampleUser = { id: SAMPLE_USER_ID, name: "샘플" };
+    if (!action && method === "GET") return json({ persona: { ...rowToPersona(row), isSample: true } });
+    if (action === "chat" && method === "GET") return personaChat(request, env, json, sampleUser, row, action);
+    if (action === "chat" && method === "POST") {
+      const limited = await rateLimit(request, env, json, "sample", "샘플 대화", Math.floor(Date.now() / 1000));
+      if (limited) return limited;
+      return personaChat(request, env, json, sampleUser, row, action, { autoIndex: true });
+    }
+    if (action === "photo" && method === "POST") return seedSamplePhoto(request, env, json, sampleUser, row);
+    if (method === "GET") return json({ error: "없는 경로예요." }, 404);
+    return json({ error: "샘플 페르소나는 고치거나 지울 수 없어요.", code: "sample_readonly" }, 403);
+  }
+
   const user = await currentUser(request, env);
   if (!user) return json({ error: "로그인이 필요해요.", code: "unauthorized" }, 401);
-  const method = request.method;
 
   if (id && action) {
     const row = await env.DB.prepare("SELECT * FROM personas WHERE id = ? AND user_id = ?").bind(id, user.id).first();
@@ -231,6 +250,45 @@ async function update(request, env, json, row) {
   ).bind(r.priority, r.tagline, r.photo_url, r.name, r.gender, r.age, r.hobbies, r.job, r.environment, r.personality, r.motivation,
     r.lifestyle, r.behavior, r.painpoints, r.needs, r.quote, r.updated_at, row.id).run();
   return json({ persona: rowToPersona({ ...row, ...r }) });
+}
+
+// ── 샘플 페르소나 심기 (없을 때만) ──
+async function ensureSample(env) {
+  let row = await env.DB.prepare("SELECT * FROM personas WHERE id = ?").bind(SAMPLE_PERSONA_ID).first();
+  if (row) return row;
+  const now = Math.floor(Date.now() / 1000);
+  const content = cleanContent(SAMPLE_PERSONA, 0);
+  const r = personaToRow({ ...content, id: SAMPLE_PERSONA_ID, userId: SAMPLE_USER_ID, sessionId: null, analysisId: SAMPLE_ANALYSIS_ID, evidence: SAMPLE_PERSONA.evidence, share: SAMPLE_PERSONA.share, createdAt: now, updatedAt: now });
+  await env.DB.batch([
+    // 로그인할 수 없는 시스템 계정 (비밀번호 해시가 아닌 값이라 어떤 비밀번호로도 통과하지 않는다)
+    env.DB.prepare("INSERT OR IGNORE INTO users (id, email, password_hash, display_name, agreed_at, created_at) VALUES (?, ?, ?, ?, ?, ?)")
+      .bind(SAMPLE_USER_ID, "sample@uxa.invalid", "none$0$0$0", "샘플", now, now),
+    env.DB.prepare("INSERT OR IGNORE INTO persona_analyses (id, user_id, service, kind, count, sources, analysis, meta, status, created_at) VALUES (?, ?, ?, 'design', 3, ?, ?, ?, 'composed', ?)")
+      .bind(SAMPLE_ANALYSIS_ID, SAMPLE_USER_ID, SAMPLE_SERVICE, JSON.stringify(SAMPLE_SOURCES), JSON.stringify(SAMPLE_ANALYSIS), JSON.stringify({ sample: true }), now),
+    env.DB.prepare(
+      `INSERT OR IGNORE INTO personas (id, user_id, session_id, analysis_id, priority, tagline, photo_url, name, gender, age, hobbies, job,
+                             environment, personality, motivation, lifestyle, behavior, painpoints, needs, quote, evidence, share, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).bind(r.id, r.user_id, r.session_id, r.analysis_id, r.priority, r.tagline, r.photo_url, r.name, r.gender, r.age, r.hobbies, r.job,
+      r.environment, r.personality, r.motivation, r.lifestyle, r.behavior, r.painpoints, r.needs, r.quote, r.evidence, r.share, r.created_at, r.updated_at),
+  ]);
+  row = await env.DB.prepare("SELECT * FROM personas WHERE id = ?").bind(SAMPLE_PERSONA_ID).first();
+  return row;
+}
+
+// 샘플 사진 한 번 만들기 (이미 있으면 그대로). 누구나 부를 수 있지만 사진이 생긴 뒤에는 아무 일도 하지 않는다
+async function seedSamplePhoto(request, env, json, sampleUser, row) {
+  if (row.photo_url) return json({ ok: true, photoUrl: row.photo_url, existed: true });
+  const limited = await rateLimit(request, env, json, "sample", "샘플 사진", Math.floor(Date.now() / 1000));
+  if (limited) return limited;
+  if (!env.OPENAI_API_KEY) return json({ error: "AI를 부르지 못했어요. 잠시 후 다시 시도해 주세요." }, 502);
+  try {
+    const made = await createPersonaImage(env, request, sampleUser, row, SAMPLE_PHOTO_SCENE);
+    return json({ ok: true, ...made });
+  } catch (err) {
+    console.error("sample photo failed", String(err?.message || err));
+    return json({ error: "샘플 사진을 만들지 못했어요. 잠시 후 다시 시도해 주세요." }, 502);
+  }
 }
 
 async function readBody(request) {

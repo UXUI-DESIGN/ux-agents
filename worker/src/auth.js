@@ -6,7 +6,7 @@ const PBKDF2_ITERATIONS = 100000; // Workers WebCrypto의 PBKDF2 상한
 const SESSION_DAYS_REMEMBER = 30; // 가입 직후, '로그인 상태 유지'를 고른 로그인
 const SESSION_DAYS_SHORT = 1; // '로그인 상태 유지'를 고르지 않은 로그인
 const RATE_WINDOW_SEC = 10 * 60; // 10분 동안
-const RATE_LIMITS = { signup: 5, login: 10, interview: 30 }; // 같은 IP에서 허용하는 시도 횟수
+const RATE_LIMITS = { signup: 5, login: 10, interview: 30, sample: 20 }; // 같은 IP에서 허용하는 시도 횟수 (sample: 로그인 없는 샘플 페르소나 채팅)
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const INVALID_LOGIN = "이메일 또는 비밀번호를 확인해 주세요.";

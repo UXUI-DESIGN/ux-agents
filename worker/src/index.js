@@ -71,7 +71,7 @@ async function route(request, env, cors) {
   const imagePath = url.pathname.match(/^\/api\/personas\/image\/([0-9a-f]+)$/);
   if (imagePath && request.method === "GET") return servePersonaImage(env, imagePath[1]);
 
-  const personaPath = url.pathname.match(/^\/api\/personas(?:\/([^/]+))?(?:\/(image-prompt|image|index|chat))?$/);
+  const personaPath = url.pathname.match(/^\/api\/personas(?:\/([^/]+))?(?:\/(image-prompt|image|index|chat|photo))?$/);
   if (url.pathname.startsWith("/api/auth/") || guidePath || participantPath || detailPath || personaPath || url.pathname === "/api/sessions" || url.pathname === "/api/debriefs") {
     if (!cors["Access-Control-Allow-Origin"]) return json({ error: "허용되지 않은 사이트에서 온 요청이에요." }, 403, cors);
     const reply = (data, status = 200) => json(data, status, cors);

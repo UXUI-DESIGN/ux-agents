@@ -163,7 +163,7 @@
     }
   </style>
 </head>
-<body data-auth="required">
+<body>
 
   <header class="nav">
     <div class="container">
@@ -233,7 +233,9 @@
     const SILHOUETTE = `<svg viewBox="0 0 240 180" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="120" cy="72" r="38" fill="currentColor"/><path d="M40 190c0-46 36-78 80-78s80 32 80 78" fill="currentColor"/></svg>`;
     const STARTERS = ["요즘 콘텐츠는 주로 언제, 어디서 보세요?", "최근에 가장 불편했던 순간은요?", "주변 사람 추천은 얼마나 믿으세요?", "이 서비스에서 꼭 있었으면 하는 기능은?"];
 
-    const personaId = new URLSearchParams(location.search).get("id") || "";
+    const personaId = new URLSearchParams(location.search).get("id") || "sample";
+    const isSample = personaId === "sample" || personaId === "sample-seeun";
+    if (!isSample && !UXA.getSession()) location.replace(UXA.loginUrl());
     const api = (path, opt) => UXA.api(`/api/personas/${encodeURIComponent(personaId)}${path}`, opt);
     const HIST_KEY = `uxa.persona.chat.${personaId}`;
     let persona = null, ready = false, busy = false;
@@ -243,7 +245,8 @@
 
     function renderPersona(p) {
       persona = p;
-      document.title = `${p.name}와(과) 대화 · 페르소나 · UXA`;
+      const wa = (w) => { const c = w.charCodeAt(w.length - 1); return c >= 0xac00 && c <= 0xd7a3 && (c - 0xac00) % 28 ? "과" : "와"; };
+      document.title = `${p.name}${wa(p.name)} 대화 · 페르소나 · UXA`;
       $("pname").textContent = p.name;
       $("psub").textContent = `${p.job} · ${p.age}세`;
       $("ptag").innerHTML = emph(p.tagline);
@@ -254,6 +257,20 @@
     }
 
     function renderIndex(st) {
+      if (st.autoIndex || isSample) {
+        // 샘플: 첫 질문 때 서버가 알아서 색인한다. 버튼 없이 바로 대화
+        ready = true;
+        $("indexState").textContent = st.ready ? "색인됨" : "자동";
+        $("indexState").className = "state ok";
+        $("indexDesc").textContent = st.ready
+          ? `샘플 인터뷰 분석의 근거 노트 ${st.total}개가 색인되어 있어요. 답변에서 [N012] 같은 표시를 눌러 원문을 확인해 보세요.`
+          : "체험용 샘플이에요. 첫 질문을 보내면 근거 노트(가상 인터뷰 4명의 어피니티 노트·테마)를 자동으로 색인하고 답해요.";
+        $("indexCounts").innerHTML = Object.entries(st.counts || {}).map(([k, n]) => `<span class="k-${esc(k)}">${esc(KIND_LABEL[k] || k)} ${n}</span>`).join("");
+        $("indexBtn").hidden = true;
+        updateSend();
+        if ($("msgs").querySelector(".blocked")) { $("msgs").innerHTML = ""; renderHistory(); }
+        return;
+      }
       ready = !!st.ready;
       $("indexState").textContent = ready ? "색인됨" : st.reason === "no_analysis" ? "불가" : "아직 없음";
       $("indexState").className = `state ${ready ? "ok" : "no"}`;
@@ -381,8 +398,7 @@
     });
     $("indexBtn").addEventListener("click", index);
 
-    if (!personaId) { $("msgs").innerHTML = `<div class="blocked"><b>페르소나를 고르세요</b><a href="/persona/" style="color:var(--accent);text-decoration:underline">목록으로</a></div>`; }
-    else loadStatus().then(() => { if (ready) renderHistory(); });
+    loadStatus().then(() => { if (ready) renderHistory(); });
   </script>
 </body>
 </html>
