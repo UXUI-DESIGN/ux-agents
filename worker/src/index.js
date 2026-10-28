@@ -59,6 +59,20 @@ async function route(request, env, cors) {
     return json(await checkOpenAI(env), 200, cors);
   }
 
+  // 이 키로 쓸 수 있는 이미지 모델 이름 (비용 없음, 키 값은 내보내지 않음)
+  if (url.pathname === "/health/images" && request.method === "GET") {
+    if (!env.OPENAI_API_KEY) return json({ images: [], reason: "OPENAI_API_KEY 비밀값이 없어요." }, 200, cors);
+    try {
+      const res = await fetch("https://api.openai.com/v1/models", { headers: { Authorization: `Bearer ${env.OPENAI_API_KEY}` } });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) return json({ images: [], reason: `OpenAI 응답 오류 (${res.status})` }, 200, cors);
+      const ids = (data.data || []).map((m) => m.id).filter((id) => /image|dall/i.test(id)).sort();
+      return json({ images: ids, configured: env.OPENAI_IMAGE_MODEL || "gpt-image-1" }, 200, cors);
+    } catch {
+      return json({ images: [], reason: "OpenAI에 접속하지 못했어요." }, 200, cors);
+    }
+  }
+
   if (url.pathname === "/api/chat" && request.method === "POST") {
     if (!cors["Access-Control-Allow-Origin"]) return json({ error: "허용되지 않은 사이트에서 온 요청이에요." }, 403, cors);
     return chat(request, env, cors);

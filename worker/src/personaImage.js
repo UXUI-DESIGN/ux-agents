@@ -165,14 +165,27 @@ function josa(word, withBatchim, without) {
 }
 
 // ── 이미지 생성 (Images API) ──
+//   설정한 모델을 이 키로 쓸 수 없으면(does not exist / not found) 다음 후보로 넘어간다. /health/images 로 쓸 수 있는 모델을 볼 수 있다
+const MODEL_FALLBACKS = ["gpt-image-2.5-flare", "gpt-image-2", "gpt-image-1.5", "gpt-image-1"];
 async function generateImage(env, model, prompt) {
-  const res = await fetch("https://api.openai.com/v1/images/generations", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${env.OPENAI_API_KEY}` },
-    body: JSON.stringify({ model, prompt, n: 1, size: IMAGE_SIZE, quality: "medium", output_format: "jpeg", output_compression: 75 }),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(`OpenAI images ${res.status}: ${data?.error?.message || ""}`);
+  const candidates = [model, ...MODEL_FALLBACKS.filter((m) => m !== model)];
+  let lastErr;
+  for (const m of candidates) {
+    const res = await fetch("https://api.openai.com/v1/images/generations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${env.OPENAI_API_KEY}` },
+      body: JSON.stringify({ model: m, prompt, n: 1, size: IMAGE_SIZE, quality: "medium", output_format: "jpeg", output_compression: 75 }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok) return decodeImage(data);
+    lastErr = new Error(`OpenAI images ${res.status} (${m}): ${data?.error?.message || ""}`);
+    const msg = String(data?.error?.message || "");
+    if (!(res.status === 400 || res.status === 404) || !/does not exist|not found|unknown model|unsupported model/i.test(msg)) throw lastErr;
+    console.warn("image model unavailable, trying next", m, msg);
+  }
+  throw lastErr;
+}
+function decodeImage(data) {
   const b64 = data?.data?.[0]?.b64_json;
   if (!b64) throw new Error("이미지 답이 비어 있음");
   const bin = atob(b64);
