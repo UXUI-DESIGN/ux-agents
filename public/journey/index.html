@@ -12,81 +12,549 @@
       --bg-soft: #f6f7fb;
       --text: #14161f;
       --text-sub: #5b6072;
+      --text-faint: #a3a7b7;
       --line: #e4e6ee;
       --accent: #4f46e5;
       --accent-soft: #eef0ff;
+      --good: #12805c;
+      --good-soft: #e6f6ef;
+      --danger: #d33a3a;
+      --danger-soft: #fdeeee;
+      --danger-line: #f5c2c2;
       --radius: 16px;
       --max: 1160px;
+      /* 저니맵 표: 레인 이름 열 + 단계 열 (감정 곡선 SVG가 같은 폭으로 맞춰 그린다) */
+      --lane-w: 124px;
+      --col-w: 232px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       display: flex; flex-direction: column; min-height: 100vh;
       font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-      word-break: keep-all;
+      background: var(--bg); color: var(--text); line-height: 1.6; word-break: keep-all;
     }
     a { color: inherit; text-decoration: none; }
+    button, input, textarea, select { font: inherit; color: inherit; }
+    [hidden] { display: none !important; }
     .container { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
 
     /* 내비게이션 (랜딩과 동일) */
-    .nav {
-      position: sticky; top: 0; z-index: 10;
-      background: rgba(255, 255, 255, 0.9);
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid var(--line);
-    }
-    .nav .container {
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 24px; height: 64px;
-    }
+    .nav { position: sticky; top: 0; z-index: 10; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+    .nav .container { display: flex; align-items: center; justify-content: space-between; gap: 24px; height: 64px; }
     .logo { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
     .logo span { color: var(--accent); }
     .nav nav { min-width: 0; }
     .menu { display: flex; gap: 4px; list-style: none; overflow-x: auto; }
-    .menu a {
-      display: block; padding: 8px 14px; border-radius: 999px;
-      font-size: 14px; font-weight: 500; color: var(--text-sub); white-space: nowrap;
-    }
+    .menu a { display: block; padding: 8px 14px; border-radius: 999px; font-size: 14px; font-weight: 500; color: var(--text-sub); white-space: nowrap; }
     .menu a:hover { background: var(--accent-soft); color: var(--accent); }
     .menu a[aria-current="page"] { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
 
     /* 본문 */
-    main { flex: 1; padding: 100px 0; background: var(--bg-soft); }
-    .page-head { text-align: center; margin-bottom: 48px; }
-    .page-head .num {
-      display: inline-grid; place-items: center; width: 44px; height: 44px; margin-bottom: 16px;
-      border-radius: 50%; background: var(--accent); color: #fff; font-weight: 800; font-size: 18px;
+    main { flex: 1; padding: 56px 0 100px; background: var(--bg-soft); }
+    .page-head { margin-bottom: 20px; }
+    .page-head .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--accent); }
+    .page-head .eyebrow .n { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 12px; font-weight: 800; }
+    .page-head h1 { margin-top: 6px; font-size: clamp(26px, 3.5vw, 34px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.3; }
+    .page-head p { margin-top: 8px; font-size: 16px; color: var(--text-sub); }
+
+    /* 원칙 안내 */
+    .rule {
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+      padding: 12px 16px; margin-bottom: 24px; border-radius: 12px; background: var(--accent-soft); font-size: 14px; color: var(--text-sub);
     }
-    .page-head h1 { font-size: clamp(28px, 4vw, 40px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.3; }
-    .page-head p { margin-top: 12px; font-size: 17px; color: var(--text-sub); }
-    .notice {
-      max-width: 560px; margin: 0 auto; padding: 48px 32px; text-align: center;
-      background: #fff; border: 1px dashed var(--accent); border-radius: var(--radius);
+    .rule .formula { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; color: var(--accent); white-space: nowrap; }
+    .rule .formula span { padding: 2px 10px; border-radius: 999px; background: #fff; }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 10px 16px; border: 1px solid var(--line); border-radius: 10px; background: #fff;
+      font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: background .15s, border-color .15s;
     }
-    .notice .badge {
-      display: inline-block; margin-bottom: 16px; padding: 6px 14px; border-radius: 999px;
-      background: var(--accent-soft); color: var(--accent); font-size: 13px; font-weight: 600;
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-primary { width: 100%; padding: 15px; border: 0; border-radius: 12px; background: var(--accent); color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; }
+    .btn-primary:hover { background: #4338ca; }
+    .btn-primary:disabled { background: #c7c9d9; cursor: not-allowed; }
+    .btn-link { padding: 0; border: 0; background: none; color: var(--accent); font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+
+    /* 작업 영역: 왼쪽 입력·결과, 오른쪽 실행 로그 */
+    .workspace { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; align-items: start; }
+    .workspace.log-closed { grid-template-columns: minmax(0, 1fr) 52px; }
+    .card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); }
+    .card + .card { margin-top: 20px; }
+    .section { padding: 26px 28px; }
+    .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .section-head h2 { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
+    .section-head .desc { font-size: 13.5px; color: var(--text-sub); }
+
+    /* 입력 */
+    .inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 18px; }
+    .field > .label { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; margin-bottom: 8px; font-size: 14px; font-weight: 600; }
+    .field > .label .count { font-size: 12px; font-weight: 600; color: var(--accent); }
+    .req { color: var(--accent); }
+    .text-input {
+      display: block; width: 100%; padding: 10px 13px; border: 1px solid var(--line); border-radius: 10px; background: #fff;
+      font-size: 14.5px; line-height: 1.6; transition: border-color .15s, box-shadow .15s;
     }
-    .notice h2 { font-size: 22px; font-weight: 700; }
-    .notice p { margin-top: 8px; color: var(--text-sub); font-size: 15px; }
+    textarea.text-input { resize: vertical; min-height: 96px; }
+    .text-input::placeholder { color: var(--text-faint); }
+    .text-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .hint { margin-top: 6px; font-size: 12.5px; color: var(--text-sub); }
+    .hint a { color: var(--accent); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+    .stack > * + * { margin-top: 8px; }
+
+    .segmented { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; padding: 4px; margin-bottom: 12px; background: var(--bg-soft); border-radius: 12px; }
+    .segmented input { position: absolute; opacity: 0; pointer-events: none; }
+    .segmented label { padding: 7px 12px; border-radius: 9px; text-align: center; cursor: pointer; font-size: 14px; font-weight: 500; color: var(--text-sub); white-space: nowrap; }
+    .segmented input:checked + label { background: #fff; color: var(--accent); font-weight: 700; box-shadow: 0 1px 3px rgba(20, 22, 31, .08); }
+    .segmented input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+    .picker { display: grid; gap: 8px; max-height: 260px; overflow-y: auto; padding-right: 2px; }
+    .pick {
+      display: grid; grid-template-columns: auto 40px 1fr; gap: 10px; align-items: center;
+      padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; cursor: pointer; font-size: 14px;
+    }
+    .pick:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+    .pick input { width: 16px; height: 16px; accent-color: var(--accent); }
+    .avatar { width: 40px; height: 40px; border-radius: 50%; overflow: hidden; background: #e7e9f3; color: #b9bdd0; display: grid; place-items: center; }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .avatar svg { width: 70%; height: 70%; }
+    .pick b { font-weight: 700; }
+    .pick .sub { display: block; font-size: 12.5px; color: var(--text-sub); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pick .tag { margin-left: 6px; padding: 1px 7px; border-radius: 999px; background: #fff; border: 1px solid var(--line); font-size: 11px; font-weight: 700; color: var(--text-sub); vertical-align: 1px; }
+    .picker-empty { padding: 18px; border: 1px dashed var(--line); border-radius: 12px; font-size: 13.5px; color: var(--text-sub); text-align: center; }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .chip { padding: 4px 10px; border: 1px solid var(--line); border-radius: 999px; background: #fff; font-size: 12.5px; color: var(--text-sub); cursor: pointer; }
+    .chip:hover { border-color: var(--accent); color: var(--accent); }
+
+    .lens { display: flex; align-items: center; gap: 8px; margin-top: 14px; font-size: 13px; color: var(--text-sub); }
+    .lens b { padding: 2px 9px; border-radius: 6px; background: var(--text); color: #fff; font-size: 12px; letter-spacing: .02em; }
+
+    .generate { display: flex; align-items: center; gap: 14px; margin-top: 22px; }
+    .generate .btn-primary { width: auto; flex: none; padding: 13px 28px; }
+    .generate .why { font-size: 13px; color: var(--text-sub); }
+
+    /* 결과 */
+    .result-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .result-head h2 { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.4; }
+    .result-head .who { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 6px; font-size: 13.5px; color: var(--text-sub); }
+    .pill { padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: var(--bg-soft); color: var(--text-sub); }
+    .pill.asis { background: var(--text); color: #fff; }
+    .pill.demo { background: #fff4e0; color: #9a5b00; }
+    .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12.5px; color: var(--text-sub); }
+    .legend i { display: inline-block; width: 12px; height: 12px; margin-right: 5px; border-radius: 3px; vertical-align: -1px; }
+    .legend .l-pain { background: var(--danger-soft); border: 1px solid var(--danger); }
+    .legend .l-opp { background: #fff; border: 1px solid var(--accent); box-shadow: 0 2px 0 var(--accent-soft); }
+
+    .empty-result { margin-top: 18px; padding: 44px 24px; border: 1px dashed var(--line); border-radius: 12px; text-align: center; color: var(--text-sub); font-size: 14px; }
+    .empty-result b { display: block; margin-bottom: 4px; font-size: 16px; color: var(--text); }
+    .skeleton { margin-top: 18px; display: grid; gap: 10px; }
+    .skeleton div { height: 54px; border-radius: 10px; background: linear-gradient(90deg, #f0f1f6 0%, #f8f9fc 50%, #f0f1f6 100%); background-size: 200% 100%; animation: shimmer 1.2s linear infinite; }
+    @keyframes shimmer { to { background-position: -200% 0; } }
+
+    /* 저니맵 표 (데스크톱): 가로 스크롤 + 레인 이름 고정 */
+    .map-scroll { position: relative; margin-top: 18px; overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; overscroll-behavior-x: contain; }
+    .map { display: grid; grid-template-columns: var(--lane-w) repeat(var(--n), var(--col-w)); width: max-content; font-size: 13.5px; }
+    .map > * { border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); }
+    .map > .last { border-bottom: 0; }
+    .map > .end { border-right: 0; }
+    .lane {
+      position: sticky; left: 0; z-index: 2; padding: 14px 14px; background: #fafbfd;
+      font-size: 13px; font-weight: 700; color: var(--text); box-shadow: 4px 0 8px -6px rgba(20, 22, 31, .18);
+    }
+    .lane small { display: block; margin-top: 2px; font-size: 11.5px; font-weight: 500; color: var(--text-faint); }
+    .lane.corner { background: #fff; color: var(--text-faint); font-size: 12px; font-weight: 600; }
+    .lane.pain { color: var(--danger); }
+    .lane.opp { color: var(--accent); }
+    .stage-h { padding: 14px 16px; background: #fff; }
+    .stage-h .no { font-size: 11.5px; font-weight: 700; color: var(--accent); letter-spacing: .04em; }
+    .stage-h b { display: block; font-size: 15px; font-weight: 800; letter-spacing: -0.01em; }
+    .stage-h small { display: block; font-size: 12.5px; color: var(--text-sub); line-height: 1.5; }
+    .cell { padding: 12px 16px; background: #fff; }
+    .cell ul { list-style: none; display: grid; gap: 6px; }
+    .cell li { position: relative; padding-left: 12px; line-height: 1.55; }
+    .cell li::before { content: ""; position: absolute; left: 0; top: .65em; width: 5px; height: 5px; border-radius: 50%; background: var(--text-faint); }
+    .cell .none { color: var(--text-faint); }
+    .quote { color: var(--text-sub); font-style: normal; }
+    .quote::before { content: "“"; } .quote::after { content: "”"; }
+    .tp { display: flex; flex-wrap: wrap; gap: 5px; }
+    .tp span { padding: 2px 9px; border-radius: 6px; background: var(--bg-soft); font-size: 12.5px; color: var(--text-sub); }
+    .tp .gap { background: #fff4e0; color: #9a5b00; font-weight: 600; }
+
+    /* 페인포인트: 빨간 표시 */
+    .cell.pain { background: var(--danger-soft); box-shadow: inset 3px 0 0 var(--danger); }
+    .cell.pain.clear { background: #fff; box-shadow: none; }
+    .pain-item { display: grid; grid-template-columns: auto 1fr; gap: 8px; align-items: start; }
+    .pain-item + .pain-item { margin-top: 8px; }
+    .pain-item .id { padding: 1px 6px; border-radius: 5px; background: var(--danger); color: #fff; font-size: 11px; font-weight: 800; line-height: 1.6; }
+    .pain-item p { color: #8f2020; line-height: 1.55; }
+
+    /* 기회: 카드 */
+    .cell.opp { background: #fbfbff; }
+    .opp-card {
+      padding: 10px 12px; border: 1px solid #d9dcfb; border-radius: 10px; background: #fff;
+      box-shadow: 0 2px 0 var(--accent-soft), 0 4px 12px -6px rgba(79, 70, 229, .25);
+    }
+    .opp-card + .opp-card { margin-top: 8px; }
+    .opp-card .top { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 4px; font-size: 11px; font-weight: 800; color: var(--accent); letter-spacing: .04em; }
+    .opp-card .top span:last-child { padding: 0 6px; border-radius: 5px; background: var(--danger-soft); color: var(--danger); letter-spacing: 0; }
+    .opp-card p { font-size: 13px; line-height: 1.55; }
+
+    /* 감정 곡선 */
+    .curve-cell { grid-column: 2 / -1; padding: 0; background: #fff; }
+    .curve-cell svg { display: block; }
+    .curve-label { font-size: 12px; font-weight: 600; fill: var(--text-sub); }
+    .curve-tag { font-size: 11px; font-weight: 800; }
+    .emo-hit { cursor: pointer; outline: none; }
+    .emo-hit:focus-visible { stroke: var(--accent); stroke-width: 2; stroke-dasharray: 3 3; }
+    .peak-end {
+      position: sticky; left: var(--lane-w); display: flex; width: max-content; flex-wrap: wrap; align-items: center; gap: 4px 12px;
+      max-width: 520px; padding: 0 16px 12px; font-size: 12.5px; color: var(--text-sub);
+    }
+    .hint-touch { display: none; }
+    @media (hover: none) { .hint-hover { display: none; } .hint-touch { display: inline; } }
+    .pe-keys { display: inline-flex; align-items: center; gap: 4px; font-weight: 700; color: var(--text); white-space: nowrap; }
+    .pe-keys i { display: inline-block; width: 9px; height: 9px; margin-left: 4px; border-radius: 50%; }
+    .pe-keys i:first-child { margin-left: 0; }
+    .emo-tip {
+      position: fixed; z-index: 50; width: 280px; padding: 12px 14px; border-radius: 12px; background: #fff; border: 1px solid var(--line);
+      box-shadow: 0 12px 32px -8px rgba(20, 22, 31, .28); font-size: 13px; pointer-events: none;
+    }
+    .emo-tip .tip-top { display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700; color: var(--text-faint); }
+    .emo-tip .tip-top em { padding: 0 7px; border-radius: 999px; color: #fff; font-style: normal; font-size: 11px; }
+    .emo-tip b { display: block; margin-top: 2px; font-size: 15px; }
+    .emo-tip p { margin-top: 2px; color: var(--text-sub); line-height: 1.5; }
+    .emo-tip blockquote, .evi { margin-top: 8px; padding: 8px 10px; border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; background: var(--bg-soft); line-height: 1.55; }
+    .emo-tip cite, .evi cite { display: block; margin-top: 4px; font-size: 11.5px; font-style: normal; color: var(--text-faint); }
+
+    .scroll-hint { display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: var(--text-faint); }
+
+    /* 분석 신호 */
+    .signals { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 18px; }
+    .signal { padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: #fff; font-size: 13.5px; }
+    .signal .k { font-size: 12px; font-weight: 800; letter-spacing: .02em; }
+    .signal b { display: block; margin-top: 2px; font-size: 14.5px; }
+    .signal p { margin-top: 4px; color: var(--text-sub); font-size: 13px; }
+    .signal.low .k { color: var(--danger); }
+    .signal.end .k { color: #9a5b00; }
+    .signal.gap .k { color: var(--accent); }
+    .next-note { margin-top: 14px; font-size: 13px; color: var(--text-sub); }
+
+    /* 모바일: 단계별 카드 넘겨 보기 */
+    .deck-wrap { display: none; }
+
+    /* 실행 로그 패널 */
+    .log { position: sticky; top: 84px; max-height: calc(100vh - 104px); display: flex; flex-direction: column; overflow: hidden; }
+    .log-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 16px 16px 12px 18px; border-bottom: 1px solid var(--line); }
+    .log-head h2 { font-size: 15px; font-weight: 700; }
+    .log-head .meta { font-size: 12px; color: var(--text-faint); font-weight: 500; margin-left: 6px; }
+    .icon-btn { display: grid; place-items: center; width: 30px; height: 30px; flex: none; border: 1px solid var(--line); border-radius: 8px; background: #fff; cursor: pointer; color: var(--text-sub); }
+    .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .icon-btn svg { width: 16px; height: 16px; transition: transform .2s; }
+    .log-body { flex: 1; overflow-y: auto; padding: 14px 18px 18px; }
+    .log-empty { font-size: 13px; color: var(--text-sub); }
+    .log-list { list-style: none; position: relative; }
+    .log-list li { position: relative; padding: 0 0 14px 24px; font-size: 13px; }
+    .log-list li::before { content: ""; position: absolute; left: 6px; top: 18px; bottom: 0; width: 1px; background: var(--line); }
+    .log-list li:last-child::before { display: none; }
+    .log-list .dot { position: absolute; left: 0; top: 4px; width: 13px; height: 13px; border-radius: 50%; border: 2px solid var(--accent); background: var(--accent); }
+    .log-list li[data-state="run"] .dot { background: #fff; animation: blink 1s ease-in-out infinite; }
+    @keyframes blink { 50% { opacity: .35; } }
+    .log-list .t { float: right; font-size: 11.5px; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+    .log-list b { font-weight: 700; }
+    .log-list p { margin-top: 2px; color: var(--text-sub); line-height: 1.5; }
+    .log-list code { padding: 0 4px; border-radius: 4px; background: var(--bg-soft); font-size: 12px; font-family: ui-monospace, Consolas, monospace; }
+    .log-rail { display: none; }
+    .workspace.log-closed .log-head h2, .workspace.log-closed .log-body { display: none; }
+    .workspace.log-closed .log-head { flex-direction: column; padding: 12px 10px; border-bottom: 0; }
+    .workspace.log-closed .log-rail { display: block; writing-mode: vertical-rl; margin-top: 10px; font-size: 13px; font-weight: 700; color: var(--text-sub); letter-spacing: .1em; cursor: pointer; border: 0; background: none; }
+    .workspace.log-closed .icon-btn svg { transform: rotate(180deg); }
 
     /* 푸터 (랜딩과 동일) */
     footer { padding: 40px 0; border-top: 1px solid var(--line); }
-    footer .container {
-      display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px;
-      font-size: 14px; color: var(--text-sub);
-    }
+    footer .container { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font-size: 14px; color: var(--text-sub); }
     footer .logo { font-size: 18px; color: var(--text); }
 
+    @media (max-width: 980px) {
+      .workspace, .workspace.log-closed { grid-template-columns: minmax(0, 1fr); }
+      .log { position: static; max-height: none; }
+      .workspace.log-closed .log-head { flex-direction: row; padding: 14px 16px 14px 18px; }
+      .workspace.log-closed .log-head h2 { display: block; }
+      .workspace.log-closed .log-rail { display: none; }
+      .log .icon-btn svg { transform: rotate(90deg); }
+      .workspace.log-closed .icon-btn svg { transform: rotate(-90deg); }
+      .log-body { max-height: 360px; }
+    }
+    @media (max-width: 720px) {
+      .inputs { grid-template-columns: 1fr; }
+      .signals { grid-template-columns: 1fr; }
+      .map-scroll, .scroll-hint { display: none; }
+      .deck-wrap { display: block; margin-top: 16px; }
+      .mini-curve { padding: 10px 6px 4px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+      .mini-curve svg { display: block; width: 100%; height: auto; }
+      .mini-curve .peak-end, .mini-curve .band-note { position: static; width: auto; max-width: none; padding: 6px 8px 6px; font-size: 12px; }
+      .deck {
+        display: grid; grid-auto-flow: column; grid-auto-columns: 88%; gap: 10px; margin: 12px -20px 0; padding: 0 20px 4px;
+        overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding: 0 20px; scrollbar-width: none;
+      }
+      .deck::-webkit-scrollbar { display: none; }
+      .scard { scroll-snap-align: start; border: 1px solid var(--line); border-radius: 14px; background: #fff; overflow: hidden; }
+      .scard-head { padding: 14px 16px 12px; border-bottom: 1px solid var(--line); }
+      .scard-head .no { font-size: 11.5px; font-weight: 700; color: var(--accent); }
+      .scard-head b { display: block; font-size: 17px; font-weight: 800; }
+      .scard-head small { display: block; font-size: 13px; color: var(--text-sub); }
+      .scard-head .emo { display: inline-block; margin-top: 6px; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+      .scard-sec { padding: 12px 16px; font-size: 13.5px; }
+      .scard-sec + .scard-sec { border-top: 1px solid var(--line); }
+      .scard-sec h3 { margin-bottom: 6px; font-size: 12px; font-weight: 800; color: var(--text-sub); letter-spacing: .02em; }
+      .scard-sec.pain { background: var(--danger-soft); box-shadow: inset 3px 0 0 var(--danger); }
+      .scard-sec.pain h3 { color: var(--danger); }
+      .scard-sec.opp h3 { color: var(--accent); }
+      .scard-sec ul { list-style: none; display: grid; gap: 5px; }
+      .scard-sec li { position: relative; padding-left: 12px; }
+      .scard-sec li::before { content: ""; position: absolute; left: 0; top: .65em; width: 5px; height: 5px; border-radius: 50%; background: var(--text-faint); }
+      .deck-nav { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 12px; }
+      .dots { display: flex; gap: 6px; }
+      .dots button { width: 8px; height: 8px; padding: 0; border: 0; border-radius: 50%; background: var(--line); cursor: pointer; }
+      .dots button[aria-current="true"] { width: 20px; border-radius: 4px; background: var(--accent); }
+      .deck-nav .pos { font-size: 13px; font-weight: 700; color: var(--text-sub); font-variant-numeric: tabular-nums; }
+    }
     @media (max-width: 640px) {
+      .container { padding: 0 16px; }
       .nav .container { flex-direction: column; align-items: flex-start; height: auto; padding-top: 12px; padding-bottom: 8px; gap: 6px; }
       .nav nav { width: 100%; }
       .menu a { padding: 8px 12px 8px 0; }
       .menu a[aria-current="page"] { padding-left: 12px; }
-      main { padding: 72px 0; }
-      .notice { padding: 40px 24px; }
+      main { padding: 36px 0 72px; }
+      .section { padding: 20px 18px; }
+      .deck { margin: 12px -18px 0; padding: 0 18px 4px; scroll-padding: 0 18px; }
+      .generate { flex-direction: column; align-items: stretch; }
+      .generate .btn-primary { width: 100%; }
+    }
+    /* ── 검수 · 확정 · TO-BE ── */
+    .btn-accent-solid { border-color: var(--accent); background: var(--accent); color: #fff; }
+    .btn-accent-solid:hover { background: #4338ca; color: #fff; }
+    .spin { display: inline-block; width: 12px; height: 12px; margin-right: 6px; border: 2px solid var(--accent-soft); border-top-color: var(--accent); border-radius: 50%; vertical-align: -1px; animation: rot .8s linear infinite; }
+    @keyframes rot { to { transform: rotate(360deg); } }
+    .pill.tobe { background: var(--accent); color: #fff; }
+    .legend .l-ai { background: #f1f2f7; border: 1px solid #d5d8e4; }
+    .legend .l-human { background: #fff; border: 2px dashed var(--good); }
+    .legend .l-rewrite { background: #fff; border: 2px dashed #8b5cf6; }
+
+    .versions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+    .ver { display: inline-flex; align-items: baseline; gap: 6px; padding: 5px 12px; border: 1px solid var(--line); border-radius: 999px; background: #fff; font-size: 13px; font-weight: 700; color: var(--text-sub); }
+    .ver small { font-size: 11px; font-weight: 600; color: var(--text-faint); }
+    .ver.to-be { border-style: dashed; }
+    .ver.on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+
+    .status { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 14px; padding: 14px 18px; border-radius: 14px; }
+    .status > div { flex: 1; min-width: 220px; }
+    .status .big { font-size: 30px; font-weight: 900; letter-spacing: -0.03em; line-height: 1; }
+    .status b { font-size: 14.5px; }
+    .status p { font-size: 13px; color: var(--text-sub); }
+    .status p a { color: var(--accent); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+    .status.draft { background: #fff7e6; border: 1px solid #f6d58f; }
+    .status.draft .big { color: #b45309; }
+    .status.done { background: var(--good-soft); border: 1px solid #bfe6d3; }
+    .status.done .big { color: var(--good); }
+    .status .saved { margin-left: 4px; color: var(--text-faint); }
+
+    .inputs-card { margin-top: 12px; border: 1px solid var(--line); border-radius: 12px; background: #fafbfd; font-size: 13.5px; }
+    .inputs-card summary { display: flex; justify-content: space-between; gap: 10px; padding: 11px 14px; cursor: pointer; list-style: none; }
+    .inputs-card summary::-webkit-details-marker { display: none; }
+    .inputs-card summary b::before { content: "▸ "; color: var(--text-faint); }
+    .inputs-card[open] summary b::before { content: "▾ "; }
+    .inputs-card summary span { color: var(--text-faint); font-size: 12.5px; }
+    .inputs-card dl { display: grid; gap: 6px; padding: 0 14px 12px; }
+    .inputs-card dl div { display: grid; grid-template-columns: 96px 1fr; gap: 10px; }
+    .inputs-card dt { font-weight: 700; color: var(--text-sub); }
+    .warn-line { margin: 8px 0 0; padding: 8px 12px; border-radius: 8px; background: #fff4e0; color: #9a5b00; font-size: 13px; }
+    .inputs-card .warn-line { margin: 0 14px 12px; }
+
+    .view-toggle { display: inline-grid; margin: 14px 0 0; }
+
+    .map.side .span2 { grid-column: span 2; }
+    .lane.sub { font-size: 12px; color: var(--text-faint); }
+    .subhead { padding: 6px 16px; font-size: 11.5px; font-weight: 800; letter-spacing: .04em; background: #fafbfd; color: var(--text-faint); }
+    .subhead.tobe { background: var(--accent-soft); color: var(--accent); }
+    .lane.asis-lane { color: var(--text-sub); font-weight: 600; background: #f4f5f9; }
+    .cell.asis { background: #fafbfd; color: var(--text-sub); }
+    .cell.asis .quote, .cell.asis li { color: var(--text-sub); }
+    .cell[data-edit] { cursor: pointer; transition: background .12s; }
+    .cell[data-edit]:hover { background: #f7f8ff; }
+    .cell[data-edit]:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+    .cell.is-human { outline: 2px dashed var(--good); outline-offset: -5px; }
+    .cell.is-rewrite { outline: 2px dashed #8b5cf6; outline-offset: -5px; }
+    .cell.working { opacity: .5; pointer-events: none; }
+    .flash { animation: flash 1.6s ease-out; }
+    @keyframes flash { 0%, 30% { background: #fff3c4; } 100% { background: transparent; } }
+    .cell-foot { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+    .by, .ref, .hyp { padding: 0 6px; border-radius: 5px; font-size: 10.5px; font-weight: 700; line-height: 1.7; }
+    .by-ai { background: #f1f2f7; color: #6b7086; }
+    .by-human { background: var(--good-soft); color: var(--good); }
+    .by-ai-rewrite { background: #f1ebff; color: #6d28d9; }
+    .ref { background: #fff; border: 1px solid var(--line); color: var(--text-sub); cursor: help; }
+    .hyp { background: #fff4e0; color: #9a5b00; }
+    .stage-h .by { display: inline-block; margin-top: 4px; }
+    .emo { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+    .emo-note { margin-top: 6px; line-height: 1.55; }
+    .cell .evi { margin-top: 8px; font-size: 12.5px; }
+    .change { font-weight: 600; line-height: 1.55; }
+
+    .opp-block + .opp-block { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--line); }
+    .opp-card.chosen { border-color: var(--accent); }
+    .opp-missing { padding: 8px 10px; border: 1.5px dashed var(--danger); border-radius: 10px; background: var(--danger-soft); color: var(--danger); font-size: 12.5px; font-weight: 600; }
+    .drafts { display: grid; gap: 6px; margin-top: 8px; }
+    .draft { display: block; width: 100%; padding: 8px 10px; border: 1px dashed #c9cdf5; border-radius: 9px; background: #fff; text-align: left; font-size: 12.5px; line-height: 1.5; cursor: pointer; }
+    .draft small { display: block; font-size: 10.5px; font-weight: 800; color: var(--text-faint); }
+    .draft:hover { border-color: var(--accent); }
+    .draft.on { border-style: solid; border-color: var(--accent); background: var(--accent-soft); }
+    .opp-tools { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+    .hl { outline: 2px solid #f59e0b !important; outline-offset: 1px; }
+
+    .memos, .links, .scenes { margin-top: 20px; }
+    .memos h3, .links h3, .scenes h3 { font-size: 15px; font-weight: 800; }
+    .memos h3 small, .links h3 small, .scenes h3 small { margin-left: 6px; font-size: 12.5px; font-weight: 500; color: var(--text-sub); }
+    .memo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+    .memo { display: block; padding: 12px; border: 1px solid var(--line); border-top: 3px solid var(--kc); border-radius: 12px; background: #fff; }
+    .memo-head { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; font-size: 13px; font-weight: 700; }
+    .memo-head i { width: 9px; height: 9px; border-radius: 50%; background: var(--kc); }
+    .memo-head b { margin-left: auto; font-size: 12px; color: var(--text-sub); }
+    .memo textarea { min-height: 76px; font-size: 13.5px; }
+    .memo textarea[readonly] { background: var(--bg-soft); }
+
+    .endcheck { margin-top: 18px; padding: 14px 16px; border-radius: 12px; font-size: 13.5px; }
+    .endcheck.ok { background: var(--good-soft); border: 1px solid #bfe6d3; }
+    .endcheck.warn { background: #fff4e0; border: 1px solid #f6d58f; }
+    .ec-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .ec-badge { padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 800; color: #fff; background: var(--good); }
+    .endcheck.warn .ec-badge { background: #d97706; }
+    .ec-score { margin-left: auto; font-size: 12.5px; color: var(--text-sub); font-weight: 600; }
+    .ec-sub { display: block; margin-top: 8px; }
+    .endcheck ul { margin: 4px 0 0 18px; }
+    .ec-note { margin-top: 6px; font-size: 12.5px; color: #9a5b00; }
+    .link-list { list-style: none; display: grid; gap: 6px; margin-top: 10px; }
+    .link-list li { display: grid; grid-template-columns: 120px 1fr auto minmax(120px, auto); gap: 10px; align-items: center; padding: 9px 12px; border: 1px solid var(--line); border-radius: 10px; background: #fff; font-size: 13px; }
+    .link-list li.missing { border-color: var(--danger-line); background: var(--danger-soft); }
+    .link-list .from { font-weight: 700; color: var(--danger); }
+    .link-list .arrow { color: var(--text-faint); }
+    .link-list .to { display: flex; flex-wrap: wrap; gap: 4px; }
+    .link-list em { padding: 1px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-style: normal; font-weight: 700; font-size: 12px; }
+    .link-list em.none { background: #fff; color: var(--danger); }
+    .scene-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; margin: 10px 0 12px; }
+    .scene { padding: 12px 14px; border: 1px solid #d9dcfb; border-radius: 12px; background: #fff; font-size: 13.5px; }
+    .scene .no { font-size: 11.5px; font-weight: 800; color: var(--accent); }
+    .scene b { display: block; font-size: 15px; }
+    .scene p { margin-top: 4px; color: var(--text-sub); line-height: 1.55; }
+    .tip-hyp { margin-top: 6px; color: #9a5b00; font-size: 12px; font-weight: 700; }
+    .pe-line { display: inline-block; width: 18px; height: 0; margin-left: 8px; border-top: 2.5px solid var(--accent); vertical-align: middle; }
+    .pe-line.ghost { border-top: 2px dashed #9aa0b4; }
+    .log-list li[data-state="fail"] .dot { background: var(--danger); border-color: var(--danger); }
+
+    dialog.dlg { width: min(520px, calc(100vw - 32px)); margin: auto; padding: 0; border: 0; border-radius: 16px; box-shadow: 0 24px 60px -12px rgba(20, 22, 31, .35); }
+    dialog.dlg::backdrop { background: rgba(20, 22, 31, .4); }
+    .dlg form, .dlg .dlg-body { padding: 22px 22px 18px; }
+    .dlg h2 { font-size: 17px; font-weight: 800; }
+    .field-l { display: block; margin-top: 14px; font-size: 13.5px; font-weight: 600; }
+    .field-l small { font-weight: 500; color: var(--text-faint); }
+    .field-l .text-input, .field-l .segmented { margin-top: 6px; }
+    .segmented.score { margin-bottom: 0; }
+    .dlg-pain { display: flex; gap: 8px; margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: var(--danger-soft); color: #8f2020; font-size: 13.5px; }
+    .dlg-pain .id, .warn-list .id { padding: 0 6px; border-radius: 5px; background: var(--danger); color: #fff; font-size: 11px; font-weight: 800; line-height: 1.8; height: fit-content; }
+    .dlg-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 18px; }
+    .dlg-actions .grow { flex: 1; }
+    .dlg-note { margin-top: 8px; font-size: 12px; color: var(--text-sub); }
+    .warn-list { list-style: none; display: grid; gap: 6px; margin-top: 12px; font-size: 13.5px; }
+    .warn-list li { display: flex; gap: 8px; align-items: baseline; }
+    .toast { position: fixed; left: 50%; bottom: 24px; z-index: 60; transform: translate(-50%, 20px); padding: 10px 18px; border-radius: 999px; background: var(--text); color: #fff; font-size: 14px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; }
+    .toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+    /* 감정 곡선: 근거 띠 */
+    .band-n { font-size: 10.5px; font-weight: 600; fill: var(--text-faint); }
+    .band-n.weak { fill: #b45309; font-weight: 800; }
+    .band-note { position: sticky; left: var(--lane-w); width: max-content; max-width: 560px; padding: 0 16px 8px; font-size: 12.5px; color: var(--text-sub); }
+    .band-note details { margin-top: 4px; }
+    .band-note summary { cursor: pointer; color: var(--accent); font-weight: 600; }
+    .band-note details p, .band-note details li { margin-top: 4px; line-height: 1.55; }
+    .band-note details ul { margin: 2px 0 0 18px; }
+    .pe-band { display: inline-block; width: 18px; height: 10px; margin-right: 2px; border-radius: 3px; background: rgba(79, 70, 229, .16); border: 1px dashed rgba(79, 70, 229, .5); vertical-align: -1px; }
+    .tip-n { margin-top: 6px !important; font-size: 12px; color: var(--text-sub); }
+    .emo-n { margin-left: 6px; font-size: 11.5px; font-weight: 700; color: var(--text-faint); }
+    .hyp.none { background: #eef0f4; color: #5b6072; }
+
+    /* 근거 보기 (히트맵): 진하기(근거 노트 수) + 무늬(추론 = 점, 근거 없음 = 빗금)로 색맹도 구분 */
+    .ev-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin-top: 14px; }
+    .switch { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; }
+    .switch input { position: absolute; opacity: 0; }
+    .switch .track { position: relative; width: 38px; height: 22px; border-radius: 11px; background: #d5d8e4; transition: background .15s; }
+    .switch .track::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.2); transition: transform .15s; }
+    .switch input:checked + .track { background: var(--accent); }
+    .switch input:checked + .track::after { transform: translateX(16px); }
+    .switch input:focus-visible + .track { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .ev-hint { font-size: 12.5px; color: var(--text-sub); }
+    .sw.grounded, .seg.grounded, .ev-chip .sw.grounded { background: #2f5bd3; }
+    .sw.inferred, .seg.inferred { background-color: #fde9b8; background-image: radial-gradient(#b7791f 1.2px, transparent 1.6px); background-size: 6px 6px; }
+    .sw.none, .seg.none { background: repeating-linear-gradient(135deg, #9aa0b4 0 2px, #eceef3 2px 6px); }
+    .sw { display: inline-block; width: 12px; height: 12px; margin-right: 5px; border-radius: 3px; vertical-align: -1px; border: 1px solid rgba(20, 22, 31, .15); }
+    .ev-summary { margin-top: 10px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: #fff; font-size: 13px; }
+    .ev-bar { display: flex; height: 14px; overflow: hidden; border-radius: 7px; border: 1px solid var(--line); }
+    .ev-bar .seg { height: 100%; }
+    .ev-text { margin-top: 8px; }
+    .ev-text small { margin-left: 6px; color: var(--text-faint); }
+    .ev-scale { margin-top: 4px; color: var(--text-sub); font-size: 12px; }
+    .ev-scale .lvl { display: inline-grid; place-items: center; width: 24px; height: 18px; margin-left: 3px; border-radius: 4px; font-style: normal; font-size: 11px; font-weight: 800; color: #1e2a55; border: 1px solid rgba(47, 91, 211, .3); }
+    .lvl[data-lvl="1"] { background: rgba(47, 91, 211, .10); }
+    .lvl[data-lvl="2"] { background: rgba(47, 91, 211, .24); }
+    .lvl[data-lvl="3"] { background: rgba(47, 91, 211, .40); }
+    .lvl[data-lvl="4"] { background: rgba(47, 91, 211, .60); color: #fff; }
+    .weak-lane { margin-top: 8px; padding: 8px 12px; border-radius: 8px; background: #fff4e0; color: #7a4a00; }
+    .weak-lane.ok { background: var(--good-soft); color: var(--good); }
+    #result.ev-on .cell[data-ev] { position: relative; box-shadow: none; }
+    #result.ev-on .cell[data-ev="grounded"][data-lvl="1"] { background: rgba(47, 91, 211, .10); }
+    #result.ev-on .cell[data-ev="grounded"][data-lvl="2"] { background: rgba(47, 91, 211, .24); }
+    #result.ev-on .cell[data-ev="grounded"][data-lvl="3"] { background: rgba(47, 91, 211, .40); }
+    #result.ev-on .cell[data-ev="grounded"][data-lvl="4"] { background: rgba(47, 91, 211, .60); }
+    #result.ev-on .cell[data-ev="inferred"] { background-color: #fff6dc; background-image: radial-gradient(rgba(183, 121, 31, .55) 1.1px, transparent 1.5px); background-size: 9px 9px; }
+    #result.ev-on .cell[data-ev="none"] { background: repeating-linear-gradient(135deg, #e3e5ec 0 3px, #f7f8fa 3px 10px); }
+    #result.ev-on .cell[data-ev="skip"] { opacity: .5; }
+    #result.ev-on .cell[data-ev]:not([data-ev="skip"]) { cursor: pointer; }
+    #result.ev-on .cell[data-ev]:not([data-ev="skip"])::after {
+      content: attr(data-evn); position: absolute; top: 6px; right: 6px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px;
+      background: #fff; border: 1.5px solid #2f5bd3; color: #1e2a55; font-size: 11px; font-weight: 800; line-height: 17px; text-align: center;
+    }
+    #result.ev-on .cell[data-ev="inferred"]::after { border-color: #b7791f; color: #7a4a00; }
+    #result.ev-on .cell[data-ev="none"]::after { border-color: #9aa0b4; color: #5b6072; }
+    #result.ev-on .cell.ev-sel { outline: 3px solid var(--text); outline-offset: -3px; }
+    #result.ev-on .lane.weak { background: #fff4e0; color: #7a4a00; }
+    #result.ev-on .lane.weak::after { content: "조사 필요"; display: inline-block; margin-top: 4px; padding: 0 6px; border-radius: 5px; background: #d97706; color: #fff; font-size: 10.5px; font-weight: 800; }
+    #result.ev-on .scard .cell[data-ev] { padding: 8px 30px 8px 8px; border-radius: 8px; }
+
+    .aside-tabs { display: flex; gap: 2px; }
+    .aside-tabs button { padding: 4px 10px; border: 0; border-radius: 8px; background: none; font: inherit; font-size: 14px; font-weight: 600; color: var(--text-faint); cursor: pointer; }
+    .aside-tabs button[aria-selected="true"] { background: var(--accent-soft); color: var(--accent); font-weight: 800; }
+    .ev-body { font-size: 13px; }
+    .ev-where { font-size: 12px; font-weight: 800; color: var(--accent); }
+    .ev-content { margin: 2px 0 8px; font-weight: 600; line-height: 1.5; }
+    .ev-chip { display: inline-flex; align-items: center; margin-right: 6px; padding: 1px 8px 1px 4px; border-radius: 999px; background: var(--bg-soft); font-weight: 700; }
+    .ev-msg { margin-top: 8px; padding: 8px 10px; border-radius: 8px; background: #fff4e0; color: #7a4a00; line-height: 1.5; }
+    .ev-body h3 { margin-top: 14px; font-size: 12.5px; font-weight: 800; color: var(--text-sub); }
+    .ev-notes, .ev-quotes { list-style: none; display: grid; gap: 8px; margin-top: 6px; }
+    .ev-notes li { padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; }
+    .ev-notes small { margin-left: 6px; color: var(--text-faint); font-weight: 600; }
+    .ev-notes p { margin-top: 4px; line-height: 1.5; }
+    .ev-quotes blockquote { padding: 8px 10px; border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; background: var(--bg-soft); line-height: 1.55; }
+    .ev-quotes cite { display: block; margin-top: 4px; font-size: 11.5px; font-style: normal; color: var(--text-faint); }
+
+    @media (max-width: 720px) {
+      .memo-grid { grid-template-columns: 1fr; }
+      .link-list li { grid-template-columns: 1fr; gap: 4px; }
+      .link-list .arrow { display: none; }
+      .scard .cell { padding: 0; background: none; outline-offset: 2px; }
+      .scard .cell.pain { box-shadow: none; }
+      .scard-head.tap { cursor: pointer; }
+      .scard-head .asis-emo { background: #f1f2f7; color: var(--text-sub); margin-left: 4px; }
+      .status .big { font-size: 24px; }
     }
   </style>
 </head>
@@ -110,14 +578,97 @@
   <main>
     <div class="container">
       <div class="page-head">
-        <span class="num">4</span>
-        <h1>저니맵 생성</h1>
-        <p>페르소나의 단계별 행동·감정·페인포인트를 저니맵으로 그립니다.</p>
+        <span class="eyebrow"><span class="n">4</span>저니맵 생성</span>
+        <h1>한 사람의 여정을 단계별로 펼쳐 봐요</h1>
+        <p>페르소나가 목표를 이루기까지의 행동·생각·감정을 시간 순으로 놓고, 마찰(페인포인트)과 개선 기회를 찾습니다.</p>
       </div>
-      <div class="notice">
-        <span class="badge">Coming soon</span>
-        <h2>준비 중입니다</h2>
-        <p>이 에이전트는 현재 개발 중이에요. 곧 만나보실 수 있습니다.</p>
+
+      <p class="rule">
+        <span class="formula"><span>페르소나 1명</span>×<span>시나리오 1개</span>= 저니맵 1장</span>
+        여러 사람이나 여러 상황을 한 장에 섞으면 마찰이 평균으로 흐려져요. 다른 사람·상황은 따로 그려 주세요.
+      </p>
+
+      <div class="workspace" id="workspace">
+        <div>
+          <!-- 입력 -->
+          <section class="card section" aria-labelledby="inputTitle">
+            <div class="section-head">
+              <h2 id="inputTitle">입력</h2>
+              <span class="desc">누구의, 어떤 상황의 여정인지 정해 주세요.</span>
+            </div>
+            <div class="inputs">
+              <div class="field">
+                <div class="label"><span>페르소나 <span class="req">*</span></span><span class="count">1명</span></div>
+                <div class="segmented" role="radiogroup" aria-label="페르소나 입력 방식">
+                  <input type="radio" name="pmode" id="pmLoad" value="load" checked /><label for="pmLoad">내 페르소나 불러오기</label>
+                  <input type="radio" name="pmode" id="pmManual" value="manual" /><label for="pmManual">직접 입력</label>
+                </div>
+                <div id="loadPane">
+                  <div class="picker" id="picker" role="radiogroup" aria-label="페르소나 선택"><div class="picker-empty">불러오는 중…</div></div>
+                  <p class="hint" id="pickerHint"></p>
+                </div>
+                <div id="manualPane" class="stack" hidden>
+                  <input class="text-input" id="mName" maxlength="20" placeholder="이름 (가명) 예) 세은" aria-label="이름" />
+                  <input class="text-input" id="mRole" maxlength="40" placeholder="직업 · 나이 예) 음악강사 · 32세" aria-label="직업과 나이" />
+                  <textarea class="text-input" id="mDesc" maxlength="300" placeholder="목표와 특징 예) 퇴근 후 쉬면서 지인이 추천한 콘텐츠를 보고 감상을 나누고 싶다. 추천 알고리즘은 잘 믿지 않는다." aria-label="목표와 특징"></textarea>
+                </div>
+              </div>
+              <div class="field">
+                <div class="label"><label for="scenario">시나리오 <span class="req">*</span></label><span class="count">1개</span></div>
+                <textarea class="text-input" id="scenario" maxlength="200" rows="4" placeholder="어떤 상황에서 무엇을 이루려는 여정인가요? 예) 퇴근 후 지인이 추천한 드라마를 찾아 보고, 감상을 나누기까지"></textarea>
+                <div class="chips" aria-label="시나리오 예시">
+                  <button type="button" class="chip" data-scn="퇴근 후 지인이 추천한 드라마를 찾아 보고, 감상을 나누기까지">지인 추천 콘텐츠 보기</button>
+                  <button type="button" class="chip" data-scn="주말에 혼자 볼 영화를 30분 안에 고르기">주말 영화 고르기</button>
+                  <button type="button" class="chip" data-scn="새 OTT 서비스에 가입해 첫 콘텐츠를 보기까지">첫 가입·온보딩</button>
+                </div>
+                <p class="lens"><b>AS-IS</b> 지금의 경험을 진단해요. TO-BE(개선안)는 AS-IS를 확정한 뒤 ‘TO-BE 만들기’로 같은 골격에 그려요.</p>
+              </div>
+            </div>
+            <div class="generate">
+              <button class="btn-primary" id="genBtn" type="button" disabled>AI로 저니맵 생성</button>
+              <button class="btn" id="demoBtn" type="button" hidden>예시 보기</button>
+              <span class="why" id="genWhy">페르소나와 시나리오를 정하면 만들 수 있어요.</span>
+            </div>
+          </section>
+
+          <!-- 결과 -->
+          <section class="card section" aria-labelledby="resultTitle" aria-live="polite">
+            <div class="result-head">
+              <div>
+                <h2 id="resultTitle">결과</h2>
+                <div class="who" id="resultWho"></div>
+              </div>
+              <div class="legend" id="legend" hidden>
+                <span><i class="l-pain"></i>페인포인트</span>
+                <span><i class="l-opp"></i>기회 카드</span>
+                <span><i class="l-ai"></i>AI가 씀</span>
+                <span><i class="l-human"></i>사람이 고침</span>
+                <span><i class="l-rewrite"></i>AI 다시 씀</span>
+              </div>
+            </div>
+            <div id="result">
+              <div class="empty-result"><b>아직 만든 저니맵이 없어요</b>위에서 페르소나와 시나리오를 정하고 ‘저니맵 생성’을 눌러 주세요.</div>
+            </div>
+          </section>
+        </div>
+
+        <!-- 실행 로그 -->
+        <aside class="card log" aria-labelledby="logTitle">
+          <div class="log-head">
+            <h2 id="logTitle" class="aside-tabs" role="tablist"><button type="button" role="tab" id="tabLog" aria-selected="true" aria-controls="logBody">실행 로그<span class="meta" id="logMeta"></span></button><button type="button" role="tab" id="tabEv" aria-selected="false" aria-controls="evBody">근거</button></h2>
+            <button class="icon-btn" id="logToggle" type="button" aria-expanded="true" aria-controls="logBody" aria-label="실행 로그 접기">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg>
+            </button>
+            <button class="log-rail" type="button" id="logRail" tabindex="-1" aria-hidden="true">실행 로그</button>
+          </div>
+          <div class="log-body" id="logBody">
+            <p class="log-empty" id="logEmpty">생성을 시작하면 에이전트가 거치는 단계가 여기에 차례로 쌓여요.</p>
+            <ol class="log-list" id="logList"></ol>
+          </div>
+          <div class="log-body ev-body" id="evBody" role="tabpanel" hidden>
+            <p class="log-empty">‘근거 보기’를 켜고 표의 칸을 누르면 그 칸의 근거 노트와 인용 원문이 여기에 보여요.</p>
+          </div>
+        </aside>
       </div>
     </div>
   </main>
@@ -130,5 +681,1059 @@
   </footer>
 
   <script src="/js/auth.js"></script>
+  <dialog class="dlg" id="editDlg" aria-labelledby="editTitle">
+    <form id="editForm" method="dialog">
+      <h2 id="editTitle">칸 고치기</h2>
+      <div id="editFields"></div>
+      <p class="dlg-note" id="rewriteNote"></p>
+      <div class="dlg-actions">
+        <button class="btn" type="button" id="rewriteBtn" data-lockable>AI로 다시 쓰기</button>
+        <span class="grow"></span>
+        <button class="btn" type="submit" value="cancel" formnovalidate>취소</button>
+        <button class="btn btn-accent-solid" type="submit" value="save">저장</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="dlg" id="warnDlg" aria-labelledby="warnTitle">
+    <div class="dlg-body">
+      <h2 id="warnTitle">기회(HMW)가 없는 페인포인트가 있어요</h2>
+      <p class="dlg-note">페인만 나열하고 기회를 잇지 않으면 ‘액션 없는 보고서’가 돼요. 페인포인트마다 기회를 하나 이상 고르는 것을 권해요.</p>
+      <ul class="warn-list" id="warnList"></ul>
+      <div class="dlg-actions">
+        <button class="btn" type="button" id="warnForce">그래도 확정</button>
+        <span class="grow"></span>
+        <button class="btn btn-accent-solid" type="button" id="warnBack">돌아가서 고르기</button>
+      </div>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <script>
+    // 저니맵 (AI · 검수 · 확정 · TO-BE)
+    //   스킬: experience-mapping/methods/journey-mapping.md — 한 지도 = 페르소나 1명 × 시나리오 1개
+    //   API: worker/src/journeys.js (/api/journeys…). OpenAI 는 Worker 만 부른다.
+    //   AS-IS 레인: 단계 · 행동 · 생각 · 감정 곡선 · 감정 설명 · 터치포인트 · 페인포인트 · 기회(HMW)
+    //   TO-BE 레인: 단계 · 바뀐 점 · 행동 · 생각 · 감정 곡선(AS-IS 겹침) · 감정 설명 · 터치포인트 · 반영된 기회 — 모든 칸은 '가설'
+    //   칸 출처(by): ai · human(사람이 고침) · ai-rewrite(칸 하나만 AI로 다시 씀)
+    const $ = (id) => document.getElementById(id);
+    const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const SILHOUETTE = `<svg viewBox="0 0 240 180" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="120" cy="72" r="38" fill="currentColor"/><path d="M40 190c0-46 36-78 80-78s80 32 80 78" fill="currentColor"/></svg>`;
+    const fmtDate = (sec) => { const d = new Date(sec * 1000); return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, "0")}.${String(d.getDate()).padStart(2, "0")} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`; };
+
+    // ── 로그인 전 '예시 보기' 용 고정 여정: 가상 참가자 5명(P01~P05) × 5단계 ──
+    //   감정은 참가자별 점수·근거 노트·인용으로 둔다. 일부러 3단계 '결정'은 의견이 크게 갈리고(-2 ~ +2),
+    //   4단계 '공유'는 근거 참가자가 1명뿐이다. 칸마다 근거 노트 수도 다르게(근거 있음 · 추론 · 근거 없음) 섞었다.
+    const EXAMPLE_SCENARIO = "퇴근 후 지인이 추천한 드라마를 찾아 보고, 감상을 나누기까지";
+    const EXAMPLE_NOTES = {
+      N002: ["P01", "P01-2", "넷플릭스·티빙·웨이브를 번갈아 쓰며 작품이 있는 곳으로 옮겨 다닌다"],
+      N004: ["P01", "P01-4", "메인 추천이 본 것과 비슷한 것만 보여 줘 새로운 게 없다"],
+      N005: ["P01", "P01-5", "추천 대신 검색창에 배우 이름이나 장르를 직접 친다"],
+      N006: ["P01", "P01-6", "고를 게 너무 많아 30분 넘게 훑다 아무것도 안 본 적이 있다"],
+      N007: ["P01", "P01-7", "친구가 카톡으로 보내 준 작품은 거의 다 끝까지 봤다"],
+      N009: ["P01", "P01-11", "친구가 추천해 준 작품을 대화방에서 다시 찾지 못했다"],
+      N012: ["P02", "P02-2", "메인 화면 첫 줄에 뜬 것을 그냥 누르는 편이다"],
+      N013: ["P02", "P02-3", "검색은 거의 하지 않는다"],
+      N014: ["P02", "P02-4", "친구 추천을 받아도 '나중에 봐야지' 하고 잊는다"],
+      N015: ["P02", "P02-6", "다음에 뭘 볼지 미리 생각하지 않는다"],
+      N017: ["P03", "P03-2", "보고 나면 인스타 스토리에 한 줄 감상을 올린다"],
+      N018: ["P03", "P03-3", "추천 알고리즘이 인기작만 밀어 취향과 맞지 않는다"],
+      N019: ["P03", "P03-4", "지인들이 올린 감상 글을 보고 작품을 고르는 일이 가장 많다"],
+      N020: ["P03", "P03-5", "장르는 좋아도 분위기가 다르면 실망해 고르기 어렵다"],
+      N021: ["P03", "P03-6", "친구들과 같은 작품을 보고 단톡방에서 토론하는 게 제일 재미있다"],
+      N023: ["P03", "P03-8", "취향이 비슷한 새로운 사람을 만날 통로가 없다"],
+      N025: ["P04", "P04-1", "보기 전에 평점과 리뷰를 20~30분 읽고 고른다"],
+      N027: ["P04", "P04-3", "친구 추천보다 평점과 리뷰 수를 더 믿는다"],
+      N028: ["P04", "P04-4", "추천 화면에 정보가 부족해 결국 다른 사이트로 간다"],
+      N031: ["P05", "P05-1", "동생이 추천해 주면 그날 바로 틀어 본다"],
+      N032: ["P05", "P05-2", "작품을 찾으려고 앱 세 개를 다 열어 본다"],
+      N033: ["P05", "P05-3", "고르다 지쳐서 그냥 앱을 끈 적이 많다"],
+      N034: ["P05", "P05-5", "다음 작품은 메인에 뜨는 것으로 정한다"],
+    };
+    const V = (code, score, ref, quote) => ({ code, score, refs: [ref], quote });
+    const C = (v, refs = [], by = "ai") => (Array.isArray(v) ? { items: v, refs, by } : { text: v, refs, by });
+    const EXAMPLE = [
+      { name: "계기", goal: "지인에게 추천을 받는다",
+        actions: C(["단톡방에서 친구가 보낸 드라마 추천을 읽는다", "제목만 메모 앱에 적어 둔다"], ["N007", "N019"]),
+        thought: C("다들 이거 본다던데, 나도 이번 주에 봐야지", ["N007"]),
+        emotion: { feel: "기대", note: "지인 추천은 믿을 만해서 기대가 생긴다", votes: [V("P01", 1, "N007", "친구가 카톡으로 보내 준 건 거의 다 끝까지 봤어요"), V("P02", 1, "N014", "추천받으면 일단 ‘나중에 봐야지’ 해요"), V("P03", 2, "N019", "지인들이 올린 감상 보고 고르는 게 제일 많아요"), V("P04", 0, "N027", "친구 추천보다는 평점을 더 믿어요"), V("P05", 1, "N031", "동생이 추천해 주면 그날 바로 틀어 봐요")] },
+        touchpoints: C(["메신저 단톡방", "메모 앱"], ["N007"]),
+        pains: [["추천 이유가 대화 속에 흩어져 왜 보려 했는지 잊는다", ["N014"], "어떻게 하면 지인의 추천을 ‘이유’와 함께 한곳에 모아 둘 수 있을까?"]] },
+      { name: "탐색", goal: "어디서 볼 수 있는지 찾는다",
+        actions: C(["OTT 앱 3개를 번갈아 열어 제목을 검색한다", "포털에서 ‘제공처’를 다시 찾아본다"], ["N002", "N005", "N032"]),
+        thought: C("이거 대체 어느 앱에 있는 거지?", ["N002"]),
+        emotion: { feel: "번거로움", note: "앱을 오가며 찾느라 지친다", votes: [V("P01", -1, "N002", "보고 싶은 게 어디 있는지 매번 찾아봐야 해요"), V("P02", -1, "N013", "검색은 귀찮아서 거의 안 해요"), V("P03", -2, "N018", "인기작만 밀어서 정작 찾는 건 안 보여요"), V("P05", -1, "N032", "앱 세 개를 다 열어 봐요")] },
+        touchpoints: C(["OTT 앱 A·B·C", "포털 검색"]),
+        pains: [["서비스마다 검색 결과가 달라 제공처 확인에 시간이 든다", ["N002", "N032"], "어떻게 하면 볼 수 있는 곳을 한 번의 검색으로 알려 줄 수 있을까?"]] },
+      { name: "결정", goal: "오늘 볼 작품을 고른다",
+        actions: C(["추천 탭을 열지만 취향과 먼 작품만 보여 닫는다", "평점과 리뷰를 훑어본다"], ["N004", "N006", "N012", "N025"]),
+        thought: C("추천은 내 취향이랑 하나도 안 맞네…", ["N004"]),
+        emotion: { feel: "실망 · 엇갈림", note: "추천을 믿는 사람과 못 믿는 사람의 경험이 정반대다", votes: [V("P01", -2, "N004", "내가 본 거랑 비슷한 것만 계속 떠요"), V("P02", 2, "N012", "첫 줄에 뜬 거 그냥 눌러요, 편해요"), V("P03", -2, "N020", "분위기가 다르면 실망해서 못 고르겠어요"), V("P04", 1, "N025", "리뷰 30분 읽고 고르면 실패가 없어요"), V("P05", -2, "N033", "고르다 지쳐서 그냥 꺼요")] },
+        touchpoints: C(["추천 탭", "리뷰 사이트"], ["N028"]),
+        pains: [["평가·기호를 반영하지 않는 추천이 믿음을 깎는다", ["N004", "N018"], "어떻게 하면 평가와 지인 취향을 추천에 녹일 수 있을까?"], ["선택지가 너무 많아 고르는 데 지친다", ["N006", "N033"], "어떻게 하면 ‘오늘 밤 볼 3편’처럼 선택지를 좁혀 줄 수 있을까?"]] },
+      { name: "공유", goal: "감상을 나눈다",
+        actions: C(["단톡방에 짧은 후기를 남긴다", "SNS 스토리에 한 줄 감상을 올린다"], ["N017"]),
+        thought: C("역시 같이 얘기하니까 훨씬 재밌다!"),
+        emotion: { feel: "즐거움", note: "지인과 이야기를 나누며 가장 즐겁다", votes: [V("P03", 2, "N021", "친구들이랑 단톡방에서 토론하는 게 제일 재밌어요")] },
+        touchpoints: C(["메신저 단톡방", "SNS 스토리"], [], "human"),
+        pains: [["후기가 대화에 묻혀 금방 사라진다", [], "어떻게 하면 짧은 후기를 작품 옆에 남겨 다시 볼 수 있게 할까?"]] },
+      { name: "다음 탐색", goal: "다음에 볼 작품을 찾는다",
+        actions: C(["친구가 추천해 준 작품을 떠올리려 한다", "기억이 안 나 처음부터 다시 검색한다"], ["N009"]),
+        thought: C("그때 뭐 추천해 줬더라… 다시 찾아야겠네"),
+        emotion: { feel: "허탈함", note: "주고받은 추천을 다시 찾지 못하고 끝난다", votes: [V("P01", -1, "N009", "친구가 추천해 준 게 분명 있었는데 못 찾겠더라고요"), V("P02", 0, "N015", "다음엔 뭐 볼지 딱히 생각 안 해요"), V("P03", -1, "N023", "취향 비슷한 사람을 만날 통로가 없어요"), V("P04", -1, "N028", "결국 또 평점 사이트로 가요"), V("P05", 0, "N034", "그냥 메인에 뜨는 거 봐요")] },
+        touchpoints: C([]),
+        pains: [["주고받은 추천이 기록으로 남지 않아 매번 처음부터 시작한다", ["N009"], "어떻게 하면 공유가 자연스럽게 다음 추천으로 이어지게 할 수 있을까?"]] },
+    ];
+    function exampleJourney(p, scenario) {
+      let k = 0;
+      const opps = [];
+      const stages = EXAMPLE.map((x, i) => {
+        const rep = [...x.emotion.votes].sort((a, b) => Math.abs(a.score) - Math.abs(b.score)).at(-1);
+        return {
+          id: `s${i + 1}`, name: x.name, goal: x.goal, headBy: "ai",
+          actions: x.actions, thought: x.thought, touchpoints: x.touchpoints,
+          emotion: { score: Math.round(x.emotion.votes.reduce((a, v) => a + v.score, 0) / x.emotion.votes.length), feel: x.emotion.feel, note: x.emotion.note, quote: rep.quote, quoteRef: rep.code, refs: [], votes: x.emotion.votes, by: "ai" },
+          pains: { by: "ai", items: x.pains.map(([text, refs, hmw]) => { const id = `P${++k}`; opps.push({ id: `O${k}`, pain: id, drafts: [hmw], chosen: hmw, by: "ai" }); return { id, text, refs }; }) },
+        };
+      });
+      const evidence = Object.fromEntries(Object.entries(EXAMPLE_NOTES).map(([id, [code, ref, text]]) => [id, { code, ref, text }]));
+      return { demo: true, id: "demo", lens: "as-is", status: "draft", version: "예시", persona: { name: p.name, role: p.role, source: p.source }, scenario, map: { stages, opps, memos: { low: "", peak: "", end: "" }, evidence }, meta: null };
+    }
+
+    // ── 입력 상태 ──
+    let personas = [];          // [{ id, name, job, age, tagline, photoUrl, project, sample }]
+    let mode = "load";
+    let busy = false;           // 생성·TO-BE·다시 쓰기 중에는 버튼을 잠근다
+    const loggedIn = () => !!UXA.getSession();
+
+    function currentPersona() {
+      if (mode === "manual") {
+        const name = $("mName").value.trim();
+        if (!name) return null;
+        return { name, role: $("mRole").value.trim(), desc: $("mDesc").value.trim(), source: "직접 입력" };
+      }
+      const id = document.querySelector('input[name="persona"]:checked')?.value;
+      const p = personas.find((x) => x.id === id);
+      if (!p) return null;
+      return { id: p.id, name: p.name, role: [p.job, p.age ? `${p.age}세` : ""].filter(Boolean).join(" · "), desc: p.tagline, source: p.sample ? "샘플 페르소나" : p.project || "내 페르소나" };
+    }
+
+    function updateGenerate() {
+      const p = currentPersona();
+      const s = $("scenario").value.trim();
+      $("genBtn").disabled = busy || (loggedIn() && (!p || !s));
+      $("genBtn").textContent = loggedIn() ? "AI로 저니맵 생성" : "로그인하고 AI로 만들기";
+      $("demoBtn").hidden = loggedIn();
+      if (busy) return;
+      $("genWhy").textContent = !loggedIn() ? "AI 생성은 로그인 후 쓸 수 있어요. 예시는 바로 볼 수 있어요."
+        : !p ? (mode === "manual" ? "페르소나 이름을 적어 주세요." : "페르소나를 한 명 골라 주세요.")
+        : !s ? "시나리오를 하나 적어 주세요."
+        : `${p.name} × ‘${s.length > 24 ? s.slice(0, 24) + "…" : s}’ 저니맵을 만들어요.`;
+    }
+
+    function renderPicker(want) {
+      if (!personas.length) {
+        $("picker").innerHTML = `<div class="picker-empty">불러올 페르소나가 없어요. ‘직접 입력’으로 적어 주세요.</div>`;
+        return;
+      }
+      want = want || new URLSearchParams(location.search).get("persona");
+      const pick = personas.find((p) => p.id === want) || personas.find((p) => !p.sample) || personas[0];
+      $("picker").innerHTML = personas.map((p) => `
+        <label class="pick">
+          <input type="radio" name="persona" value="${esc(p.id)}" ${p === pick ? "checked" : ""} />
+          <span class="avatar">${p.photoUrl ? `<img src="${esc(p.photoUrl)}" alt="" />` : SILHOUETTE}</span>
+          <span><b>${esc(p.name)}</b>${p.sample ? `<span class="tag">샘플</span>` : ""}<span class="sub">${esc([p.job, p.age ? p.age + "세" : "", p.project].filter(Boolean).join(" · "))}</span></span>
+        </label>`).join("");
+      if (pick.sample && !$("scenario").value) $("scenario").value = EXAMPLE_SCENARIO;
+      updateGenerate();
+    }
+
+    async function loadPersonas() {
+      const tasks = [UXA.api("/api/personas/sample")];
+      if (loggedIn()) tasks.push(UXA.api("/api/personas"));
+      const [sample, mine] = await Promise.all(tasks.map((t) => t.catch(() => ({ res: { ok: false }, data: {} }))));
+      const list = [];
+      if (mine?.res.status === 401) UXA.clearSession();
+      if (mine?.res.ok) {
+        for (const pj of mine.data.projects || []) for (const p of pj.personas || []) list.push({ id: p.id, name: p.name, job: p.job, age: p.age, tagline: p.tagline, photoUrl: p.photoUrl, project: pj.name });
+      }
+      if (sample.res.ok && sample.data.persona) {
+        const p = sample.data.persona;
+        list.push({ id: p.id, name: p.profile.name, job: p.profile.job, age: p.profile.age, tagline: p.tagline, photoUrl: p.photoUrl, project: "OTT 추천 서비스", sample: true });
+      }
+      personas = list;
+      $("pickerHint").innerHTML = !loggedIn()
+        ? `3단계에서 만든 내 페르소나를 쓰려면 <a href="${UXA.loginUrl("/journey/")}">로그인</a>해 주세요. 지금은 샘플로 체험할 수 있어요.`
+        : list.some((p) => !p.sample) ? "3단계(페르소나)에서 만든 페르소나 중 한 명을 골라요." : `아직 만든 페르소나가 없어요. <a href="/persona/new/">페르소나 만들기</a>`;
+      renderPicker(state.journey?.personaId);
+    }
+
+    // ── 실행 로그 ──
+    let t0 = 0;
+    function log(title, detail, stateName = "run") {
+      $("logEmpty").hidden = true;
+      $("logList").querySelectorAll('li[data-state="run"]').forEach((li) => (li.dataset.state = "done"));
+      const li = document.createElement("li");
+      li.dataset.state = stateName;
+      li.innerHTML = `<span class="dot"></span><span class="t">+${((performance.now() - t0) / 1000).toFixed(1)}s</span><b>${esc(title)}</b>${detail ? `<p>${detail}</p>` : ""}`;
+      $("logList").appendChild(li);
+      $("logBody").scrollTop = $("logBody").scrollHeight;
+      return li;
+    }
+    function startLog(label) {
+      t0 = performance.now();
+      $("logList").innerHTML = "";
+      $("logMeta").textContent = ` · ${label}`;
+      setAsideTab("log");
+      if ($("workspace").classList.contains("log-closed") && innerWidth > 980) setLogOpen(true);
+    }
+    function endLog(ok = true) {
+      $("logList").querySelectorAll('li[data-state="run"]').forEach((li) => (li.dataset.state = ok ? "done" : "fail"));
+      $("logMeta").textContent = ` · ${((performance.now() - t0) / 1000).toFixed(1)}초`;
+    }
+    function setAsideTab(name) {
+      const ev = name === "ev";
+      $("tabLog").setAttribute("aria-selected", String(!ev));
+      $("tabEv").setAttribute("aria-selected", String(ev));
+      $("logBody").hidden = ev;
+      $("evBody").hidden = !ev;
+    }
+    function setLogOpen(open) {
+      $("workspace").classList.toggle("log-closed", !open);
+      $("logToggle").setAttribute("aria-expanded", String(open));
+      $("logToggle").setAttribute("aria-label", open ? "실행 로그 접기" : "실행 로그 펼치기");
+      try { localStorage.setItem("uxa.journey.log", open ? "open" : "closed"); } catch {}
+    }
+
+    // 생성 중 진행 표시: 버튼을 잠그고 경과 시간을 보여 준다
+    let ticker = null;
+    function lock(on, label = "") {
+      busy = on;
+      document.querySelectorAll("[data-lockable]").forEach((el) => (el.disabled = on));
+      clearInterval(ticker);
+      if (on) {
+        const start = Date.now();
+        const tick = () => { $("genWhy").innerHTML = `<span class="spin" aria-hidden="true"></span>${esc(label)} ${Math.floor((Date.now() - start) / 1000)}초 · 보통 30초~1분 걸려요`; };
+        tick(); ticker = setInterval(tick, 1000);
+      }
+      updateGenerate();
+    }
+
+    // ── 저니맵 상태 ──
+    const state = { journey: null, view: "overlay", versions: [], savedAt: null, saving: false, evidence: false };
+    const editable = () => !!state.journey && !state.journey.demo && state.journey.status === "draft" && !busy;
+
+    // ── 감정 곡선 ──
+    const EMO_COLOR = (v) => (v <= -1 ? "var(--danger)" : v >= 1 ? "var(--good)" : "var(--text-sub)");
+    const EMO_BG = (v) => (v <= -1 ? "var(--danger-soft)" : v >= 1 ? "var(--good-soft)" : "var(--bg-soft)");
+    const fmtEmo = (v) => `${v > 0 ? "+" : v < 0 ? "−" : ""}${Number.isInteger(v) ? Math.abs(v) : Math.abs(v).toFixed(1)}`;
+    const KEY = { peak: { label: "정점", color: "#12805c" }, low: { label: "저점", color: "#d33a3a" }, end: { label: "종점", color: "#d97706" } };
+    const keyRoles = (sig, i) => ["peak", "low", "end"].filter((k) => sig[k] === i);
+    const keyColor = (roles) => (roles.includes("end") ? KEY.end.color : roles.includes("low") ? KEY.low.color : roles.includes("peak") ? KEY.peak.color : null);
+    // 근거 띠: 평균 점수가 얼마나 흔들릴 수 있는지 (위아래 각각의 폭, 점수 단위)
+    //   폭 = √(의견 차이² + 1) ÷ √(근거 참가자 수), 최대 1.6
+    //   의견 차이 = 참가자 점수의 표준편차. '+1' 은 한 사람의 말만 있을 때도 ±1점은 불확실하다고 보는 바닥값.
+    //   예) 1명 ±1.0 · 5명이 같은 점수 ±0.45 · 5명이 −2~+2로 갈림 ±0.9 · 참가자 점수 없음 ±1.6(점선)
+    const BAND_MAX = 1.6;
+    function bandOf(votes) {
+      const n = votes.length;
+      if (!n) return { n: 0, mean: null, sd: 0, half: BAND_MAX };
+      const mean = votes.reduce((a, v) => a + v.score, 0) / n;
+      const sd = Math.sqrt(votes.reduce((a, v) => a + (v.score - mean) ** 2, 0) / n);
+      return { n, mean, sd, half: Math.min(BAND_MAX, Math.sqrt(sd * sd + 1) / Math.sqrt(n)) };
+    }
+    const r1 = (v) => Math.round(v * 10) / 10;
+    // 곡선의 점: 참가자 점수가 있으면 그 평균(사람이 점수를 고친 칸은 고친 점수), 없으면 AI 점수
+    const points = (stages) => stages.map((s) => {
+      const e = s.emotion, votes = e.votes || [], b = bandOf(votes);
+      const fromVotes = b.n > 0 && e.by !== "human";
+      const score = fromVotes ? r1(b.mean) : e.score;
+      const rep = [...votes].filter((v) => v.quote).sort((a, c) => Math.abs(a.score - score) - Math.abs(c.score - score))[0];
+      return { name: s.name, score, feel: e.feel, note: e.note, quote: rep?.quote || e.quote, ref: rep ? `${rep.code} · ${rep.refs.join(", ")}` : e.quoteRef, votes, n: b.n, sd: b.sd, half: b.half, fromVotes };
+    });
+
+    function analyze(stages) {
+      const vals = points(stages).map((p) => p.score);
+      const low = vals.indexOf(Math.min(...vals));
+      const peak = vals.indexOf(Math.max(...vals));
+      let drop = 0, dropAt = 0;
+      for (let i = 1; i < vals.length; i++) if (vals[i - 1] - vals[i] > drop) { drop = vals[i - 1] - vals[i]; dropAt = i; }
+      const gaps = stages.map((s, i) => (s.touchpoints.items.length ? -1 : i)).filter((i) => i >= 0);
+      return { low, peak, end: vals.length - 1, drop, dropAt, gaps };
+    }
+
+    // colW 마다 한 점(열 가운데)이라 표의 단계 열과 정확히 맞는다. ghost 가 있으면 AS-IS 곡선을 회색 점선으로 겹쳐 그린다.
+    function curveSvg(pts, sig, { colW, h, mini = false, active = -1, ghost = null, owner = "main", band = false }) {
+      const w = colW * pts.length;
+      const pad = mini ? 18 : 46;
+      const bottom = mini ? 18 : 0;
+      const y = (v) => pad + ((2 - v) / 4) * (h - bottom - pad * 2);
+      const path = (arr, val = (p) => p.score) => {
+        const xy = arr.map((p, i) => [colW * i + colW / 2, y(val(p))]);
+        let d = `M${xy[0][0]},${xy[0][1]}`;
+        for (let i = 1; i < xy.length; i++) { const [x0, y0] = xy[i - 1], [x1, y1] = xy[i], dx = (x1 - x0) / 2; d += ` C${x0 + dx},${y0} ${x1 - dx},${y1} ${x1},${y1}`; }
+        return { d, xy };
+      };
+      const main = path(pts);
+      const area = `${main.d} L${main.xy.at(-1)[0]},${h - bottom} L${main.xy[0][0]},${h - bottom} Z`;
+      const fid = `emoFill-${owner}${mini ? "M" : ""}`;
+      const guides = mini ? "" : [-2, -1, 0, 1, 2].map((v) => `<line x1="0" x2="${w}" y1="${y(v)}" y2="${y(v)}" stroke="${v === 0 ? "#d3d6e2" : "#eef0f5"}" ${v === 0 ? 'stroke-dasharray="4 4"' : ""}/><text x="6" y="${y(v) - 4}" font-size="10" fill="var(--text-faint)">${fmtEmo(v)}</text>`).join("");
+      const cols = mini ? "" : pts.slice(1).map((_, i) => `<line x1="${colW * (i + 1)}" x2="${colW * (i + 1)}" y1="0" y2="${h}" stroke="var(--line)"/>`).join("");
+      // 근거 띠: 평균 ± 폭. 참가자 점수가 하나라도 있는 지도에서만 그린다
+      let bandEls = "";
+      if (band && pts.some((p) => p.n)) {
+        const lim = (v) => Math.max(-2.4, Math.min(2.4, v));
+        const up = path(pts, (p) => lim(p.score + p.half)), lo = path([...pts].reverse(), (p) => lim(p.score - p.half));
+        const loXY = lo.xy.map(([, yy], i) => [colW * (pts.length - 1 - i) + colW / 2, yy]);
+        let d = up.d + ` L${loXY[0][0]},${loXY[0][1]}`;
+        for (let i = 1; i < loXY.length; i++) { const [x0, y0] = loXY[i - 1], [x1, y1] = loXY[i], dx = (x1 - x0) / 2; d += ` C${x0 + dx},${y0} ${x1 - dx},${y1} ${x1},${y1}`; }
+        bandEls = `<path class="band" d="${d} Z" fill="#4f46e5" fill-opacity="${mini ? 0.14 : 0.13}" stroke="#4f46e5" stroke-opacity=".25" stroke-dasharray="3 3"/>`;
+        if (!mini) bandEls += pts.map((p, i) => `<text x="${colW * i + colW / 2}" y="${h - 8}" text-anchor="middle" class="band-n ${p.n <= 1 || p.sd >= 1.2 ? "weak" : ""}">${p.n ? `근거 ${p.n}명` : "참가자 점수 없음"}${p.n === 1 ? " · 근거 약함" : ""}${p.sd >= 1.2 ? " · 의견 갈림" : ""} · ±${p.half.toFixed(1)}</text>`).join("");
+      }
+      let ghostEls = "";
+      if (ghost && ghost.length === pts.length) {
+        const g = path(ghost);
+        ghostEls = `<path d="${g.d}" fill="none" stroke="#9aa0b4" stroke-width="${mini ? 1.5 : 2}" stroke-dasharray="5 5"/>` +
+          g.xy.map(([x, py], i) => `<circle cx="${x}" cy="${py}" r="${mini ? 2.5 : 4}" fill="#fff" stroke="#9aa0b4" stroke-width="2"/>${mini ? "" : `<circle class="emo-hit" data-owner="${owner}" data-ghost="1" data-i="${i}" cx="${x}" cy="${py}" r="12" fill="transparent" tabindex="0" role="button" aria-label="AS-IS ${i + 1}단계 ${esc(ghost[i].name)} 감정 ${fmtEmo(ghost[i].score)}"/>`}`).join("");
+      }
+      const marks = main.xy.map(([x, py], i) => {
+        const s = pts[i];
+        const roles = keyRoles(sig, i);
+        const kc = keyColor(roles);
+        const up = s.score >= 0;
+        let out = "";
+        if (mini && i === active) out += `<circle cx="${x}" cy="${py}" r="10" fill="none" stroke="var(--accent)" stroke-width="2"/>`;
+        if (kc && !mini) out += `<circle cx="${x}" cy="${py}" r="13" fill="${kc}" opacity=".16"/>`;
+        out += kc
+          ? `<circle cx="${x}" cy="${py}" r="${mini ? 5 : 7.5}" fill="${kc}" stroke="#fff" stroke-width="2.5"/>`
+          : `<circle cx="${x}" cy="${py}" r="${mini ? 4 : 6}" fill="#fff" stroke="var(--accent)" stroke-width="3"/>`;
+        if (!mini) {
+          out += `<text class="curve-label" x="${x}" y="${up ? py - 18 : py + 26}" text-anchor="middle">${esc(s.feel)} ${fmtEmo(s.score)}</text>`;
+          if (roles.length) {
+            const txt = roles.map((r) => KEY[r].label).join(" · ");
+            const tw = txt.length * 12 + 18, th = 20, ty = up ? py + 18 : py - 18 - th;
+            out += `<g aria-hidden="true"><rect x="${x - tw / 2}" y="${ty}" width="${tw}" height="${th}" rx="10" fill="${kc}"/><text class="curve-tag" x="${x}" y="${ty + 14}" text-anchor="middle" fill="#fff">${txt}</text></g>`;
+          }
+        }
+        out += `<circle class="emo-hit" data-owner="${owner}" data-i="${i}" cx="${x}" cy="${py}" r="${mini ? 14 : 20}" fill="transparent" tabindex="0" role="button" aria-label="${i + 1}단계 ${esc(s.name)} 감정 ${esc(s.feel)} ${fmtEmo(s.score)}${roles.length ? " · " + roles.map((r) => KEY[r].label).join(" · ") : ""}"/>`;
+        return out;
+      }).join("");
+      const miniLabels = mini ? pts.map((s, i) => `<text x="${colW * i + colW / 2}" y="${h - 4}" text-anchor="middle" font-size="10" font-weight="${i === active ? 800 : 500}" fill="${i === active ? "var(--accent)" : "var(--text-faint)"}">${esc(s.name)}</text>`).join("") : "";
+      return `<svg ${mini ? 'width="100%"' : `width="${w}" height="${h}"`} viewBox="0 0 ${w} ${h}" role="group" aria-label="감정 곡선: ${esc(pts.map((s) => `${s.name} ${s.feel}(${fmtEmo(s.score)})`).join(", "))}">
+        <defs><linearGradient id="${fid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4f46e5" stop-opacity=".14"/><stop offset="1" stop-color="#4f46e5" stop-opacity="0"/></linearGradient></defs>
+        ${guides}${cols}
+        ${bandEls ? "" : `<path d="${area}" fill="url(#${fid})"/>`}
+        ${bandEls}
+        ${ghostEls}
+        <path d="${main.d}" fill="none" stroke="var(--accent)" stroke-width="${mini ? 2 : 2.5}" stroke-linecap="round"/>
+        ${marks}${miniLabels}
+      </svg>`;
+    }
+
+    const bandNote = () => `<div class="band-note"><span class="pe-keys"><b class="pe-band"></b>근거 띠</span> 띠가 넓을수록 근거가 약하거나 의견이 갈린 단계입니다.
+        <details><summary>띠 넓이는 어떻게 정했나요?</summary>
+          <p>곡선의 점은 그 단계에서 감정을 말한 참가자들의 <b>평균 점수</b>예요. 띠는 “이 평균이 위아래로 얼마나 흔들릴 수 있나”를 점수 단위로 그린 거예요.</p>
+          <p><b>띠 폭 = √(의견 차이² + 1) ÷ √(근거 참가자 수)</b> (최대 ±1.6)</p>
+          <ul><li><b>근거 참가자 수</b>: 말한 사람이 많을수록 좁아져요. 4배 많아지면 폭이 절반.</li>
+            <li><b>의견 차이</b>: 참가자 점수가 서로 얼마나 다른지(표준편차). 모두 같은 점수면 0, −2와 +2로 갈리면 커져요.</li>
+            <li><b>+1</b>: 한 사람의 말만 있을 때도 최소 ±1점은 불확실하다고 보는 바닥값이에요.</li></ul>
+          <p>예) 1명뿐 ±1.0 · 5명이 같은 점수 ±0.45 · 5명이 −2~+2로 갈림 ±0.9 · 참가자 점수 없음 ±1.6</p>
+        </details></div>`;
+    const peakEndNote = (overlay, band = false) => `${band ? bandNote() : ""}<p class="peak-end"><span class="pe-keys"><i style="background:${KEY.peak.color}"></i>정점 <i style="background:${KEY.low.color}"></i>저점 <i style="background:${KEY.end.color}"></i>종점${overlay ? ` <b class="pe-line"></b>TO-BE <b class="pe-line ghost"></b>AS-IS` : ""}</span>사람은 정점과 마지막 순간으로 경험을 기억해요 (피크엔드 법칙). <span class="hint-hover">점에 마우스를 올리면 감정 설명과 근거 인용이 보여요.</span><span class="hint-touch">점을 누르면 그 단계 카드로 넘어가요.</span></p>`;
+
+    // ── 감정 점 툴팁 ──
+    const tipData = {};   // owner → { pts, sig, ghost }
+    const tip = document.createElement("div");
+    tip.className = "emo-tip"; tip.id = "emoTip"; tip.setAttribute("role", "tooltip"); tip.hidden = true;
+    document.body.appendChild(tip);
+    function showTip(el) {
+      const d = tipData[el.dataset.owner];
+      if (!d) return;
+      const i = Number(el.dataset.i), isGhost = !!el.dataset.ghost;
+      const s = (isGhost ? d.ghost : d.pts)[i];
+      if (!s) return;
+      const roles = isGhost ? [] : keyRoles(d.sig, i);
+      tip.innerHTML = `
+        <div class="tip-top"><span>${isGhost ? "AS-IS · " : d.ghost ? "TO-BE · " : ""}STAGE ${i + 1} · ${esc(s.name)}</span>${roles.map((r) => `<em style="background:${KEY[r].color}">${KEY[r].label}</em>`).join("")}</div>
+        <b style="color:${EMO_COLOR(s.score)}">${s.fromVotes ? "평균 " : ""}${fmtEmo(s.score)} · ${esc(s.feel)}</b>
+        <p>${esc(s.note || "")}</p>
+        ${s.n ? `<p class="tip-n">근거 참가자 <b>${s.n}명</b> · 점수 ${s.votes.map((v) => `${esc(v.code)} ${fmtEmo(v.score)}`).join(", ")}<br>띠 ±${s.half.toFixed(1)}${s.n === 1 ? " · 근거가 1명뿐이에요" : ""}${s.sd >= 1.2 ? " · 의견이 크게 갈려요" : ""}</p>` : d.band ? `<p class="tip-n">참가자별 점수가 없어 AI가 매긴 점수예요.</p>` : ""}
+        ${s.quote ? `<blockquote>“${esc(s.quote)}”<cite>대표 인용 · ${esc(s.ref || "—")}</cite></blockquote>` : d.ghost && !isGhost ? `<p class="tip-hyp">가설 · 검증 전</p>` : ""}`;
+      tip.hidden = false;
+      el.setAttribute("aria-describedby", "emoTip");
+      const r = el.getBoundingClientRect(), tw = tip.offsetWidth, th = tip.offsetHeight;
+      tip.style.left = `${Math.max(8, Math.min(innerWidth - tw - 8, r.left + r.width / 2 - tw / 2))}px`;
+      tip.style.top = `${r.top - th - 8 >= 8 ? r.top - th - 8 : r.bottom + 8}px`;
+    }
+    const hideTip = () => { tip.hidden = true; };
+    document.addEventListener("pointerover", (e) => { const el = e.target.closest?.(".emo-hit"); if (el) showTip(el); });
+    document.addEventListener("pointerout", (e) => { if (e.target.closest?.(".emo-hit")) hideTip(); });
+    document.addEventListener("focusin", (e) => { const el = e.target.closest?.(".emo-hit"); el ? showTip(el) : hideTip(); });
+    document.addEventListener("focusout", (e) => { if (e.target.closest?.(".emo-hit")) hideTip(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") hideTip(); });
+    addEventListener("scroll", hideTip, { passive: true, capture: true });
+
+    // ── 근거 보기: 칸마다 근거 노트 수와 종류 ──
+    //   grounded 근거 노트가 있는 칸(수만큼 진하게) · inferred 근거 없이 AI가 추론한 칸 · none 근거 없음(사람이 근거 없이 쓴 칸, 빈 칸)
+    //   skip: 단계 이름 · 기회(HMW) · 바뀐 점 처럼 근거로 평가하지 않는 칸, 페인포인트가 없는 칸
+    const EV_LANES = ["actions", "thought", "emotion", "touchpoints", "pains"];
+    const EV_LABEL = { grounded: "근거 있음", inferred: "추론", none: "근거 없음" };
+    function evOf(s, lane) {
+      if (!EV_LANES.includes(lane)) return { type: "skip", refs: [] };
+      const c = s[lane] || {};
+      let refs = c.refs || [], filled = true;
+      if (lane === "actions" || lane === "touchpoints") filled = (c.items || []).length > 0;
+      if (lane === "thought") filled = !!c.text;
+      if (lane === "emotion") refs = [...(c.refs || []), ...(c.votes || []).flatMap((v) => v.refs)];
+      if (lane === "pains") { if (!(c.items || []).length) return { type: "skip", refs: [] }; refs = c.items.flatMap((p) => p.refs || []); }
+      refs = [...new Set(refs)];
+      const type = refs.length ? "grounded" : filled && c.by !== "human" ? "inferred" : "none";
+      return { type, refs };
+    }
+    function evStats(j) {
+      const cells = j.map.stages.flatMap((s) => EV_LANES.map((lane) => ({ s, lane, ...evOf(s, lane) }))).filter((c) => c.type !== "skip");
+      const pct = (t) => Math.round((cells.filter((c) => c.type === t).length / (cells.length || 1)) * 100);
+      const lanes = EV_LANES.map((lane) => {
+        const mine = cells.filter((c) => c.lane === lane);
+        const g = mine.filter((c) => c.type === "grounded");
+        return { lane, total: mine.length, grounded: g.length, ratio: mine.length ? g.length / mine.length : 1, avg: mine.length ? mine.reduce((a, c) => a + c.refs.length, 0) / mine.length : 0 };
+      }).filter((l) => l.total);
+      const weak = [...lanes].sort((a, b) => a.ratio - b.ratio || a.avg - b.avg)[0];
+      return { cells, grounded: pct("grounded"), inferred: pct("inferred"), none: pct("none"), weak };
+    }
+    function evSummaryHtml(j) {
+      const st = evStats(j);
+      const g = st.grounded, i = st.inferred, n = Math.max(0, 100 - g - i);
+      const w = st.weak;
+      return `<div class="ev-summary">
+        <div class="ev-bar" role="img" aria-label="근거 있는 칸 ${g}%, 추론 ${i}%, 근거 없음 ${n}%"><span class="seg grounded" style="width:${g}%"></span><span class="seg inferred" style="width:${i}%"></span><span class="seg none" style="width:${n}%"></span></div>
+        <p class="ev-text"><span><i class="sw grounded"></i><b>근거 있는 칸 ${g}%</b></span> · <span><i class="sw inferred"></i>추론 ${i}%</span> · <span><i class="sw none"></i>근거 없음 ${n}%</span> <small>평가한 칸 ${st.cells.length}개 · 단계 이름·기회·빈 페인포인트 칸은 제외</small></p>
+        <p class="ev-scale">진하기 = 근거 노트 수 <i class="lvl" data-lvl="1">1</i><i class="lvl" data-lvl="2">2</i><i class="lvl" data-lvl="3">3</i><i class="lvl" data-lvl="4">4+</i> · 칸 오른쪽 위 숫자 · 칸을 누르면 오른쪽 ‘근거’ 패널에 노트와 인용이 보여요</p>
+        ${w && w.ratio < 1 ? `<p class="weak-lane"><b>추가 조사가 필요한 레인: ${LANE_LABEL[w.lane]}</b> — ${w.total}칸 중 근거 있는 칸 ${w.grounded}칸(${Math.round(w.ratio * 100)}%), 칸당 근거 노트 평균 ${w.avg.toFixed(1)}개. 이 레인을 맥락 질문이나 관찰로 보강해 보세요.</p>` : `<p class="weak-lane ok">모든 레인이 근거 노트로 채워져 있어요.</p>`}
+      </div>`;
+    }
+
+    // 근거 패널: 칸 하나의 근거 노트 목록과 인용 원문
+    function showEvidence(stageId, lane) {
+      const j = state.journey, s = j.map.stages.find((x) => x.id === stageId), ev = evOf(s, lane);
+      if (ev.type === "skip") return;
+      document.querySelectorAll(".ev-sel").forEach((x) => x.classList.remove("ev-sel"));
+      document.querySelectorAll(`[data-stage="${stageId}"][data-lane="${lane}"]`).forEach((x) => x.classList.add("ev-sel"));
+      const notes = ev.refs.map((r) => ({ id: r, ...(j.map.evidence?.[r] || {}) }));
+      const quotes = [];
+      if (lane === "emotion") for (const v of s.emotion.votes || []) if (v.quote) quotes.push({ who: `${v.code} · ${fmtEmo(v.score)}`, text: v.quote, refs: v.refs });
+      if (lane === "emotion" && !(s.emotion.votes || []).length && s.emotion.quote) quotes.push({ who: s.emotion.quoteRef || "", text: s.emotion.quote, refs: [] });
+      const content = lane === "pains" ? s.pains.items.map((p) => `${p.id} ${p.text}`).join(" / ") : lane === "thought" ? s.thought.text : lane === "emotion" ? `${s.emotion.feel} · ${s.emotion.note}` : (s[lane].items || []).join(" / ");
+      $("evBody").innerHTML = `
+        <p class="ev-where">${j.map.stages.indexOf(s) + 1}단계 ${esc(s.name)} · ${esc(LANE_LABEL[lane])}</p>
+        <p class="ev-content">${esc(content || "(비어 있음)")}</p>
+        <p><span class="ev-chip ${ev.type}"><i class="sw ${ev.type}"></i>${EV_LABEL[ev.type]}</span> 근거 노트 ${ev.refs.length}개</p>
+        ${ev.type === "inferred" ? `<p class="ev-msg">근거 노트 없이 AI가 페르소나 문서에서 <b>추론</b>한 칸이에요. 인터뷰로 확인되기 전까지는 가설로 다뤄 주세요.</p>` : ""}
+        ${ev.type === "none" ? `<p class="ev-msg">이 칸을 뒷받침하는 근거 노트가 없어요${s[lane]?.by === "human" ? " (사람이 근거 없이 고친 칸)" : ""}. 추가 조사 대상이에요.</p>` : ""}
+        ${notes.length ? `<h3>근거 노트</h3><ul class="ev-notes">${notes.map((n) => `<li><span class="ref">${esc(n.id)}</span>${n.code ? `<small>${esc(n.code)}${n.ref ? ` · ${esc(n.ref)}` : ""}</small>` : ""}<p>${esc(n.text || "노트 내용을 불러오지 못했어요")}</p></li>`).join("")}</ul>` : ""}
+        ${quotes.length ? `<h3>인용 원문</h3><ul class="ev-quotes">${quotes.map((q) => `<li><blockquote>“${esc(q.text)}”<cite>${esc(q.who)}${q.refs.length ? ` · ${esc(q.refs.join(", "))}` : ""}</cite></blockquote></li>`).join("")}</ul>` : ""}`;
+      setAsideTab("ev");
+      if ($("workspace").classList.contains("log-closed")) setLogOpen(true);
+      if (innerWidth <= 980) document.querySelector(".log").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    // ── 칸 그리기 ──
+    const BY_LABEL = { ai: "AI", human: "고침", "ai-rewrite": "AI 다시 씀" };
+    const LANE_LABEL = { head: "단계", actions: "행동", thought: "생각", emotion: "감정 설명", touchpoints: "터치포인트", pains: "페인포인트", hmw: "기회", change: "바뀐 점", applied: "반영된 기회" };
+    const LANE_SUB = { actions: "실제로 하는 일", thought: "머릿속 질문·기대", emotion: "점수 · 이유 · 인용", touchpoints: "화면·사람·문서", pains: "마찰·중단 지점", hmw: "How might we", change: "AS-IS 대비", applied: "확정한 HMW" };
+
+    function refsHtml(j, refs, hyp, by) {
+      if (hyp) return `<span class="hyp">가설</span>`;
+      if (!refs?.length) return by === "human" ? `<span class="hyp none" title="근거 노트 없이 사람이 쓴 칸">근거 없음</span>` : `<span class="hyp" title="근거 노트 없이 AI가 추론한 칸">[추론]</span>`;
+      return refs.map((r) => { const e = j.map.evidence?.[r]; return `<span class="ref" title="${esc(e ? `${e.ref ? e.ref + " " : ""}${e.text}` : r)}">${esc(r)}</span>`; }).join("");
+    }
+    const byTag = (by) => (by && by !== "ai" ? `<span class="by by-${by}">${BY_LABEL[by]}</span>` : `<span class="by by-ai">AI</span>`);
+    const list = (items) => (items.length ? `<ul>${items.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : `<span class="none">—</span>`);
+    const tpHtml = (tps) => `<div class="tp">${tps.length ? tps.map((x) => `<span>${esc(x)}</span>`).join("") : `<span class="gap">접점 없음</span>`}</div>`;
+
+    function oppOf(j, painId) { return (j.map.opps || []).find((o) => o.pain === painId); }
+    function painLookup(j, oppId) {
+      const src = j.lens === "to-be" ? j.parent?.map : j.map;
+      const o = (src?.opps || j.map.opps || []).find((x) => x.id === oppId);
+      if (!o) return null;
+      for (const s of src.stages) { const p = s.pains.items.find((x) => x.id === o.pain); if (p) return { opp: o, pain: p, stage: s }; }
+      return { opp: o, pain: null, stage: null };
+    }
+
+    // 칸 한 개. asis=true 면 TO-BE 비교 보기 안의 읽기 전용 AS-IS 칸
+    function cellHtml(j, s, lane, { asis = false, extra = "" } = {}) {
+      const tobe = j.lens === "to-be" && !asis;
+      const canEdit = editable() && !asis && !["applied"].includes(lane);
+      const attrs0 = `data-stage="${s.id}" data-lane="${lane}" ${canEdit && lane !== "hmw" ? 'data-edit="1" tabindex="0" role="button"' : ""}`;
+      const cell = s[lane] || {};
+      const by = lane === "head" ? s.headBy : cell.by;
+      const cls = ["cell", `lane-${lane}`, asis ? "asis" : "", by === "human" ? "is-human" : by === "ai-rewrite" ? "is-rewrite" : "", extra].join(" ");
+      const ev = j.lens === "as-is" && !asis ? evOf(s, lane) : null;
+      const evAttrs = ev ? `data-ev="${ev.type}" data-evn="${ev.refs.length}" data-lvl="${Math.min(4, ev.refs.length)}"` : "";
+      const attrs = `${attrs0} ${evAttrs}`;
+      const foot = (refs) => `<div class="cell-foot">${asis ? "" : byTag(by)}${refsHtml(j, refs, tobe, by)}</div>`;
+      if (lane === "actions") return `<div class="${cls}" ${attrs}>${list(cell.items)}${foot(cell.refs)}</div>`;
+      if (lane === "touchpoints") return `<div class="${cls}" ${attrs}>${tpHtml(cell.items)}${foot(cell.refs)}</div>`;
+      if (lane === "thought") return `<div class="${cls}" ${attrs}>${cell.text ? `<q class="quote">${esc(cell.text)}</q>` : `<span class="none">—</span>`}${foot(cell.refs)}</div>`;
+      if (lane === "change") return `<div class="${cls}" ${attrs}><p class="change">${esc(cell.text || "—")}</p>${foot([])}</div>`;
+      if (lane === "emotion") {
+        const e = s.emotion;
+        const pt = points([s])[0];
+        return `<div class="${cls}" ${attrs}><span class="emo" style="background:${EMO_BG(pt.score)};color:${EMO_COLOR(pt.score)}">${esc(e.feel)} ${pt.fromVotes ? "평균 " : ""}${fmtEmo(pt.score)}</span>${pt.n ? `<span class="emo-n">참가자 ${pt.n}명</span>` : ""}<p class="emo-note">${esc(e.note)}</p>${pt.quote ? `<blockquote class="evi">“${esc(pt.quote)}”<cite>근거 ${esc(pt.ref || "—")}</cite></blockquote>` : ""}${foot([...new Set([...(e.refs || []), ...(e.votes || []).flatMap((v) => v.refs)])])}</div>`;
+      }
+      if (lane === "pains") {
+        const items = s.pains?.items || [];
+        return `<div class="${cls} pain ${items.length ? "" : "clear"}" ${attrs}>${items.length ? items.map((p) => `<div class="pain-item" data-pain="${esc(p.id)}"><span class="id">${esc(p.id)}</span><p>${esc(p.text)}</p></div>`).join("") : `<span class="none">—</span>`}${foot(items.flatMap((p) => p.refs))}</div>`;
+      }
+      if (lane === "hmw") {
+        const items = s.pains?.items || [];
+        if (!items.length) return `<div class="${cls} opp" ${attrs}><span class="none">—</span></div>`;
+        return `<div class="${cls} opp" ${attrs}>${items.map((p) => oppBlock(j, s, p)).join("")}</div>`;
+      }
+      if (lane === "applied") {
+        const ids = s.applied || [];
+        return `<div class="${cls} opp" ${attrs}>${ids.length ? ids.map((id) => { const x = painLookup(j, id); return `<div class="opp-card linked" data-opp="${esc(id)}"><div class="top"><span>HMW ${esc(id)}</span><span>← ${esc(x?.stage?.name || "")} ${esc(x?.pain?.id || "")}</span></div><p>${esc(x?.opp.chosen || "")}</p></div>`; }).join("") : `<span class="none">—</span>`}<div class="cell-foot"><span class="hyp">가설</span></div></div>`;
+      }
+      return "";
+    }
+
+    // 페인포인트 하나의 HMW: 확정한 기회 + AI 초안 2~3개 (고르거나 고쳐 확정)
+    function oppBlock(j, s, p) {
+      const o = oppOf(j, p.id) || { id: "", drafts: [], chosen: "" };
+      const ed = editable();
+      const used = j.children?.length ? "" : "";
+      const chosen = o.chosen
+        ? `<div class="opp-card chosen" data-opp="${esc(o.id)}"><div class="top"><span>HMW ${esc(o.id)} · 확정</span><span>${esc(p.id)}</span></div><p>${esc(o.chosen)}</p><div class="cell-foot">${byTag(o.by)}</div></div>`
+        : `<div class="opp-missing">${esc(p.id)}에 고른 기회가 없어요${ed ? " — 아래 초안에서 고르거나 직접 써 주세요" : ""}</div>`;
+      const drafts = ed && o.drafts.length ? `<div class="drafts" role="group" aria-label="${esc(p.id)} 기회 초안">${o.drafts.map((d, k) => `<button type="button" class="draft ${d === o.chosen ? "on" : ""}" data-choose="${esc(p.id)}" data-k="${k}" aria-pressed="${d === o.chosen}"><small>AI 초안 ${k + 1}</small>${esc(d)}</button>`).join("")}</div>` : "";
+      const tools = ed ? `<div class="opp-tools"><button type="button" class="btn-link" data-write="${esc(p.id)}">직접 쓰기·고치기</button><button type="button" class="btn-link" data-redraft="${esc(p.id)}" data-lockable>AI 초안 다시 받기</button></div>` : "";
+      return `<div class="opp-block" data-pain="${esc(p.id)}">${chosen}${drafts}${tools}</div>`;
+    }
+
+    function headHtml(j, s, i, span) {
+      const ed = editable();
+      return `<div class="stage-h cell lane-head ${s.headBy === "human" ? "is-human" : s.headBy === "ai-rewrite" ? "is-rewrite" : ""}" style="${span ? "grid-column: span 2" : ""}" data-stage="${s.id}" data-lane="head" ${ed ? 'data-edit="1" tabindex="0" role="button"' : ""} role="columnheader"><span class="no">STAGE ${i + 1}</span><b>${esc(s.name)}</b><small>${esc(s.goal)}</small>${s.headBy && s.headBy !== "ai" ? byTag(s.headBy) : ""}</div>`;
+    }
+
+    // ── 표 (데스크톱) ──
+    function gridHtml(j) {
+      const S = j.map.stages, n = S.length;
+      const tobe = j.lens === "to-be";
+      const A = tobe ? j.parent?.map.stages : null;
+      const side = tobe && A && state.view === "side";
+      const colW = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--col-w"), 10) || 232;
+      const curveW = side ? colW * 2 : colW;
+      const template = `var(--lane-w) repeat(${side ? n * 2 : n}, ${side ? colW : colW}px)`;
+      const rows = [];
+      rows.push(`<div class="lane corner" role="columnheader">레인 \\ 단계</div>${S.map((s, i) => headHtml(j, s, i, side)).join("")}`);
+      if (side) rows.push(`<div class="lane sub" role="rowheader">비교</div>${S.map(() => `<div class="subhead asis">AS-IS</div><div class="subhead tobe">TO-BE · 가설</div>`).join("")}`);
+      const lanes = tobe ? ["change", "actions", "thought", "curve", "emotion", "touchpoints", "applied"] : ["actions", "thought", "curve", "emotion", "touchpoints", "pains", "hmw"];
+      const compare = new Set(["actions", "thought", "emotion", "touchpoints"]);
+      for (const lane of lanes) {
+        if (lane === "curve") {
+          const pts = points(S), sig = analyze(S);
+          const band = !tobe;
+          tipData.main = { pts, sig, ghost: A ? points(A) : null, band };
+          rows.push(`<div class="lane" role="rowheader" data-lane-h="curve">감정 곡선<small>${A ? "AS-IS ┅ / TO-BE ━" : "참가자 평균 · 근거 띠"}</small></div><div class="curve-cell" role="cell">${curveSvg(pts, sig, { colW: curveW, h: band ? 240 : 210, ghost: A ? points(A) : null, owner: "main", band })}${peakEndNote(!!A, band && pts.some((p) => p.n))}</div>`);
+          continue;
+        }
+        const cls = lane === "pains" ? "pain" : lane === "hmw" || lane === "applied" ? "opp" : "";
+        if (tobe && A && compare.has(lane)) {
+          if (side) {
+            rows.push(`<div class="lane ${cls}" role="rowheader">${LANE_LABEL[lane]}<small>${LANE_SUB[lane]}</small></div>${S.map((s, i) => cellHtml(j, A[i], lane, { asis: true }) + cellHtml(j, s, lane)).join("")}`);
+          } else {
+            rows.push(`<div class="lane asis-lane" role="rowheader">${LANE_LABEL[lane]}<small>AS-IS</small></div>${A.map((a) => cellHtml(j, a, lane, { asis: true })).join("")}`);
+            rows.push(`<div class="lane ${cls}" role="rowheader">${LANE_LABEL[lane]}<small>TO-BE · 가설</small></div>${S.map((s) => cellHtml(j, s, lane)).join("")}`);
+          }
+          continue;
+        }
+        const span = side ? "span2" : "";
+        rows.push(`<div class="lane ${cls}" role="rowheader" data-lane-h="${lane}">${LANE_LABEL[lane]}<small>${LANE_SUB[lane]}</small></div>${S.map((s) => cellHtml(j, s, lane, { extra: span })).join("")}`);
+      }
+      return `<div class="map-scroll" tabindex="0" aria-label="저니맵 표 (좌우로 스크롤)"><div class="map ${side ? "side" : ""}" role="table" style="grid-template-columns:${template}">${rows.join("")}</div></div>
+        <div class="scroll-hint"><span>레인 이름은 고정돼요${editable() ? " · 칸을 누르면 고칠 수 있어요" : ""}</span><span>${n}단계 · 좌우로 스크롤 →</span></div>`;
+    }
+
+    // ── 모바일 카드 ──
+    function deckHtml(j) {
+      const S = j.map.stages, n = S.length, tobe = j.lens === "to-be", A = tobe ? j.parent?.map.stages : null;
+      const sig = analyze(S);
+      const lanes = tobe ? ["change", "actions", "thought", "emotion", "touchpoints", "applied"] : ["actions", "thought", "emotion", "touchpoints", "pains", "hmw"];
+      const cards = S.map((s, i) => `
+        <article class="scard" id="sc-${i}" aria-label="${i + 1}단계 ${esc(s.name)}">
+          <div class="scard-head ${editable() ? "tap" : ""}" data-stage="${s.id}" data-lane="head" ${editable() ? 'data-edit="1"' : ""}>
+            <span class="no">STAGE ${i + 1} / ${n}${tobe ? " · TO-BE 가설" : ""}</span><b>${esc(s.name)}</b><small>${esc(s.goal)}</small>
+            <span class="emo" style="background:${EMO_BG(s.emotion.score)};color:${EMO_COLOR(s.emotion.score)}">감정 ${esc(s.emotion.feel)} ${fmtEmo(s.emotion.score)}${i === sig.low ? " · 저점" : i === sig.peak ? " · 정점" : ""}${i === sig.end ? " · 종점" : ""}</span>
+            ${A ? `<span class="emo asis-emo">AS-IS ${esc(A[i].emotion.feel)} ${fmtEmo(A[i].emotion.score)}</span>` : ""}
+          </div>
+          ${lanes.map((lane) => `<div class="scard-sec ${lane === "pains" ? "pain" : lane === "hmw" || lane === "applied" ? "opp" : ""}"><h3>${LANE_LABEL[lane]}</h3>${cellHtml(j, s, lane)}</div>`).join("")}
+        </article>`).join("");
+      return `<div class="deck-wrap">
+          <div class="mini-curve"><div id="miniCurve"></div>${peakEndNote(!!A, !A && points(S).some((p) => p.n))}</div>
+          <div class="deck" id="deck">${cards}</div>
+          <div class="deck-nav">
+            <button class="btn" type="button" id="prevCard" aria-label="이전 단계">←</button>
+            <div class="dots" id="dots">${S.map((s, i) => `<button type="button" aria-label="${i + 1}단계 ${esc(s.name)}로"></button>`).join("")}</div>
+            <span class="pos" id="pos"></span>
+            <button class="btn" type="button" id="nextCard" aria-label="다음 단계">→</button>
+          </div>
+        </div>`;
+    }
+
+    function wireDeck(j) {
+      const S = j.map.stages, n = S.length, A = j.lens === "to-be" ? j.parent?.map.stages : null;
+      const deck = $("deck");
+      const dots = [...$("dots").children];
+      const sig = analyze(S);
+      tipData.mini = { pts: points(S), sig, ghost: A ? points(A) : null, band: !A };
+      let cur = -1;
+      const setCur = (i) => {
+        if (i === cur) return;
+        cur = i;
+        dots.forEach((d, k) => d.setAttribute("aria-current", String(k === i)));
+        $("pos").textContent = `${i + 1} / ${n}`;
+        $("prevCard").disabled = i === 0;
+        $("nextCard").disabled = i === n - 1;
+        $("miniCurve").innerHTML = curveSvg(points(S), sig, { colW: 60, h: 104, mini: true, active: i, ghost: A ? points(A) : null, owner: "mini", band: !A });
+      };
+      const go = (i) => { const c = $(`sc-${Math.max(0, Math.min(n - 1, i))}`); deck.scrollTo({ left: c.offsetLeft - deck.offsetLeft - parseFloat(getComputedStyle(deck).paddingLeft), behavior: "smooth" }); };
+      deck.addEventListener("scroll", () => {
+        const w = deck.firstElementChild.getBoundingClientRect().width + 10;
+        setCur(Math.max(0, Math.min(n - 1, Math.round(deck.scrollLeft / w))));
+      }, { passive: true });
+      dots.forEach((d, k) => d.addEventListener("click", () => go(k)));
+      $("prevCard").addEventListener("click", () => go(cur - 1));
+      $("nextCard").addEventListener("click", () => go(cur + 1));
+      $("miniCurve").addEventListener("click", (e) => { const el = e.target.closest(".emo-hit"); if (el) go(Number(el.dataset.i)); });
+      setCur(0);
+    }
+
+    // ── 표 아래: 해석 메모 · 분석 신호 · TO-BE 점검·장면 ──
+    function memosHtml(j) {
+      const S = j.map.stages, sig = analyze(S), ed = editable();
+      const items = [["low", "저점", "왜 여기서 감정이 가장 낮아졌을까요? 이탈 데이터와도 맞는지 적어 주세요."], ["peak", "정점", "무엇이 이 순간을 가장 좋게 만들었을까요?"], ["end", "종점", "이 여정은 어떤 기억으로 끝나나요? 종점 설계에 대한 해석을 적어 주세요."]];
+      return `<div class="memos"><h3>해석 메모 <small>리서처가 직접 써요 · AI는 채우지 않아요</small></h3><div class="memo-grid">${items.map(([k, label, ph]) => {
+        const s = S[sig[k]];
+        return `<label class="memo" style="--kc:${KEY[k].color}"><span class="memo-head"><i></i>${label} · ${esc(s.name)} <b>${esc(s.emotion.feel)} ${fmtEmo(points(S)[sig[k]].score)}</b></span>
+          <textarea class="text-input" data-memo="${k}" rows="3" maxlength="600" placeholder="${ph}" ${ed ? "" : "readonly"}>${esc(j.map.memos?.[k] || "")}</textarea></label>`;
+      }).join("")}</div></div>`;
+    }
+
+    function signalsHtml(j) {
+      const S = j.map.stages, sig = analyze(S), endS = S[sig.end];
+      return `<div class="signals">
+        <div class="signal low"><span class="k">감정 급락 · 마찰 집중</span><b>${sig.drop ? `${esc(S[sig.dropAt - 1].name)} → ${esc(S[sig.dropAt].name)} (${sig.drop}칸 하락)` : "급락 없음"}</b><p>저점 ‘${esc(S[sig.low].name)}’의 근본 원인을 맥락 질문으로 확인해 보세요.</p></div>
+        <div class="signal end"><span class="k">종점 ${points(S)[sig.end].score < 0 ? "부정 · 기억 왜곡 위험" : "긍정"}</span><b>${esc(endS.name)} · ${esc(endS.emotion.feel)} ${fmtEmo(points(S)[sig.end].score)}</b><p>${points(S)[sig.end].score < 0 ? "종점 설계를 다시 살펴보세요." : "이 종점을 지켜 주세요."}</p></div>
+        <div class="signal gap"><span class="k">터치포인트 공백</span><b>${sig.gaps.length ? sig.gaps.map((i) => esc(S[i].name)).join(", ") : "없음"}</b><p>${sig.gaps.length ? "안내가 끊긴 구간이에요. 채널 연결을 보강할 자리입니다." : "모든 단계에 접점이 있어요."}</p></div>
+      </div>`;
+    }
+
+    function tobeExtrasHtml(j) {
+      const ec = j.map.endCheck || {};
+      const S = j.map.stages, last = S[S.length - 1], A = j.parent?.map.stages;
+      const chosen = (j.map.opps || []).filter((o) => o.chosen);
+      const unlinked = chosen.filter((o) => !S.some((s) => (s.applied || []).includes(o.id)));
+      const ed = editable();
+      return `
+        <div class="endcheck ${ec.positive ? "ok" : "warn"}">
+          <div class="ec-head"><span class="ec-badge">${ec.positive ? "✓ 종점 긍정" : "! 종점 점검 필요"}</span><b>AI 종점 점검</b><span class="ec-score">종점 ‘${esc(last.name)}’ ${A ? `AS-IS ${fmtEmo(A[A.length - 1].emotion.score)} → ` : ""}TO-BE ${fmtEmo(last.emotion.score)}</span></div>
+          ${ec.comment ? `<p>${esc(ec.comment)}</p>` : ""}
+          ${ec.aiSaid && !ec.positive ? `<p class="ec-note">AI는 긍정이라고 답했지만 종점 감정 점수가 0 이하라 ‘점검 필요’로 표시했어요.</p>` : ""}
+          ${ec.suggestions?.length ? `<b class="ec-sub">제안</b><ul>${ec.suggestions.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+        </div>
+        <div class="links">
+          <h3>HMW 반영 연결 <small>확정한 기회가 TO-BE 어느 단계에 들어갔는지</small></h3>
+          <ul class="link-list">${chosen.map((o) => {
+            const x = painLookup(j, o.id);
+            const at = S.filter((s) => (s.applied || []).includes(o.id));
+            return `<li data-opp="${esc(o.id)}" class="${at.length ? "" : "missing"}"><span class="from">${esc(x?.stage?.name || "")} · ${esc(x?.pain?.id || "")}</span><span class="hmw"><b>${esc(o.id)}</b> ${esc(o.chosen)}</span><span class="arrow">→</span><span class="to">${at.length ? at.map((s) => `<em>${esc(s.name)}</em>`).join("") : "<em class='none'>반영 안 됨</em>"}</span></li>`;
+          }).join("")}</ul>
+          ${unlinked.length ? `<p class="warn-line">${unlinked.map((o) => o.id).join(", ")}는 TO-BE에 반영되지 않았어요. 해당 단계의 ‘바뀐 점’을 고치거나 TO-BE를 다시 만들어 보세요.</p>` : ""}
+        </div>
+        <div class="scenes">
+          <h3>시나리오 보드로 보낼 핵심 장면 <small>5단계 시나리오 보드에서 불러가요 · 모두 가설</small></h3>
+          <div class="scene-grid">${(j.map.scenes || []).map((c) => {
+            const st = S.find((s) => s.id === c.stage);
+            return `<article class="scene cell ${c.by === "human" ? "is-human" : ""}" data-scene="${esc(c.id)}" ${ed ? 'data-edit="1" tabindex="0" role="button"' : ""}>
+              <span class="no">${esc(c.id)} · ${esc(st?.name || "")}</span><b>${esc(c.title)}</b><p>${esc(c.description)}</p>
+              <div class="cell-foot">${byTag(c.by)}<span class="hyp">가설</span>${c.hmw.map((h) => `<span class="ref">${esc(h)}</span>`).join("")}</div>
+            </article>`;
+          }).join("") || `<p class="none">장면이 없어요.</p>`}</div>
+          ${j.status === "confirmed" ? `<a class="btn" href="/scenario/?journey=${encodeURIComponent(j.id)}">시나리오 보드에서 열기 →</a>` : `<p class="hint">TO-BE를 확정하면 시나리오 보드 목록에 ‘확정’으로 표시돼요. 초안 장면도 불러갈 수 있어요.</p>`}
+        </div>`;
+    }
+
+    function inputsHtml(j) {
+      const inputs = j.meta?.inputs;
+      if (!inputs?.length) return "";
+      return `<details class="inputs-card" ${state.justMade ? "open" : ""}><summary><b>AI가 받은 정보</b><span>${j.meta.model ? `${esc(j.meta.model)} · ` : ""}${j.meta.ms ? `${Math.round(j.meta.ms / 1000)}초` : ""}</span></summary>
+        <dl>${inputs.map((x) => `<div><dt>${esc(x.k)}</dt><dd>${esc(x.v)}</dd></div>`).join("")}</dl>
+        ${j.meta.warnings?.length ? `<p class="warn-line">${j.meta.warnings.map(esc).join(" ")}</p>` : ""}</details>`;
+    }
+
+    // ── 결과 전체 ──
+    function render() {
+      const j = state.journey;
+      if (!j) return;
+      const tobe = j.lens === "to-be";
+      const draft = j.status === "draft";
+      $("resultTitle").textContent = `${j.persona.name} × ${j.scenario}`;
+      $("resultWho").innerHTML = `<span class="pill ${tobe ? "tobe" : "asis"}">${tobe ? "TO-BE" : "AS-IS"}</span>${j.demo ? `<span class="pill demo">예시 · AI 연결 전</span>` : `<span class="pill">버전 ${esc(j.version)}</span>`}<span>${esc([j.persona.role, j.project || j.persona.source].filter(Boolean).join(" · "))}</span>`;
+      $("legend").hidden = false;
+      $("result").innerHTML = `
+        ${versionsHtml(j)}
+        ${statusHtml(j)}
+        ${inputsHtml(j)}
+        ${tobe && j.parent ? `<div class="view-toggle segmented" role="radiogroup" aria-label="비교 보기"><input type="radio" name="cmp" id="cmpOverlay" value="overlay" ${state.view === "overlay" ? "checked" : ""}/><label for="cmpOverlay">위아래로 겹쳐 보기</label><input type="radio" name="cmp" id="cmpSide" value="side" ${state.view === "side" ? "checked" : ""}/><label for="cmpSide">단계별 나란히</label></div>` : ""}
+        ${tobe ? "" : `<div class="ev-toolbar"><label class="switch"><input type="checkbox" id="evToggle" role="switch" ${state.evidence ? "checked" : ""}/><span class="track" aria-hidden="true"></span><b>근거 보기</b></label><span class="ev-hint">${state.evidence ? "칸 색 = 근거의 양 · 칸을 누르면 근거 패널이 열려요" : "켜면 칸마다 근거가 얼마나 있는지 히트맵으로 보여요"}</span></div>${state.evidence ? evSummaryHtml(j) : ""}`}
+        ${gridHtml(j)}
+        ${deckHtml(j)}
+        ${memosHtml(j)}
+        ${tobe ? tobeExtrasHtml(j) : signalsHtml(j)}
+        ${!tobe && j.status === "confirmed" ? `<p class="next-note">다음: 이 AS-IS를 바탕으로 ‘TO-BE 만들기’를 눌러 같은 단계 골격에 개선된 경험을 설계해요.</p>` : !tobe ? `<p class="next-note">검수 순서: 칸을 눌러 고치기 → 페인포인트마다 기회(HMW) 고르기 → 저점·정점·종점 해석 메모 → 확정.</p>` : ""}`;
+      wireDeck(j);
+      document.querySelectorAll('input[name="cmp"]').forEach((r) => r.addEventListener("change", () => { state.view = r.value; render(); }));
+      const evOn = state.evidence && !tobe;
+      $("result").classList.toggle("ev-on", evOn);
+      if (evOn) {
+        const w = evStats(j).weak;
+        if (w && w.ratio < 1) document.querySelectorAll(`[data-lane-h="${w.lane}"]`).forEach((x) => x.classList.add("weak"));
+      }
+      $("evToggle")?.addEventListener("change", (e) => { state.evidence = e.target.checked; if (!state.evidence) setAsideTab("log"); render(); });
+    }
+
+    function statusHtml(j) {
+      if (j.demo) return `<div class="status draft"><span class="big">예시</span><div><b>로그인 없이 보는 예시예요</b><p>로그인하면 내 페르소나와 시나리오로 AI가 저니맵을 채우고, 검수·확정할 수 있어요.</p></div><a class="btn btn-accent-solid" href="${UXA.loginUrl("/journey/")}">로그인</a></div>`;
+      const tobe = j.lens === "to-be";
+      const save = state.saving ? "저장 중…" : state.savedAt ? `저장됨 ${state.savedAt}` : "";
+      if (j.status === "draft") {
+        return `<div class="status draft"><span class="big">초안</span><div><b>${tobe ? "TO-BE 초안 · 모든 칸은 검증 전 가설이에요" : "리서처 검수 전이에요"}</b><p>${tobe ? "칸을 눌러 고치고, 핵심 장면을 다듬은 뒤 확정하세요." : "칸을 눌러 고치고, 페인포인트마다 기회를 고른 뒤 확정하세요."} <span class="saved" id="savedAt">${esc(save)}</span></p></div>
+          <button class="btn btn-accent-solid" type="button" id="confirmBtn" data-lockable>${tobe ? "TO-BE 확정" : "확정하고 저장"}</button></div>`;
+      }
+      const child = j.children?.[j.children.length - 1];
+      return `<div class="status done"><span class="big">확정</span><div><b>${fmtDate(j.confirmedAt)} 확정 · 내 프로젝트에 저장됐어요</b><p>${j.project ? `프로젝트 ‘${esc(j.project)}’ · ` : ""}<a href="/mypage/#journeys">마이페이지에서 보기</a></p></div>
+        ${tobe ? "" : child ? `<a class="btn btn-accent-solid" href="?id=${encodeURIComponent(child.id)}">TO-BE 열기</a><button class="btn" type="button" id="tobeBtn" data-lockable>TO-BE 다시 만들기</button>` : `<button class="btn btn-accent-solid" type="button" id="tobeBtn" data-lockable>TO-BE 만들기</button>`}</div>`;
+    }
+
+    function versionsHtml(j) {
+      if (j.demo || !state.versions.length) return "";
+      const label = (v) => (v.lens === "to-be" ? `${v.version} → TO-BE` : `버전 ${v.version}`);
+      return `<nav class="versions" aria-label="버전">${state.versions.map((v) => `<a href="?id=${encodeURIComponent(v.id)}" class="ver ${v.id === j.id ? "on" : ""} ${v.lens}" ${v.id === j.id ? 'aria-current="page"' : ""}>${esc(label(v))}<small>${v.status === "confirmed" ? "확정" : "초안"}</small></a>`).join("")}</nav>`;
+    }
+
+    async function loadVersions(j) {
+      if (j.demo) { state.versions = []; return; }
+      const { res, data } = await UXA.api("/api/journeys").catch(() => ({ res: { ok: false } }));
+      if (!res.ok) return;
+      const key = (x) => `${x.personaId || "manual:" + x.persona.name}|${x.scenario}`;
+      const k = key(j);
+      state.versions = data.journeys.filter((x) => key(x) === k).sort((a, b) => (a.version === b.version ? (a.lens === "as-is" ? -1 : 1) : a.version < b.version ? -1 : 1));
+      render();
+    }
+
+    function setJourney(j, { push = true } = {}) {
+      state.journey = j;
+      if (push && !j.demo) history.replaceState(null, "", `?id=${encodeURIComponent(j.id)}`);
+      render();
+      if (!j.demo) loadVersions(j);
+    }
+
+    // ── 저장 ──
+    let saveTimer = null;
+    async function persist() {
+      const j = state.journey;
+      if (!j || j.demo) return;
+      state.saving = true; if ($("savedAt")) $("savedAt").textContent = "저장 중…";
+      const { res, data } = await UXA.api(`/api/journeys/${j.id}`, { method: "PUT", body: { map: j.map } }).catch(() => ({ res: { ok: false }, data: {} }));
+      state.saving = false;
+      if (!res.ok) { toast(data.error || "저장하지 못했어요. 잠시 후 다시 시도해 주세요."); return; }
+      const keepFocus = document.activeElement?.dataset?.memo;
+      state.journey = { ...data.journey };
+      state.savedAt = new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" });
+      if (keepFocus) { if ($("savedAt")) $("savedAt").textContent = `저장됨 ${state.savedAt}`; return; }
+      render();
+    }
+
+    // ── 칸 고치기 (대화상자) ──
+    let editing = null;   // { stage, lane, pain?, scene? }
+    function openEditor(target) {
+      const j = state.journey;
+      const s = j.map.stages.find((x) => x.id === target.stage);
+      const f = $("editFields");
+      editing = target;
+      let title = "", html = "";
+      if (target.scene) {
+        const c = j.map.scenes.find((x) => x.id === target.scene);
+        title = `핵심 장면 ${c.id}`;
+        html = `<label class="field-l">제목<input class="text-input" name="title" maxlength="80" value="${esc(c.title)}"/></label><label class="field-l">장면 설명<textarea class="text-input" name="description" rows="5" maxlength="600">${esc(c.description)}</textarea></label>`;
+      } else {
+        title = `${j.map.stages.indexOf(s) + 1}단계 ${s.name} · ${LANE_LABEL[target.lane] || "기회"}`;
+        const lane = target.lane;
+        if (lane === "head") html = `<label class="field-l">단계 이름<input class="text-input" name="name" maxlength="30" value="${esc(s.name)}"/></label><label class="field-l">이 단계에서 하려는 일<input class="text-input" name="goal" maxlength="160" value="${esc(s.goal)}"/></label>`;
+        if (lane === "actions" || lane === "touchpoints") html = `<label class="field-l">${LANE_LABEL[lane]} <small>한 줄에 하나씩</small><textarea class="text-input" name="items" rows="5">${esc(s[lane].items.join("\n"))}</textarea></label>`;
+        if (lane === "thought" || lane === "change") html = `<label class="field-l">${LANE_LABEL[lane]}<textarea class="text-input" name="text" rows="4" maxlength="300">${esc(s[lane].text)}</textarea></label>`;
+        if (lane === "pains") html = `<label class="field-l">페인포인트 <small>한 줄에 하나씩 · 순서대로 ${esc(s.pains.items.map((p) => p.id).join(", ") || "새 번호")}가 이어져요</small><textarea class="text-input" name="items" rows="5">${esc(s.pains.items.map((p) => p.text).join("\n"))}</textarea></label>`;
+        if (lane === "emotion") html = `
+          <div class="field-l">감정 점수<div class="segmented score">${[-2, -1, 0, 1, 2].map((v) => `<input type="radio" name="score" id="sc${v}" value="${v}" ${v === s.emotion.score ? "checked" : ""}/><label for="sc${v}">${fmtEmo(v)}</label>`).join("")}</div></div>
+          <label class="field-l">감정 단어<input class="text-input" name="feel" maxlength="30" value="${esc(s.emotion.feel)}"/></label>
+          <label class="field-l">한 줄 설명<input class="text-input" name="note" maxlength="200" value="${esc(s.emotion.note)}"/></label>
+          <label class="field-l">근거 인용 <small>${esc(s.emotion.quoteRef || "")}</small><textarea class="text-input" name="quote" rows="2" maxlength="300">${esc(s.emotion.quote)}</textarea></label>`;
+        if (lane === "hmw-write") {
+          const p = s.pains.items.find((x) => x.id === target.pain), o = oppOf(j, target.pain);
+          title = `${p.id} 기회 (How might we…)`;
+          html = `<p class="dlg-pain"><span class="id">${esc(p.id)}</span>${esc(p.text)}</p><label class="field-l">확정할 기회<textarea class="text-input" name="chosen" rows="3" maxlength="300" placeholder="어떻게 하면 …할 수 있을까?">${esc(o?.chosen || o?.drafts?.[0] || "")}</textarea></label>`;
+        }
+      }
+      $("editTitle").textContent = title;
+      f.innerHTML = html;
+      const canRewrite = !target.scene && target.lane !== "hmw-write" && !(j.lens === "to-be" && target.lane === "pains");
+      $("rewriteBtn").hidden = !canRewrite;
+      $("rewriteNote").hidden = !canRewrite;
+      $("rewriteNote").textContent = canRewrite ? (j.lens === "to-be" ? "이 칸만 AI가 다시 써요. 결과는 가설로 남아요." : "이 칸만 근거 노트를 다시 찾아 AI가 고쳐 써요. 지금 내용은 사라져요.") : "";
+      $("editDlg").showModal();
+      f.querySelector("input, textarea")?.focus();
+    }
+
+    function applyEdit() {
+      const j = state.journey, t = editing, fd = new FormData($("editForm"));
+      const lines = (v) => String(v || "").split("\n").map((x) => x.trim()).filter(Boolean);
+      if (t.scene) { Object.assign(j.map.scenes.find((x) => x.id === t.scene), { title: fd.get("title").trim(), description: fd.get("description").trim() }); return; }
+      const s = j.map.stages.find((x) => x.id === t.stage);
+      if (t.lane === "head") Object.assign(s, { name: fd.get("name").trim() || s.name, goal: fd.get("goal").trim() });
+      if (t.lane === "actions" || t.lane === "touchpoints") s[t.lane] = { ...s[t.lane], items: lines(fd.get("items")) };
+      if (t.lane === "thought" || t.lane === "change") s[t.lane] = { ...s[t.lane], text: fd.get("text").trim() };
+      if (t.lane === "emotion") s.emotion = { ...s.emotion, score: Number(fd.get("score")), feel: fd.get("feel").trim(), note: fd.get("note").trim(), quote: fd.get("quote").trim() };
+      if (t.lane === "pains") {
+        const old = s.pains.items;
+        s.pains = { ...s.pains, items: lines(fd.get("items")).map((text, k) => ({ id: old[k]?.id || `${s.id}-p${k + 1}`, text, refs: old[k]?.refs || [] })) };
+      }
+      if (t.lane === "hmw-write") {
+        const o = oppOf(j, t.pain);
+        const chosen = fd.get("chosen").trim();
+        if (o) o.chosen = chosen; else j.map.opps.push({ id: "", pain: t.pain, drafts: [], chosen });
+      }
+    }
+
+    $("editForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (e.submitter?.value === "cancel") { $("editDlg").close(); return; }
+      applyEdit();
+      $("editDlg").close();
+      render();
+      persist();
+    });
+
+    // 칸 하나만 AI로 다시 쓰기
+    $("rewriteBtn").addEventListener("click", async () => {
+      const j = state.journey, t = editing;
+      $("editDlg").close();
+      await rewriteCell(j, t.stage, t.lane);
+    });
+    async function rewriteCell(j, stage, lane, pain) {
+      const s = j.map.stages.find((x) => x.id === stage);
+      startLog("칸 다시 쓰기");
+      log("칸 고르기", `${esc(s.name)} · ${esc(LANE_LABEL[lane] || lane)}${pain ? ` · ${esc(pain)}` : ""}`, "done");
+      log("근거 다시 찾기", j.analysisId ? "이 칸과 가까운 근거 노트를 벡터 검색으로 찾아요(처음이면 색인부터)." : "근거 노트가 없는 페르소나라 페르소나 문서만 다시 읽어요.");
+      lock(true, "칸을 다시 쓰는 중…");
+      const cell = document.querySelector(`.map [data-stage="${stage}"][data-lane="${lane === "hmw" ? "hmw" : lane}"]`);
+      cell?.classList.add("working");
+      const { res, data } = await UXA.api(`/api/journeys/${j.id}/rewrite`, { method: "POST", body: { stage, lane, pain } }).catch(() => ({ res: { ok: false }, data: {} }));
+      lock(false);
+      if (!res.ok) { log("실패", esc(data.error || "다시 쓰지 못했어요."), "fail"); endLog(false); toast(data.error || "다시 쓰지 못했어요."); render(); return; }
+      log("AI로 다시 쓰기", `근거 ${data.rewrite.searched}개 중 ${data.rewrite.refs.length}개를 인용했어요${data.rewrite.refs.length ? `: ${data.rewrite.refs.map(esc).join(", ")}` : " (근거 없음 · 가설)"}.`, "done");
+      endLog();
+      state.journey = data.journey;
+      render();
+      document.querySelector(`.map [data-stage="${stage}"][data-lane="${lane}"]`)?.classList.add("flash");
+    }
+
+    // ── 확정 ──
+    function missingOpps(j) {
+      return j.map.stages.flatMap((s) => s.pains.items.filter((p) => !(j.map.opps || []).some((o) => o.pain === p.id && o.chosen)).map((p) => ({ id: p.id, stage: s.name, text: p.text })));
+    }
+    async function confirmJourney(force = false) {
+      const j = state.journey;
+      if (j.lens === "as-is" && !force) {
+        const missing = missingOpps(j);
+        if (missing.length) return openWarn(missing);
+      }
+      lock(true, "확정하는 중…");
+      const { res, data } = await UXA.api(`/api/journeys/${j.id}/confirm`, { method: "POST", body: { map: j.map, force } }).catch(() => ({ res: { ok: false }, data: {} }));
+      lock(false);
+      if (res.status === 409 && data.code === "missing_opps") return openWarn(data.missing);
+      if (!res.ok) { toast(data.error || "확정하지 못했어요."); return; }
+      toast("확정했어요. 마이페이지 목록에 저장됐어요.");
+      setJourney(data.journey);
+    }
+    function openWarn(missing) {
+      $("warnList").innerHTML = missing.map((m) => `<li><span class="id">${esc(m.id)}</span><b>${esc(m.stage)}</b> ${esc(m.text)}</li>`).join("");
+      $("warnDlg").showModal();
+    }
+    $("warnBack").addEventListener("click", () => {
+      $("warnDlg").close();
+      const first = document.querySelector(".opp-missing");
+      first?.closest(".cell")?.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+      first?.closest(".cell")?.classList.add("flash");
+    });
+    $("warnForce").addEventListener("click", () => { $("warnDlg").close(); confirmJourney(true); });
+
+    // ── TO-BE 만들기 ──
+    async function makeToBe() {
+      const j = state.journey;
+      startLog("TO-BE 생성");
+      const chosen = j.map.opps.filter((o) => o.chosen).length;
+      log("입력 확인", `확정한 AS-IS 버전 ${esc(j.version)} · 단계 ${j.map.stages.length}개 골격 · 확정한 HMW ${chosen}개`, "done");
+      log("AI 생성 요청", "같은 단계 위에 개선된 행동·생각·감정·터치포인트를 설계하고, HMW가 어느 단계에 들어가는지 연결해요.");
+      lock(true, "TO-BE를 만드는 중…");
+      const { res, data } = await UXA.api(`/api/journeys/${j.id}/tobe`, { method: "POST" }).catch(() => ({ res: { ok: false }, data: {} }));
+      lock(false);
+      if (!res.ok) { log("실패", esc(data.error || "TO-BE를 만들지 못했어요."), "fail"); endLog(false); toast(data.error || "TO-BE를 만들지 못했어요."); return; }
+      const t = data.journey;
+      log("종점 점검", t.map.endCheck.positive ? "종점이 긍정으로 설계됐어요." : "종점이 아직 긍정이 아니에요. 제안을 확인해 주세요.", "done");
+      log("핵심 장면 저장", `시나리오 보드로 보낼 장면 ${t.map.scenes.length}개`, "done");
+      if (t.meta.unlinked?.length) log("반영 안 된 HMW", esc(t.meta.unlinked.join(", ")), "fail");
+      endLog();
+      state.justMade = true;
+      setJourney(t);
+    }
+
+    // ── AS-IS 생성 ──
+    async function generate() {
+      if (!loggedIn()) { location.href = UXA.loginUrl("/journey/"); return; }
+      const p = currentPersona();
+      const scenario = $("scenario").value.trim();
+      if (!p || !scenario || busy) return;
+      startLog("AI 생성");
+      log("입력 확인", `페르소나 1명(<b>${esc(p.name)}</b>) × 시나리오 1개 — 범위 원칙을 지켰어요.`, "done");
+      log("페르소나·근거 노트 준비", p.id ? "Worker가 페르소나 문서와 같은 프로젝트의 근거 노트(관찰 노트·테마)를 모아요." : "직접 입력한 페르소나라 근거 노트 없이 진행해요. 모든 칸이 가설이 돼요.", "done");
+      log("AI 생성 요청", `스킬 <code>journey-mapping.md</code> 규칙으로 저니맵 전체를 한 번에 채워요.`);
+      lock(true, "AI가 저니맵을 채우는 중…");
+      $("resultWho").innerHTML = "";
+      $("result").innerHTML = `<div class="skeleton" aria-label="만드는 중"><div></div><div></div><div></div><div></div></div>`;
+      const body = { scenario, persona: p.id ? { id: p.id } : { name: p.name, role: p.role, desc: p.desc } };
+      const { res, data } = await UXA.api("/api/journeys/generate", { method: "POST", body }).catch(() => ({ res: { ok: false }, data: { error: "서버에 연결하지 못했어요." } }));
+      lock(false);
+      if (res.status === 401) { UXA.clearSession(); location.href = UXA.loginUrl("/journey/"); return; }
+      if (!res.ok) {
+        log("실패", esc(data.error || "만들지 못했어요."), "fail"); endLog(false);
+        $("result").innerHTML = `<div class="empty-result"><b>저니맵을 만들지 못했어요</b>${esc(data.error || "잠시 후 다시 시도해 주세요.")}</div>`;
+        if (state.journey) render();
+        return;
+      }
+      const j = data.journey, S = j.map.stages;
+      const pains = S.reduce((k, s) => k + s.pains.items.length, 0);
+      log("결과 받음", `단계 ${S.length}개(${S.map((s) => esc(s.name)).join(" → ")}) · 페인포인트 ${pains}개 · HMW 초안 ${j.map.opps.reduce((k, o) => k + o.drafts.length, 0)}개`, "done");
+      const result = j.meta.inputs.find((x) => x.k === "결과");
+      if (result) log("근거 확인", esc(result.v), "done");
+      if (j.meta.warnings?.length) log("확인 필요", esc(j.meta.warnings.join(" ")), "fail");
+      log(`버전 ${j.version}로 저장`, "초안으로 저장했어요. 검수 후 확정하면 마이페이지에 올라가요.", "done");
+      endLog();
+      state.justMade = true;
+      setJourney(j);
+      $("resultTitle").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function showDemo() {
+      const p = currentPersona() || { name: "세은", role: "음악강사 · 32세", source: "샘플 페르소나" };
+      startLog("예시");
+      log("예시 보기", "AI를 부르지 않고 미리 만들어 둔 예시 여정을 보여 줘요.", "done");
+      endLog();
+      setJourney(exampleJourney(p, $("scenario").value.trim() || EXAMPLE_SCENARIO), { push: false });
+    }
+
+    // ── 결과 영역 이벤트 (위임) ──
+    $("result").addEventListener("click", (e) => {
+      const j = state.journey;
+      if (!j) return;
+      if (e.target.closest("#confirmBtn")) return confirmJourney(false);
+      if (e.target.closest("#tobeBtn")) return makeToBe();
+      if (state.evidence && j.lens === "as-is") {
+        const c = e.target.closest("[data-ev]");
+        if (c && c.dataset.ev !== "skip") return showEvidence(c.dataset.stage, c.dataset.lane);
+        if (c) return;
+      }
+      if (!editable()) return;
+      const choose = e.target.closest("[data-choose]");
+      if (choose) {
+        const o = oppOf(j, choose.dataset.choose);
+        const d = o.drafts[Number(choose.dataset.k)];
+        o.chosen = o.chosen === d ? "" : d;
+        render(); persist(); return;
+      }
+      const write = e.target.closest("[data-write]");
+      if (write) { const s = j.map.stages.find((x) => x.pains.items.some((p) => p.id === write.dataset.write)); return openEditor({ stage: s.id, lane: "hmw-write", pain: write.dataset.write }); }
+      const redraft = e.target.closest("[data-redraft]");
+      if (redraft) { const s = j.map.stages.find((x) => x.pains.items.some((p) => p.id === redraft.dataset.redraft)); return rewriteCell(j, s.id, "hmw", redraft.dataset.redraft); }
+      const cell = e.target.closest("[data-edit]");
+      if (cell) {
+        if (cell.dataset.scene) return openEditor({ scene: cell.dataset.scene });
+        if (cell.closest(".map") || cell.closest(".deck") || cell.classList.contains("scard-head")) return openEditor({ stage: cell.dataset.stage, lane: cell.dataset.lane });
+      }
+    });
+    $("result").addEventListener("keydown", (e) => {
+      if ((e.key === "Enter" || e.key === " ") && (e.target.matches("[data-edit]") || (state.evidence && e.target.matches("[data-ev]")))) { e.preventDefault(); e.target.click(); }
+    });
+    $("result").addEventListener("input", (e) => {
+      const k = e.target.dataset?.memo;
+      if (!k || !editable()) return;
+      state.journey.map.memos = { ...state.journey.map.memos, [k]: e.target.value };
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(persist, 900);
+    });
+    $("result").addEventListener("focusout", (e) => { if (e.target.dataset?.memo && saveTimer) { clearTimeout(saveTimer); saveTimer = null; persist().then(render); } });
+    // HMW 연결 강조: 같은 기회 ID 를 가진 곳을 함께 밝힌다
+    $("result").addEventListener("pointerover", (e) => {
+      const el = e.target.closest("[data-opp]");
+      document.querySelectorAll(".hl").forEach((x) => x.classList.remove("hl"));
+      if (el?.dataset.opp) document.querySelectorAll(`[data-opp="${CSS.escape(el.dataset.opp)}"]`).forEach((x) => x.classList.add("hl"));
+    });
+
+    function toast(msg) {
+      $("toast").textContent = msg;
+      $("toast").classList.add("on");
+      clearTimeout(toast.t); toast.t = setTimeout(() => $("toast").classList.remove("on"), 3200);
+    }
+
+    // ── 입력 이벤트 ──
+    document.querySelectorAll('input[name="pmode"]').forEach((r) => r.addEventListener("change", () => {
+      mode = r.value;
+      $("loadPane").hidden = mode !== "load";
+      $("manualPane").hidden = mode !== "manual";
+      if (mode === "manual") $("mName").focus();
+      updateGenerate();
+    }));
+    $("picker").addEventListener("change", updateGenerate);
+    ["mName", "mRole", "mDesc", "scenario"].forEach((id) => $(id).addEventListener("input", updateGenerate));
+    document.querySelectorAll(".chip[data-scn]").forEach((c) => c.addEventListener("click", () => { $("scenario").value = c.dataset.scn; updateGenerate(); }));
+    $("genBtn").addEventListener("click", generate);
+    $("demoBtn").addEventListener("click", showDemo);
+    $("logToggle").addEventListener("click", () => setLogOpen($("workspace").classList.contains("log-closed")));
+    $("logRail").addEventListener("click", () => setLogOpen(true));
+    $("tabLog").addEventListener("click", () => setAsideTab("log"));
+    $("tabEv").addEventListener("click", () => setAsideTab("ev"));
+    try { if (localStorage.getItem("uxa.journey.log") === "closed") setLogOpen(false); } catch {}
+
+    // ── 시작: ?id= 로 저장된 저니맵 열기 ──
+    async function openSaved(id) {
+      if (!loggedIn()) { location.replace(UXA.loginUrl(`/journey/?id=${encodeURIComponent(id)}`)); return; }
+      $("result").innerHTML = `<div class="skeleton" aria-label="불러오는 중"><div></div><div></div></div>`;
+      const { res, data } = await UXA.api(`/api/journeys/${encodeURIComponent(id)}`).catch(() => ({ res: { ok: false }, data: {} }));
+      if (!res.ok) { $("result").innerHTML = `<div class="empty-result"><b>저니맵을 열지 못했어요</b>${esc(data.error || "목록에서 다시 열어 주세요.")}</div>`; return; }
+      const j = data.journey;
+      $("scenario").value = j.scenario;
+      if (!j.personaId) {
+        document.getElementById("pmManual").checked = true; mode = "manual";
+        $("loadPane").hidden = true; $("manualPane").hidden = false;
+        $("mName").value = j.persona.name; $("mRole").value = j.persona.role || ""; $("mDesc").value = j.persona.desc || "";
+      } else renderPicker(j.personaId);
+      setJourney(j, { push: false });
+    }
+
+    loadPersonas();
+    updateGenerate();
+    const openId = new URLSearchParams(location.search).get("id");
+    if (openId) openSaved(openId);
+  </script>
 </body>
 </html>

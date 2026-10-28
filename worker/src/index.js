@@ -14,6 +14,7 @@
 //   /api/personas[/sources|analyze|compose|:id]  인터뷰 전사 → 어피니티 매핑 → 페르소나 문서 (personas.js)
 //   /api/personas/:id/image-prompt|image, GET /api/personas/image/:imageId  프로필 사진 프롬프트 조립·생성·제공 (personaImage.js)
 //   /api/personas/:id/index|chat  근거 노트 벡터 색인(rag_chunks)과 페르소나 채팅 (personaChat.js)
+//   /api/journeys[/generate|scenes|:id[/rewrite|confirm|tobe]]  페르소나×시나리오 저니맵: AI 생성 · 검수 · 확정 · TO-BE (journeys.js)
 //   /api/p/:token[/interviews[/me[/messages|pause|resume|end|withdraw]]] 참가자 링크: 세션 정보·동의하고 시작·다시 열기·AI 모더레이터 대화
 
 import { signup, login, logout, me } from "./auth.js";
@@ -23,6 +24,7 @@ import { sessionDetail } from "./sessionDetail.js";
 import { myDebriefs } from "./debrief.js";
 import { personas } from "./personas.js";
 import { servePersonaImage } from "./personaImage.js";
+import { journeys } from "./journeys.js";
 
 const MAX_INPUT_CHARS = 20000;
 const MAX_OUTPUT_TOKENS = 4000;
@@ -86,7 +88,8 @@ async function route(request, env, cors) {
   if (imagePath && request.method === "GET") return servePersonaImage(env, imagePath[1]);
 
   const personaPath = url.pathname.match(/^\/api\/personas(?:\/([^/]+))?(?:\/(image-prompt|image|index|chat|photo))?$/);
-  if (url.pathname.startsWith("/api/auth/") || guidePath || participantPath || detailPath || personaPath || url.pathname === "/api/sessions" || url.pathname === "/api/debriefs") {
+  const journeyPath = url.pathname.match(/^\/api\/journeys(?:\/([^/]+))?(?:\/(rewrite|confirm|tobe))?$/);
+  if (url.pathname.startsWith("/api/auth/") || journeyPath || guidePath || participantPath || detailPath || personaPath || url.pathname === "/api/sessions" || url.pathname === "/api/debriefs") {
     if (!cors["Access-Control-Allow-Origin"]) return json({ error: "허용되지 않은 사이트에서 온 요청이에요." }, 403, cors);
     const reply = (data, status = 200) => json(data, status, cors);
     const routes = {
@@ -99,6 +102,7 @@ async function route(request, env, cors) {
     if (url.pathname === "/api/sessions") return sessions(request, env, reply);
     if (detailPath) return sessionDetail(request, env, reply, ...detailPath.slice(1));
     if (url.pathname === "/api/debriefs" && request.method === "GET") return myDebriefs(request, env, reply);
+    if (journeyPath) return journeys(request, env, reply, journeyPath[1], journeyPath[2]);
     if (personaPath) return personas(request, env, reply, personaPath[1], personaPath[2]);
     if (participantPath) return participant(request, env, reply, participantPath[1], participantPath[2], participantPath[3], participantPath[4]);
     const handler = routes[`${request.method} ${url.pathname}`];

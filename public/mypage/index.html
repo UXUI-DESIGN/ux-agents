@@ -205,6 +205,7 @@
           <button class="tab" role="tab" id="tab-guides" aria-controls="panel-guides" aria-selected="true">내 인터뷰 가이드<span class="count" id="guideCount" hidden></span></button>
           <button class="tab" role="tab" id="tab-sessions" aria-controls="panel-sessions" aria-selected="false" tabindex="-1">내 인터뷰 세션<span class="count" id="sessionCount" hidden></span></button>
           <button class="tab" role="tab" id="tab-debriefs" aria-controls="panel-debriefs" aria-selected="false" tabindex="-1">내 디브리핑<span class="count" id="debriefCount" hidden></span></button>
+          <button class="tab" role="tab" id="tab-journeys" aria-controls="panel-journeys" aria-selected="false" tabindex="-1">내 저니맵<span class="count" id="journeyCount" hidden></span></button>
         </div>
 
         <section class="panel" id="panel-guides" role="tabpanel" aria-labelledby="tab-guides">
@@ -285,6 +286,31 @@
             <a class="btn btn-accent" href="#sessions" id="toSessions">내 인터뷰 세션으로</a>
           </div>
         </section>
+
+        <section class="panel" id="panel-journeys" role="tabpanel" aria-labelledby="tab-journeys" hidden>
+          <div id="journeysLoading" aria-busy="true"><div class="skeleton"></div></div>
+          <div class="load-error" id="journeysError" hidden>
+            <p id="journeysErrorMsg">저니맵을 불러오지 못했어요.</p>
+            <button class="btn" type="button" id="journeysRetry">다시 시도</button>
+          </div>
+          <div id="journeysList" hidden>
+            <div class="list-head">
+              <span id="journeysSummary"></span>
+              <a class="btn" href="/journey/">+ 새 저니맵</a>
+            </div>
+            <ul class="guides" id="journeys"></ul>
+          </div>
+          <div class="empty" id="journeysEmpty" hidden>
+            <svg viewBox="0 0 56 56" fill="none" aria-hidden="true">
+              <path d="M6 40c8 0 10-18 18-18s8 12 16 12 8-16 10-16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+              <circle cx="24" cy="22" r="3.5" fill="var(--accent-soft)" stroke="currentColor" stroke-width="2.5" />
+              <circle cx="40" cy="34" r="3.5" fill="var(--accent-soft)" stroke="currentColor" stroke-width="2.5" />
+            </svg>
+            <h2>아직 확정한 저니맵이 없어요</h2>
+            <p>저니맵 생성에서 AI 초안을 검수하고 ‘확정하고 저장’을 누르면 여기에 모여요.</p>
+            <a class="btn btn-accent" href="/journey/">저니맵 만들기</a>
+          </div>
+        </section>
       </div>
     </div>
   </main>
@@ -342,7 +368,7 @@
     UXA.api("/api/auth/me").then(({ res, data }) => { if (res.ok) { $("userName").textContent = data.user.name; $("userEmail").textContent = data.user.email; } }).catch(() => {});
 
     // ── 탭 ──
-    const tabs = [$("tab-guides"), $("tab-sessions"), $("tab-debriefs")];
+    const tabs = [$("tab-guides"), $("tab-sessions"), $("tab-debriefs"), $("tab-journeys")];
     function selectTab(tab, focus) {
       tabs.forEach((t) => {
         const on = t === tab;
@@ -361,6 +387,7 @@
     });
     if (location.hash === "#sessions") selectTab($("tab-sessions"));
     if (location.hash === "#debriefs") selectTab($("tab-debriefs"));
+    if (location.hash === "#journeys") selectTab($("tab-journeys"));
 
     // ── 내 인터뷰 가이드 ──
     const fmtDate = (sec) => {
@@ -564,6 +591,64 @@
     $("debriefsRetry").addEventListener("click", loadDebriefs);
     $("toSessions").addEventListener("click", (e) => { e.preventDefault(); selectTab($("tab-sessions"), true); });
     if (UXA.getSession()) loadDebriefs();
+
+    // ── 내 저니맵 (확정한 것만) ──
+    let journeys = [];
+    function showJourneys(state) {
+      $("journeysLoading").hidden = state !== "loading";
+      $("journeysError").hidden = state !== "error";
+      $("journeysEmpty").hidden = state !== "empty";
+      $("journeysList").hidden = state !== "list";
+    }
+    function renderJourneys() {
+      $("journeyCount").hidden = false;
+      $("journeyCount").textContent = journeys.length;
+      if (!journeys.length) return showJourneys("empty");
+      $("journeysSummary").textContent = `확정한 저니맵 ${journeys.length}개 · 최근 확정한 순`;
+      $("journeys").replaceChildren(...journeys.map((j) => {
+        const li = document.createElement("li");
+        li.className = "guide session";
+        li.innerHTML = `
+          <div class="info">
+            <a class="title"></a>
+            <div class="meta">
+              <span class="chip"></span>
+              <span class="who"></span>
+              <span class="date"></span>
+            </div>
+            <p class="lead" style="margin-top:8px;font-size:14px;color:var(--text-sub)"></p>
+          </div>
+          <div class="actions">
+            <a class="btn btn-accent open">열기</a>
+          </div>`;
+        const href = `/journey/?id=${encodeURIComponent(j.id)}`;
+        li.querySelector(".title").textContent = `${j.persona.name} × ${j.scenario}`;
+        li.querySelector(".title").href = href;
+        li.querySelector(".open").href = href;
+        li.querySelector(".chip").textContent = j.lens === "to-be" ? `TO-BE · 버전 ${j.version}` : `AS-IS · 버전 ${j.version}`;
+        li.querySelector(".chip").classList.toggle("validate", j.lens === "to-be");
+        li.querySelector(".who").textContent = [j.project || j.persona.source, j.persona.role].filter(Boolean).join(" · ");
+        li.querySelector(".date").textContent = `${fmtDate(j.confirmedAt)} 확정`;
+        li.querySelector(".lead").textContent = `${j.stages.join(" → ")}${j.lens === "as-is" ? ` · 페인포인트 ${j.pains}개 · 기회 ${j.opps}개` : ""}`;
+        return li;
+      }));
+      showJourneys("list");
+    }
+    async function loadJourneys() {
+      showJourneys("loading");
+      try {
+        const { res, data } = await UXA.api("/api/journeys");
+        if (res.status === 401) { UXA.clearSession(); location.replace(UXA.loginUrl()); return; }
+        if (!res.ok) throw new Error(data.error);
+        journeys = data.journeys.filter((j) => j.status === "confirmed").sort((a, b) => b.confirmedAt - a.confirmedAt);
+        renderJourneys();
+      } catch (err) {
+        $("journeysErrorMsg").textContent = err instanceof TypeError ? "서버에 연결하지 못했어요. 인터넷 연결을 확인해 주세요." : err.message || "저니맵을 불러오지 못했어요.";
+        showJourneys("error");
+      }
+    }
+    $("journeysRetry").addEventListener("click", loadJourneys);
+    if (UXA.getSession()) loadJourneys();
 
     async function copyLink(link) {
       try { await navigator.clipboard.writeText(link); showToast("참가자 링크를 복사했어요."); }

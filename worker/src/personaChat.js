@@ -101,7 +101,7 @@ async function status(env, a) {
 }
 
 // 분석 묶음 하나를 임베딩해 rag_chunks 에 넣는다 (이전 색인은 지운다)
-async function indexAnalysis(env, user, a) {
+export async function indexAnalysis(env, user, a) {
   const started = Date.now();
   const chunks = await buildChunks(env, user, a);
   const vectors = await embedAll(env, chunks.map((c) => c.text));
@@ -168,7 +168,7 @@ async function buildChunks(env, user, a) {
 
 // ── 임베딩 ──
 const embedModel = (env) => env.OPENAI_EMBED_MODEL || "text-embedding-3-small";
-async function embedAll(env, texts) {
+export async function embedAll(env, texts) {
   const out = [];
   for (let i = 0; i < texts.length; i += EMBED_BATCH) {
     const batch = texts.slice(i, i + EMBED_BATCH).map((t) => t.slice(0, 4000));
@@ -200,7 +200,7 @@ function personaBoost(row, a) {
     return { codes: new Set(seg?.codes || []), personaName: row.name };
   } catch { return { codes: new Set(), personaName: row.name }; }
 }
-async function search(env, a, qvec, boost) {
+export async function search(env, a, qvec, boost) {
   const { results } = await env.DB.prepare("SELECT kind, ref_id, code, source_ref, text, embedding FROM rag_chunks WHERE analysis_id = ?").bind(a.id).all();
   const qn = norm(qvec);
   const scored = results.map((r) => {
