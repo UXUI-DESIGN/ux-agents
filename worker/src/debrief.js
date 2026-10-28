@@ -115,10 +115,12 @@ async function sourcesOf(env, sessionId) {
 }
 
 // ── 읽을 자료 만들기: 완료된 참가자만, 분석 제외 빼고, 마스킹해서 ──
-export async function materialOf(env, session) {
-  const { results: ivs } = await env.DB.prepare(
+// interviewIds를 주면 그 참가자만 읽는다 (페르소나 생성에서 고른 인터뷰만)
+export async function materialOf(env, session, interviewIds = null) {
+  const { results: all } = await env.DB.prepare(
     "SELECT id, code, seq, consented_at, finished_at, paused_total, stage FROM interviews WHERE session_id = ? AND status = 'completed' AND code IS NOT NULL ORDER BY seq"
   ).bind(session.id).all();
+  const ivs = interviewIds ? all.filter((iv) => interviewIds.includes(iv.id)) : all;
   const participants = [];
   let skippedExcluded = 0;
   for (const iv of ivs) {
@@ -133,7 +135,7 @@ export async function materialOf(env, session) {
       const ref = m.role === "participant" ? `${iv.code}-${++pIdx}` : `${iv.code}-M${++mIdx}`;
       lines.push({ ref, id: m.id, role: m.role, stage: m.stage, at: m.created_at - (iv.consented_at || m.created_at), text: maskText(m.content, m.pii) });
     }
-    participants.push({ code: iv.code, seq: iv.seq, minutes: iv.finished_at && iv.consented_at ? Math.round((iv.finished_at - iv.consented_at - (iv.paused_total || 0)) / 60) : null, lines });
+    participants.push({ id: iv.id, code: iv.code, seq: iv.seq, minutes: iv.finished_at && iv.consented_at ? Math.round((iv.finished_at - iv.consented_at - (iv.paused_total || 0)) / 60) : null, lines });
   }
   return { participants, skippedExcluded };
 }

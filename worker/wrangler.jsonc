@@ -13,6 +13,8 @@
   "vars": {
     // 이 Worker를 부를 수 있는 사이트 주소 (쉼표로 구분)
     "ALLOWED_ORIGINS": "https://ux-agents.pages.dev,http://localhost:5173",
-    "OPENAI_MODEL": "gpt-6-luna"
+    "OPENAI_MODEL": "gpt-6-luna",
+    // 페르소나 프로필 사진 생성 모델 (Images API)
+    "OPENAI_IMAGE_MODEL": "gpt-image-1"
   }
 }

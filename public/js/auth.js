@@ -4,7 +4,8 @@
 //   - <body data-auth="required">인 페이지는 로그인하지 않으면 로그인 페이지로 보낸다 (로그인 후 돌아옴)
 //   페이지 스크립트는 window.UXA로 쓴다.
 (() => {
-  const API_BASE = "https://uxa-api.kopeakai88.workers.dev";
+  // 로컬 Worker로 붙어 보려면 콘솔에서 localStorage.setItem("uxa.apiBase", "http://localhost:8787") (지우면 원래대로)
+  const API_BASE = (() => { try { return localStorage.getItem("uxa.apiBase") || ""; } catch { return ""; } })() || "https://uxa-api.kopeakai88.workers.dev";
   const KEY = "uxa.session";
   const stores = () => [window.localStorage, window.sessionStorage];
 

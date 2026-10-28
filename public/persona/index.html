@@ -144,7 +144,7 @@
     }
   </style>
 </head>
-<body>
+<body data-auth="required">
 
   <header class="nav">
     <div class="container">
@@ -187,26 +187,10 @@
 
   <script src="/js/auth.js"></script>
   <script>
-    // ── 더미 데이터: 프로젝트(인터뷰 세션) 별 페르소나 ──
-    // TODO(API): GET /api/personas → { projects: [{ id, name, personas: Persona[] }] }
+    // GET /api/personas → { projects: [{ id, name, kind, interviews, sessions, session_id, updated_at, personas: [...] }] }
     const PRIORITY_LABEL = { primary: "Primary Persona", secondary: "Secondary Persona", tertiary: "Tertiary Persona" };
-    const DUMMY_PROJECTS = [
-      {
-        id: "s_ott", name: "OTT 콘텐츠 추천 서비스", interviews: 6, updatedAt: "2026-10-24",
-        personas: [
-          { id: "p_demo", priority: "primary", photoUrl: null, name: "세은", job: "음악강사", age: 32, tagline: "다양한 콘텐츠를 감상하며 **지인과 소통**하고 **피드백을 공유**하고 싶어요", updatedAt: "2026-10-24" },
-          { id: "p_minjun", priority: "secondary", photoUrl: null, name: "민준", job: "스타트업 개발자", age: 28, tagline: "고민 없이 **지금 기분에 맞는 콘텐츠**를 바로 틀고 싶어요", updatedAt: "2026-10-24" },
-          { id: "p_jiwoo", priority: "tertiary", photoUrl: null, name: "지우", job: "대학원생", age: 25, tagline: "**리뷰와 평점**을 꼼꼼히 보고 실패 없는 선택을 하고 싶어요", updatedAt: "2026-10-23" },
-        ],
-      },
-      {
-        id: "s_market", name: "동네 중고거래 앱", interviews: 4, updatedAt: "2026-10-15",
-        personas: [
-          { id: "p_hyeon", priority: "primary", photoUrl: null, name: "현우", job: "초등 교사", age: 36, tagline: "**믿을 수 있는 이웃**과 빠르고 안전하게 거래하고 싶어요", updatedAt: "2026-10-15" },
-          { id: "p_yuna", priority: "secondary", photoUrl: null, name: "유나", job: "프리랜서 디자이너", age: 30, tagline: "안 쓰는 물건을 **부담 없이 정리**하며 소소한 수입을 얻고 싶어요", updatedAt: "2026-10-14" },
-        ],
-      },
-    ];
+    const KIND_LABEL = { design: "Design", marketing: "Marketing" };
+    const fmtDate = (sec) => (sec ? new Date(sec * 1000).toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" }) : "");
 
     const $ = (id) => document.getElementById(id);
     const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -223,7 +207,7 @@
           </div>
           <div class="card-body">
             <p class="tagline">${emph(p.tagline)}</p>
-            <div class="card-foot"><span>${esc(p.updatedAt)}</span><span>열기 →</span></div>
+            <div class="card-foot"><span>${p.share ? esc(p.share) + " · " : ""}${fmtDate(p.updatedAt)}</span><span>열기 →</span></div>
           </div>
         </a>`;
     }
@@ -240,24 +224,31 @@
           </div>`;
         return;
       }
-      $("projects").innerHTML = projects.map((pj) => `
-        <section class="project" aria-labelledby="pj-${esc(pj.id)}">
+      $("projects").innerHTML = projects.map((pj, i) => `
+        <section class="project" aria-labelledby="pj-${i}">
           <div class="project-head">
-            <h2 id="pj-${esc(pj.id)}">${esc(pj.name)}</h2>
-            <p class="meta"><span>인터뷰 ${esc(pj.interviews)}건</span><span>페르소나 ${pj.personas.length}명</span><span>${esc(pj.updatedAt)}</span></p>
+            <h2 id="pj-${i}">${esc(pj.name)}</h2>
+            <p class="meta"><span>${esc(KIND_LABEL[pj.kind] || "Design")}</span>${pj.sessions?.length ? `<span>${esc(pj.sessions.join(", "))}</span>` : ""}<span>인터뷰 ${esc(pj.interviews)}건</span><span>페르소나 ${pj.personas.length}명</span><span>${fmtDate(pj.updated_at)}</span></p>
           </div>
           <div class="grid">
             ${pj.personas.map(card).join("")}
-            <a class="card add" href="/persona/new/?project=${encodeURIComponent(pj.id)}">
+            <a class="card add" href="/persona/new/${pj.session_id ? `?session=${encodeURIComponent(pj.session_id)}` : ""}">
               <span class="plus">+</span>
-              <b>이 프로젝트에 추가</b>
-              <small>같은 인터뷰에서 페르소나 더 만들기</small>
+              <b>다시 만들기</b>
+              <small>같은 인터뷰로 다른 조건의 페르소나 만들기</small>
             </a>
           </div>
         </section>`).join("");
     }
 
-    render(DUMMY_PROJECTS);
+    async function load() {
+      $("total").textContent = "불러오는 중…";
+      const { res, data } = await UXA.api("/api/personas");
+      if (res.status === 401) { UXA.clearSession(); location.replace(UXA.loginUrl()); return; }
+      if (!res.ok) { $("total").textContent = ""; $("projects").innerHTML = `<div class="empty"><h2>목록을 불러오지 못했어요</h2><p>${esc(data.error || "잠시 후 다시 시도해 주세요.")}</p></div>`; return; }
+      render(data.projects || []);
+    }
+    load();
   </script>
 </body>
 </html>

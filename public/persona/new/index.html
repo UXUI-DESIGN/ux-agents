@@ -140,6 +140,41 @@
     .progress-log .row { display: flex; gap: 8px; }
     .progress-log .row + .row { margin-top: 4px; }
     .progress-log time { flex: none; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+    .progress-log .row.sub { color: var(--text-faint); padding-left: 8px; }
+    .progress-log .row.error { color: #d92d20; font-weight: 600; }
+    .stage[data-state="skipped"] .dot { border-style: dashed; color: var(--text-faint); }
+    .stage[data-state="skipped"] b { color: var(--text-sub); text-decoration: line-through; text-decoration-color: var(--text-faint); }
+    .stage[data-state="manual"] .dot { border-style: dashed; border-color: var(--accent); color: var(--accent); }
+    .stage[data-state="manual"] b { color: var(--text); }
+    .stage[data-state="manual"] small { color: var(--accent); }
+    .stage[data-state="error"] .dot { border-color: #d92d20; color: #d92d20; background: #fff1f0; }
+    .result-actions { display: flex; gap: 10px; margin-top: 10px; font-size: 12.5px; }
+    .result-actions .mini { color: var(--text-sub); font-weight: 600; }
+    .result-actions .mini:hover { text-decoration: underline; }
+    .result-actions .mini.accent { color: var(--accent); font-weight: 600; }
+    .result-actions .mini.accent:hover { text-decoration: underline; }
+    .stage[data-state="error"] b { color: #d92d20; }
+
+    /* 세션별 인터뷰 묶음 */
+    .src-session { border: 0; padding: 0; margin-top: 12px; display: grid; gap: 8px; }
+    .src-session legend { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .src-session legend small { font-weight: 500; color: var(--text-sub); }
+    .empty-src { margin-top: 12px; padding: 24px; text-align: center; border: 1px dashed var(--line); border-radius: 12px; }
+    .empty-src b { font-size: 15px; }
+    .empty-src p { margin: 4px 0 12px; font-size: 14px; color: var(--text-sub); }
+
+    /* 결과 */
+    .result { margin-top: 22px; padding-top: 20px; border-top: 1px solid var(--line); }
+    .result-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; font-size: 15px; }
+    .result-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+    .result-card { display: block; padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: #fff; transition: border-color .15s; }
+    .result-card:hover { border-color: var(--accent); }
+    .result-card .pri { display: inline-block; margin-bottom: 8px; padding: 2px 9px; border-radius: 999px; font-size: 11px; font-weight: 700; text-transform: capitalize; background: #d9f7a3; color: #2d4a12; }
+    .result-card .pri[data-priority="secondary"] { background: #e3e8ff; color: #2d3a8c; }
+    .result-card .pri[data-priority="tertiary"] { background: #f1f3f7; color: #4b4f5c; }
+    .result-card b { display: block; font-size: 16px; }
+    .result-card small { display: block; font-size: 12.5px; color: var(--text-sub); }
+    .result-card p { margin-top: 8px; font-size: 13px; color: var(--text-sub); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .submit { margin-top: 24px; }
     .submit .hint { text-align: center; }
 
@@ -164,7 +199,7 @@
     }
   </style>
 </head>
-<body>
+<body data-auth="required">
 
   <header class="nav">
     <div class="container">
@@ -242,11 +277,16 @@
             <ol class="progress" id="progress" aria-label="생성 진행 상태">
               <li class="stage" data-state="pending"><span class="dot">1</span><b>분석 중</b><small>인터뷰 기록에서 패턴 추출</small></li>
               <li class="stage" data-state="pending"><span class="dot">2</span><b>작성 중</b><small>페르소나 문서 작성</small></li>
-              <li class="stage" data-state="pending"><span class="dot">3</span><b>이미지 생성 중</b><small>프로필 사진 만들기</small></li>
+              <li class="stage" data-state="pending"><span class="dot">3</span><b>이미지 생성</b><small>문서에서 프롬프트 확인 후 생성</small></li>
               <li class="stage" data-state="pending"><span class="dot">4</span><b>완료</b><small>문서 열기</small></li>
             </ol>
             <div class="progress-log" id="log">
               <div class="row"><time>--:--</time><span>아직 시작하지 않았어요. 위에서 인터뷰를 고르고 생성을 시작하세요.</span></div>
+            </div>
+
+            <div class="result" id="result" hidden>
+              <div class="result-head"><b>만들어진 페르소나</b><a class="btn" href="/persona/">목록으로</a></div>
+              <div class="result-list" id="resultList"></div>
             </div>
 
             <div class="submit">
@@ -268,52 +308,134 @@
 
   <script src="/js/auth.js"></script>
   <script>
-    // ── 더미: 모더레이터 인터뷰 목록 5건 ──
-    // TODO(API): GET /api/sessions → 각 세션의 interviews (status=ended, transcript 있음) 로 바꾼다
-    const DUMMY_INTERVIEWS = [
-      { id: "i1", session: "OTT 콘텐츠 추천 서비스", code: "P-01", date: "2026-10-21", minutes: 28, status: "ended" },
-      { id: "i2", session: "OTT 콘텐츠 추천 서비스", code: "P-02", date: "2026-10-21", minutes: 31, status: "ended" },
-      { id: "i3", session: "OTT 콘텐츠 추천 서비스", code: "P-03", date: "2026-10-22", minutes: 24, status: "ended" },
-      { id: "i4", session: "OTT 콘텐츠 추천 서비스", code: "P-04", date: "2026-10-23", minutes: 35, status: "ended" },
-      { id: "i5", session: "동네 중고거래 앱", code: "P-01", date: "2026-10-14", minutes: 19, status: "open" },
-    ];
-
+    // 흐름: GET /api/personas/sources (완료된 인터뷰) → POST /api/personas/analyze (어피니티 매핑)
+    //       → POST /api/personas/compose (페르소나 작성·저장) → 이미지 단계는 아직 없음(건너뜀) → 완료
     const $ = (id) => document.getElementById(id);
     const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const fmtDate = (sec) => (sec ? new Date(sec * 1000).toLocaleDateString("ko-KR", { year: "numeric", month: "2-digit", day: "2-digit" }) : "-");
+    const preselect = new URLSearchParams(location.search).get("session") || "";
 
-    $("interviews").innerHTML = DUMMY_INTERVIEWS.map((it) => `
-      <label class="interview">
-        <input type="checkbox" name="interview" value="${esc(it.id)}" ${it.status !== "ended" ? "disabled" : ""} />
-        <span>
-          <span class="title">${esc(it.session)} · 참가자 ${esc(it.code)}</span>
-          <span class="sub"><span>${esc(it.date)}</span><span>${esc(it.minutes)}분</span></span>
-        </span>
-        <span class="status ${it.status === "ended" ? "" : "open"}">${it.status === "ended" ? "전사 완료" : "진행 중"}</span>
-      </label>`).join("");
+    // ── Step 1: 완료된 인터뷰 불러오기 ──
+    async function loadSources() {
+      $("interviews").innerHTML = `<p class="hint">인터뷰를 불러오는 중…</p>`;
+      const { res, data } = await UXA.api("/api/personas/sources");
+      if (res.status === 401) { UXA.clearSession(); location.replace(UXA.loginUrl()); return; }
+      if (!res.ok) { $("interviews").innerHTML = `<p class="hint">${esc(data.error || "인터뷰를 불러오지 못했어요.")}</p>`; return; }
+      const sessions = data.sessions || [];
+      if (!sessions.length) {
+        $("interviews").innerHTML = `
+          <div class="empty-src">
+            <b>완료된 인터뷰가 아직 없어요</b>
+            <p>인터뷰 모더레이터로 참가자 인터뷰를 끝까지 진행하면 여기에 나타나요.</p>
+            <a class="btn" href="/moderator/">인터뷰 모더레이터로</a>
+          </div>`;
+        return;
+      }
+      $("interviews").innerHTML = sessions.map((s) => `
+        <fieldset class="src-session">
+          <legend>${esc(s.name)}${s.topic && s.topic !== s.name ? ` <small>· ${esc(s.topic)}</small>` : ""}${s.personas ? ` <small>· 페르소나 ${s.personas}명 있음</small>` : ""}</legend>
+          ${s.interviews.map((it) => `
+            <label class="interview">
+              <input type="checkbox" name="interview" value="${esc(it.id)}" data-session="${esc(s.id)}" ${preselect && preselect === s.id ? "checked" : ""} />
+              <span>
+                <span class="title">참가자 ${esc(it.code)}</span>
+                <span class="sub"><span>${fmtDate(it.finished_at)}</span>${it.minutes != null ? `<span>${esc(it.minutes)}분</span>` : ""}<span>발화 ${esc(it.participant_messages)}개</span></span>
+              </span>
+              <span class="status">완료</span>
+            </label>`).join("")}
+        </fieldset>`).join("");
+      refresh();
+    }
 
     const boxes = () => [...document.querySelectorAll('input[name="interview"]:not(:disabled)')];
+    let running = false;
     function refresh() {
       const n = boxes().filter((b) => b.checked).length;
       $("pickCount").textContent = `선택 ${n}건`;
-      const ok = n > 0 && $("service").value.trim().length > 0;
+      const ok = n > 0 && $("service").value.trim().length > 0 && !running;
       $("startBtn").disabled = !ok;
-      $("submitHint").textContent = ok ? "아직 생성 기능은 연결 전이에요. 레이아웃만 확인할 수 있어요." : "인터뷰를 1건 이상 고르고 서비스 설명을 적으면 시작할 수 있어요.";
+      if (!running) $("submitHint").textContent = ok ? "보통 1~2분 걸려요. 완료되면 페르소나 문서로 이동할 수 있어요." : "인터뷰를 1건 이상 고르고 서비스 설명을 적으면 시작할 수 있어요.";
     }
     $("pickAll").addEventListener("click", () => { boxes().forEach((b) => (b.checked = true)); refresh(); });
     $("pickNone").addEventListener("click", () => { boxes().forEach((b) => (b.checked = false)); refresh(); });
     $("form").addEventListener("change", refresh);
     $("service").addEventListener("input", refresh);
 
-    // 아직 동작 없음: 제출을 막고 안내만 한다. 나중에 POST /api/personas/generate 로 연결
-    $("form").addEventListener("submit", (e) => {
+    // ── Step 3: 진행 상태 ──
+    const stages = () => [...document.querySelectorAll("#progress .stage")];
+    function setStage(i, state) { stages()[i].dataset.state = state; }
+    function log(msg, kind = "") {
+      const row = document.createElement("div");
+      row.className = `row ${kind}`;
+      row.innerHTML = `<time>${new Date().toTimeString().slice(0, 5)}</time><span>${esc(msg)}</span>`;
+      if ($("log").dataset.fresh !== "1") { $("log").innerHTML = ""; $("log").dataset.fresh = "1"; }
+      $("log").appendChild(row);
+    }
+
+    $("form").addEventListener("submit", async (e) => {
       e.preventDefault();
-      $("log").innerHTML = `<div class="row"><time>${new Date().toTimeString().slice(0, 5)}</time><span>생성 기능은 다음 단계에서 연결돼요. (선택 ${boxes().filter((b) => b.checked).length}건 · ${document.querySelector('input[name="kind"]:checked').value} · ${document.querySelector('input[name="count"]:checked').value}명)</span></div>`;
+      if (running) return;
+      const interview_ids = boxes().filter((b) => b.checked).map((b) => b.value);
+      const service = $("service").value.trim();
+      const kind = document.querySelector('input[name="kind"]:checked').value;
+      const count = Number(document.querySelector('input[name="count"]:checked').value);
+      if (!interview_ids.length || !service) return;
+
+      running = true; refresh();
+      $("startBtn").textContent = "생성 중…";
+      $("submitHint").textContent = "창을 닫지 마세요. 단계마다 결과가 서버에 저장돼요.";
+      $("log").dataset.fresh = "0";
+      stages().forEach((s) => (s.dataset.state = "pending"));
+      $("result").hidden = true;
+
+      try {
+        // 1) 어피니티 매핑
+        setStage(0, "active");
+        log(`인터뷰 ${interview_ids.length}건을 읽고 어피니티 매핑을 시작했어요. (노트 분해 → 1차·2차 군집 → 통찰 문장 → 세그먼트)`);
+        let r = await UXA.api("/api/personas/analyze", { method: "POST", body: { interview_ids, service, kind, count } });
+        if (r.res.status === 401) { UXA.clearSession(); location.replace(UXA.loginUrl()); return; }
+        if (!r.res.ok) throw new Error(r.data.error || "인터뷰 분석에 실패했어요.");
+        const a = r.data.analysis;
+        setStage(0, "done");
+        log(`분석 완료: 노트 ${a.notes.length}장 · 테마 ${a.themes.length}개 · 세그먼트 ${a.segments.length}개${a.orphans.length ? ` · 고아 노트 ${a.orphans.length}장` : ""}${a.missing_codes?.length ? ` · 노트가 없는 참가자: ${a.missing_codes.join(", ")}` : ""}`);
+        a.themes.forEach((t) => log(`테마 · ${t.insight || t.title} (노트 ${t.note_count}, 참가자 ${t.participant_count})`, "sub"));
+
+        // 2) 페르소나 작성
+        setStage(1, "active");
+        log(`세그먼트 ${a.segments.length}개를 바탕으로 페르소나 ${Math.min(count, Math.max(1, a.segments.length))}명을 작성하고 있어요.`);
+        r = await UXA.api("/api/personas/compose", { method: "POST", body: { analysis_id: r.data.analysis_id } });
+        if (!r.res.ok) throw new Error(r.data.error || "페르소나 작성에 실패했어요.");
+        const personas = r.data.personas || [];
+        setStage(1, "done");
+        log(`작성 완료: ${personas.map((p) => `${p.profile.name}(${p.priority})`).join(", ")}`);
+
+        // 3) 이미지 — 프롬프트를 먼저 보여 주고 사용자가 고친 뒤 만들어야 하므로 문서 화면에서 진행한다
+        setStage(2, "manual");
+        log("프로필 사진은 문서 화면에서 조립된 프롬프트를 확인·수정한 뒤 만들 수 있어요. (각 카드의 '사진 만들기')", "sub");
+
+        // 4) 완료
+        setStage(3, "done");
+        log("완료! 아래에서 문서를 열어 보세요.");
+        $("result").hidden = false;
+        $("resultList").innerHTML = personas.map((p) => `
+          <div class="result-card">
+            <span class="pri" data-priority="${esc(p.priority)}">${esc(p.priority)}</span>
+            <b>${esc(p.profile.name)}</b><small>${esc(p.profile.job)} · ${esc(p.profile.age)}세${p.share ? ` · ${esc(p.share)}` : ""}</small>
+            <p>${esc(p.tagline.replace(/\*\*/g, ""))}</p>
+            <span class="result-actions"><a class="mini" href="/persona/view/?id=${encodeURIComponent(p.id)}">문서 열기</a><a class="mini accent" href="/persona/view/?id=${encodeURIComponent(p.id)}&photo=1">사진 만들기</a></span>
+          </div>`).join("");
+        $("startBtn").textContent = "다시 생성";
+      } catch (err) {
+        const active = stages().findIndex((s) => s.dataset.state === "active");
+        if (active >= 0) setStage(active, "error");
+        log(err.message || "생성에 실패했어요. 잠시 후 다시 시도해 주세요.", "error");
+        $("startBtn").textContent = "다시 시도";
+      } finally {
+        running = false; refresh();
+      }
     });
 
-    // 목록에서 "이 프로젝트에 추가"로 들어오면 그 프로젝트 인터뷰를 미리 체크해 둔다 (더미)
-    const project = new URLSearchParams(location.search).get("project");
-    if (project === "s_ott") boxes().slice(0, 4).forEach((b) => (b.checked = true));
-    refresh();
+    loadSources();
   </script>
 </body>
 </html>
