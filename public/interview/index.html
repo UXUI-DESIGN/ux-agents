@@ -307,7 +307,7 @@
             <svg viewBox="0 0 24 24" fill="none"><path d="M4 12 20 4l-4 16-4-7-8-1Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
           </button>
         </div>
-        <p class="hint">Enter는 줄바꿈 · 보내기는 버튼</p>
+        <p class="hint">Enter 보내기 · Shift+Enter 줄바꿈</p>
       </form>
     </section>
 
@@ -620,14 +620,19 @@
       scrollToEnd();
     }
 
-    // 입력창: 쓰는 만큼 늘어나고, Enter는 줄바꿈 (보내기는 버튼 / Ctrl+Enter)
+    // 입력창: 쓰는 만큼 늘어나고, Enter는 보내기 · Shift+Enter는 줄바꿈
     const input = $("input");
     input.addEventListener("input", () => {
       input.style.height = "auto";
       input.style.height = Math.min(input.scrollHeight, innerHeight * 0.4) + "px";
       $("sendBtn").disabled = sending || !input.value.trim();
     });
-    input.addEventListener("keydown", (e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); $("composer").requestSubmit(); } });
+    input.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter" || e.shiftKey) return;           // Shift+Enter → 줄바꿈
+      if (e.isComposing || e.keyCode === 229) return;        // 한글 조합 중 Enter는 무시 (중복 전송 방지)
+      e.preventDefault();
+      if (!$("sendBtn").disabled) $("composer").requestSubmit();
+    });
     $("composer").addEventListener("submit", (e) => {
       e.preventDefault();
       const text = input.value.trim();
