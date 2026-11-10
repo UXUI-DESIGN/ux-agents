@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>세션 상세 · UXA</title>
+  <title>세션 상세 · Janus AI</title>
   <meta name="robots" content="noindex" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
   <style>
@@ -225,7 +225,7 @@
 
   <header class="nav">
     <div class="container">
-      <a href="../../index.html" class="logo">UX<span>A</span></a>
+      <a href="../../index.html" class="logo">Janus <span>AI</span></a>
       <nav aria-label="에이전트 메뉴">
         <ul class="menu">
           <li><a href="../../guide/index.html">인터뷰 가이드</a></li>
@@ -324,7 +324,7 @@
 
   <footer>
     <div class="container">
-      <span class="logo">UXA · UX Agents</span>
+      <span class="logo">Janus <span>AI</span></span>
       <span>만든 사람 [내 이름] · © 2026</span>
     </div>
   </footer>
@@ -403,7 +403,7 @@
     load();
 
     function renderSession() {
-      document.title = `${session.name} · 세션 상세 · UXA`;
+      document.title = `${session.name} · 세션 상세 · Janus AI`;
       const open = session.status === "open";
       $("sStatus").textContent = open ? "참가자 모집 중" : "링크 닫힘";
       $("sStatus").className = `chip ${open ? "open" : "closed"}`;

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>인터뷰 참여 · UXA</title>
+  <title>인터뷰 참여 · Janus AI</title>
   <meta name="robots" content="noindex, nofollow" />
   <meta name="referrer" content="no-referrer" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
@@ -231,7 +231,7 @@
 </head>
 <body>
 
-  <header class="top"><div class="in"><span class="logo">UX<span>A</span></span></div></header>
+  <header class="top"><div class="in"><span class="logo">Janus <span>AI</span></span></div></header>
 
   <main>
     <div class="loading" id="loading">인터뷰 정보를 불러오는 중…</div>
@@ -326,7 +326,7 @@
       <header class="chat-head">
         <div class="in">
           <div class="row">
-            <div class="who"><span class="logo">UX<span style="color:var(--accent)">A</span></span><span class="pcode" id="chatCode"></span><img class="avatar" src="./moderator.webp" alt="" /><span class="mod"><b>김사랑</b><small>AI 모더레이터</small></span></div>
+            <div class="who"><span class="logo">Janus <span style="color:var(--accent)">AI</span></span><span class="pcode" id="chatCode"></span><img class="avatar" src="./moderator.webp" alt="" /><span class="mod"><b>김사랑</b><small>AI 모더레이터</small></span></div>
             <div class="tools">
               <button class="tool-btn" type="button" id="pauseBtn">잠시 쉬기</button>
               <button class="tool-btn" type="button" id="quitBtn">그만하기</button>
@@ -419,7 +419,7 @@
       $("code").textContent = interview.code;
       // 마지막 숫자를 읽었을 때 받침이 있으면(영·삼·육) '으로', 없거나 ㄹ이면 '로' — P03으로, P01로
       $("codeTail").textContent = `${/[036]$/.test(interview.code) ? "으로" : "로"} 기록됩니다`;
-      document.title = `${interview.code} · 인터뷰 참여 · UXA`;
+      document.title = `${interview.code} · 인터뷰 참여 · Janus AI`;
       show("started");
     }
 
@@ -537,7 +537,7 @@
       opening = true;
       $("goChat").disabled = $("goVoice").disabled = true;
       $("chatCode").textContent = interview.code;
-      document.title = `${interview.code} · 인터뷰 참여 · UXA`;
+      document.title = `${interview.code} · 인터뷰 참여 · Janus AI`;
       show("chat");
       $("chatIn").replaceChildren();
       try {
@@ -1093,7 +1093,7 @@
         if (v === "withdraw") {
           dropKey();
           clearInterval(ticker);
-          document.title = "인터뷰 참여 · UXA";
+          document.title = "인터뷰 참여 · Janus AI";
           show("withdrawn");
           window.scrollTo({ top: 0 });
         } else {

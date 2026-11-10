@@ -1,4 +1,4 @@
-// UXA API 서버 — 모든 에이전트는 이 Worker를 거쳐서만 OpenAI를 부른다.
+// Janus AI API 서버 — 모든 에이전트는 이 Worker를 거쳐서만 OpenAI를 부른다.
 //   GET  /health         살아 있는지, 비밀값이 등록됐는지 확인
 //   GET  /health/openai  비밀값 키로 OpenAI에 실제로 접속되는지 확인 (토큰 사용 없음, 키 값은 절대 내보내지 않음)
 //   POST /api/chat       { input, instructions?, max_output_tokens?, schema? } → { text, model, usage, incomplete }
