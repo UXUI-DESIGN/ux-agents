@@ -81,7 +81,7 @@ export async function personas(request, env, json, id, action) {
 }
 
 // ── 고를 수 있는 인터뷰 ──
-async function sourcesOf(env, user) {
+export async function sourcesOf(env, user) {
   const { results } = await env.DB.prepare(
     `SELECT s.id AS session_id, s.name AS session_name, s.guide_snapshot, s.created_at AS session_created_at,
             i.id, i.code, i.seq, i.consented_at, i.finished_at, i.paused_total,

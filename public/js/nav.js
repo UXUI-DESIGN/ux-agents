@@ -12,7 +12,7 @@
       items: [
         { label: "인터뷰 가이드", hint: "리서치 목표 → 인터뷰 질문지", path: "/guide/" },
         { label: "인터뷰 모더레이터", hint: "AI가 진행하는 사용자 인터뷰", path: "/moderator/" },
-        { label: "인터뷰 데이터분석", hint: "인터뷰 기록 → 핵심 발견 · 패턴" },
+        { label: "인터뷰 데이터분석", hint: "인터뷰 기록 → 핵심 발견 · 패턴", path: "/analysis/" },
       ],
     },
     {
