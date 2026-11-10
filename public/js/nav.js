@@ -135,3 +135,40 @@
   nav.setAttribute("aria-label", "메뉴");
   nav.replaceChildren(list);
 })();
+
+// Janus AI 공통 푸터 — 운영 주체(인공지능디자인협회) 정보 표기
+//   협회 사이트(https://www.ai-design.kr) 푸터의 사업자정보와 같은 내용이다. 협회 정보가 바뀌면 여기 한 곳만 고친다.
+(() => {
+  const box = document.querySelector("body > footer .container");
+  if (!box) return;
+
+  const style = document.createElement("style");
+  style.textContent = `
+    body > footer { background: var(--bg-soft, #f6f7fb); }
+    .ft { flex: 1 1 100%; min-width: 0; font-size: 13px; line-height: 1.8; color: var(--text-sub); }
+    .ft a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+    .ft-brand { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid var(--line); }
+    .ft-brand .logo { text-decoration: none; }
+    .ft-info b { color: var(--text); font-weight: 700; }
+    .ft-info .bar { margin: 0 8px; color: var(--line); }
+    .ft-copy { margin-top: 12px; font-size: 12px; }`;
+  document.head.appendChild(style);
+
+  const year = Math.max(2026, new Date().getFullYear());
+  const bar = '<span class="bar" aria-hidden="true">|</span>';
+  const ft = document.createElement("div");
+  ft.className = "ft";
+  ft.innerHTML = `
+    <div class="ft-brand">
+      <a href="/" class="logo">Janus <span>AI</span></a>
+      <span><a href="https://www.ai-design.kr/" target="_blank" rel="noopener noreferrer">인공지능디자인협회</a> (AI DESIGN ASSOCIATION)가 운영하는 서비스입니다.</span>
+    </div>
+    <p class="ft-info">
+      <b>인공지능디자인협회</b>${bar}대표자 유훈식${bar}사업자등록번호 116-82-70490<br>
+      (03907) 서울특별시 마포구 상암산로1길 24, 407동 21층 2102호<br>
+      대표전화 070-7954-1843${bar}고객센터 <a href="mailto:cs@ai-design.kr">cs@ai-design.kr</a>${bar}개인정보 보호책임자 유훈식<br>
+      호스팅제공자 Cloudflare, Inc.
+    </p>
+    <p class="ft-copy">© ${year} AI Design Association. All rights reserved.</p>`;
+  box.replaceChildren(ft);
+})();
