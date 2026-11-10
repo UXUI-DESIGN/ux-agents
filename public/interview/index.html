@@ -161,6 +161,34 @@
     .send { flex: none; width: 46px; height: 46px; border: 0; border-radius: 50%; background: var(--accent); color: #fff; cursor: pointer; display: grid; place-items: center; }
     .send:disabled { background: #c7c9d6; cursor: not-allowed; }
     .send svg { width: 22px; height: 22px; }
+    .mic { flex: none; width: 46px; height: 46px; border: 1px solid var(--line); border-radius: 50%; background: #fff; color: var(--accent); cursor: pointer; display: grid; place-items: center; }
+    .mic:hover { border-color: var(--accent); background: var(--accent-soft); }
+    .mic:disabled { color: var(--text-faint); cursor: not-allowed; background: #fff; border-color: var(--line); }
+    .mic svg { width: 22px; height: 22px; }
+
+    /* 음성 대화 막대: 지금 누가 말하는지 · 음소거 · 글로 전환 */
+    .voice-bar { flex: none; background: #fff; border-top: 1px solid var(--line); padding: 12px 12px calc(12px + env(safe-area-inset-bottom)); }
+    .voice-bar .in { max-width: 720px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+    .voice-state { display: flex; align-items: center; gap: 12px; min-width: 0; font-size: 15px; font-weight: 600; }
+    .voice-state small { display: block; font-size: 12.5px; font-weight: 400; color: var(--text-sub); }
+    .orb { flex: none; width: 40px; height: 40px; border-radius: 50%; background: var(--line); display: grid; place-items: center; color: #fff; }
+    .orb svg { width: 20px; height: 20px; }
+    [data-state=listening] .orb { background: var(--good); }
+    [data-state=hearing] .orb { background: var(--good); animation: pulse 1s infinite; }
+    [data-state=thinking] .orb, [data-state=connecting] .orb { background: var(--text-faint); animation: blink 1.2s infinite; }
+    [data-state=speaking] .orb { background: var(--accent); animation: pulse 1.4s infinite; }
+    [data-state=muted] .orb { background: #b42318; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, .35); } 100% { box-shadow: 0 0 0 14px rgba(79, 70, 229, 0); } }
+    .voice-tools { display: flex; gap: 6px; margin-left: auto; }
+    .tool-btn[aria-pressed=true] { border-color: #b42318; color: #b42318; background: #fff4f3; }
+    .msg.pending .bubble { opacity: .6; font-style: italic; }
+    .go-row { display: grid; gap: 8px; margin-top: 22px; }
+    .go-row .go { margin-top: 0; }
+    .code-card .go.alt { background: #fff; color: var(--accent); border: 1px solid var(--accent); }
+    .go-note { margin-top: 10px; font-size: 13px; color: var(--text-sub); }
+    .msg.error .btns { display: flex; gap: 6px; flex-wrap: wrap; }
+    @media (prefers-reduced-motion: reduce) { .orb { animation: none !important; } }
+
     .composer .hint { max-width: 720px; margin: 4px auto 0; padding: 0 6px; font-size: 11.5px; color: var(--text-faint); text-align: right; }
 
     .overlay { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 20px; background: rgba(20, 22, 31, .55); backdrop-filter: blur(3px); }
@@ -278,7 +306,11 @@
         <li>이름 대신 이 코드로만 기록돼요. 리서처도 코드로만 알아볼 수 있어요.</li>
         <li>이 링크로 다시 들어오면 이 인터뷰로 이어서 돌아와요. 중간에 쉬어도 괜찮아요.</li>
       </ul>
-      <button class="go" type="button" id="goChat">AI 모더레이터와 대화 시작</button>
+      <div class="go-row">
+        <button class="go" type="button" id="goVoice">🎤 음성으로 대화하기</button>
+        <button class="go alt" type="button" id="goChat">⌨️ 글로 대화하기</button>
+      </div>
+      <p class="go-note">음성은 마이크를 쓰고, 말한 내용은 AI 서비스로 전달돼 글로 받아써요. 녹음 파일은 보관하지 않아요. 대화 중에도 언제든 서로 바꿀 수 있어요.</p>
     </section>
 
     <!-- 대화 -->
@@ -302,13 +334,29 @@
       <div class="chat-log" id="chatLog"><div class="in" id="chatIn" aria-live="polite"></div></div>
       <form class="composer" id="composer">
         <div class="in">
+          <button class="mic" type="button" id="voiceBtn" aria-label="음성으로 대화하기" title="음성으로 대화하기" disabled>
+            <svg viewBox="0 0 24 24" fill="none"><rect x="9" y="3" width="6" height="11" rx="3" stroke="currentColor" stroke-width="2"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
           <textarea id="input" rows="1" placeholder="편하게 말씀해 주세요…" aria-label="답변 입력" maxlength="2000"></textarea>
           <button class="send" type="submit" id="sendBtn" aria-label="보내기" disabled>
             <svg viewBox="0 0 24 24" fill="none"><path d="M4 12 20 4l-4 16-4-7-8-1Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
           </button>
         </div>
-        <p class="hint">Enter 보내기 · Shift+Enter 줄바꿈</p>
+        <p class="hint">Enter 보내기 · Shift+Enter 줄바꿈 · 🎤 음성으로 대화</p>
       </form>
+      <div class="voice-bar" id="voiceBar" hidden>
+        <div class="in">
+          <div class="voice-state" id="voiceState" data-state="connecting" aria-live="polite">
+            <span class="orb" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="9" y="3" width="6" height="11" rx="3" stroke="currentColor" stroke-width="2"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+            <span><span id="voiceText">연결하는 중…</span><small id="voiceSub">마이크를 허용해 주세요.</small></span>
+          </div>
+          <div class="voice-tools">
+            <button class="tool-btn" type="button" id="muteBtn" aria-pressed="false">음소거</button>
+            <button class="tool-btn" type="button" id="toTextBtn">글로 전환</button>
+          </div>
+        </div>
+      </div>
+      <audio id="voiceAudio" autoplay hidden></audio>
     </section>
 
     <div class="overlay" id="pauseOverlay" hidden>
@@ -336,7 +384,9 @@
   <script>
     // 참가자 링크: /interview/#<세션 링크 값>. # 뒤는 서버 기록에 남지 않는다.
     // 이 화면은 로그인 없이 열리고, 이 세션의 정보 보기·동의·자기 인터뷰 다시 열기만 할 수 있다.
-    const API_BASE = "https://uxa-api.kopeakai88.workers.dev";
+    // 개발할 때만: http://localhost:5173/interview/?api=local#… 로 열면 내 컴퓨터의 Worker(8787)를 쓴다
+    const API_BASE = location.hostname === "localhost" && new URLSearchParams(location.search).get("api") === "local"
+      ? "http://localhost:8787" : "https://uxa-api.kopeakai88.workers.dev";
     const $ = (id) => document.getElementById(id);
     const token = location.hash.slice(1);
     const KEY_STORE = `uxa.interview:${token}`; // 이 기기에서 시작한 인터뷰의 열쇠 (새로고침해도 같은 참가자로)
@@ -466,13 +516,15 @@
     const keyHeaders = () => ({ "X-Interview-Key": getKey() || "" });
     let remainingSec = 0, paused = false, ticker = null, sending = false;
 
-    $("goChat").addEventListener("click", openChat);
+    $("goChat").addEventListener("click", () => openChat("text"));
+    $("goVoice").addEventListener("click", () => openChat("voice"));
 
     let opening = false;
-    async function openChat() {
+    // mode: text(글) | voice(음성). 새로고침으로 다시 들어오면 글로 열고, 마이크 버튼으로 음성을 켠다
+    async function openChat(mode = "text") {
       if (opening) return; // 두 번 눌러도 한 번만 연다
       opening = true;
-      $("goChat").disabled = true;
+      $("goChat").disabled = $("goVoice").disabled = true;
       $("chatCode").textContent = interview.code;
       document.title = `${interview.code} · 인터뷰 참여 · UXA`;
       show("chat");
@@ -484,6 +536,8 @@
         applyState(data);
         data.messages.forEach((m) => addMessage(m.role, m.content, m));
         if (data.status === "completed" || data.status === "stopped") return finishChat(data.status);
+        // 음성: 첫 인사도 목소리로 받는다 (연결하면 쉬는 중이던 시간도 다시 흐른다)
+        if (mode === "voice") { opening = false; return startVoice(); }
         if (paused) showPause(true);
         // 첫 인사 전이거나, 참가자 말 뒤에 답이 끊겼으면(새로고침·연결 끊김) 그 자리에서 이어서
         if (!data.messages.length || data.messages.at(-1).role === "participant") await requestModerator("");
@@ -521,7 +575,7 @@
       if (role === "sys") { el.className = "sys"; el.textContent = text; }
       else {
         el.className = `msg ${role}`;
-        if (role !== "error") el.innerHTML = `<span class="who-label">${role === "moderator" ? "AI 모더레이터" : interview.code}</span>`;
+        if (role !== "error") el.innerHTML = `<span class="who-label">${role === "moderator" ? "AI 모더레이터" : interview.code}${meta.mode === "voice" ? " · 음성" : ""}</span>`;
         const b = document.createElement("div");
         b.className = "bubble";
         b.textContent = text;
@@ -555,6 +609,7 @@
     function enableInput(on) {
       $("input").disabled = !on;
       $("sendBtn").disabled = !on || !$("input").value.trim();
+      $("voiceBtn").disabled = !on;
       if (on && matchMedia("(min-width: 720px)").matches) $("input").focus();
     }
 
@@ -607,6 +662,9 @@
       if (finished) return;
       finished = true;
       clearInterval(ticker);
+      stopVoice();
+      showVoiceBar(false);
+      $("voiceBtn").hidden = true;
       enableInput(false);
       $("input").placeholder = "인터뷰를 마쳤어요";
       $("pauseBtn").hidden = true;
@@ -643,15 +701,350 @@
       requestModerator(text, bubble);
     });
 
+    // ── 음성으로 대화 (OpenAI Realtime · WebRTC) ──
+    // 브라우저가 OpenAI와 직접 음성을 주고받는다. 서버(Worker)는 잠깐 쓰는 임시 키를 내주고, 받아쓴 글만 기록한다.
+    // 음성 파일은 어디에도 저장하지 않는다. 화면에는 받아쓴 글이 자막처럼 쌓인다.
+    const REALTIME_CALLS = "https://api.openai.com/v1/realtime/calls";
+    const VOICE_OVERTIME_SEC = 5 * 60; // 세션 시간이 끝나고 이만큼 지나면 음성을 끊고 글로 마무리하게 한다
+    const VOICE_STATES = {
+      connecting: ["연결하는 중…", "마이크를 허용해 주세요."],
+      listening: ["듣고 있어요", "편하게 말씀해 주세요."],
+      hearing: ["듣는 중…", "말씀이 끝나면 모더레이터가 답해요."],
+      thinking: ["생각하는 중…", ""],
+      speaking: ["모더레이터가 말하는 중", "중간에 끼어들어 말씀하셔도 돼요."],
+      muted: ["음소거 중이에요", "‘음소거 해제’를 누르면 다시 들어요."],
+    };
+    const voice = {
+      on: false, starting: false, gen: 0, pc: null, dc: null, mic: null, muted: false,
+      queue: [], flushing: null,      // 기록 대기열: 말한 순서대로 서버에 남긴다
+      live: new Map(),                // 지금 말하고 있는 모더레이터 말풍선 (item_id → { el, text })
+      noticeLevel: null, excludeNext: false, finishing: null, finishTimer: null,
+      pinger: null, overSince: 0, resumeAfterPause: false,
+    };
+
+    function showVoiceBar(on) { $("voiceBar").hidden = !on; $("composer").hidden = on; }
+    function setVoiceState(state) {
+      if (voice.muted && ["listening", "hearing"].includes(state)) state = "muted";
+      $("voiceState").dataset.state = state;
+      [$("voiceText").textContent, $("voiceSub").textContent] = VOICE_STATES[state];
+    }
+    const voiceSend = (ev) => { if (voice.dc?.readyState === "open") voice.dc.send(JSON.stringify(ev)); };
+
+    $("voiceBtn").addEventListener("click", () => startVoice());
+
+    async function startVoice() {
+      if (voice.on || voice.starting || finished || sending) return;
+      if (!navigator.mediaDevices?.getUserMedia || !window.RTCPeerConnection) return voiceToText("이 브라우저에서는 음성 대화를 쓸 수 없어요. 글로 이어 갈게요.");
+      voice.starting = true;
+      const gen = ++voice.gen;
+      const stale = () => gen !== voice.gen; // 연결하는 사이에 끊기·쉬기·종료가 눌렸는지
+      enableInput(false);
+      showVoiceBar(true);
+      voice.muted = false;
+      $("muteBtn").setAttribute("aria-pressed", "false");
+      $("muteBtn").textContent = "음소거";
+      setVoiceState("connecting");
+      try {
+        let mic;
+        try {
+          mic = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
+        } catch {
+          throw Object.assign(new Error("마이크를 쓸 수 없어요. 브라우저에서 마이크를 허용하면 🎤 버튼으로 다시 켤 수 있어요. 지금은 글로 이어 갈게요."), { shown: true });
+        }
+        if (stale()) return mic.getTracks().forEach((t) => t.stop());
+        voice.mic = mic;
+
+        const { res, data } = await api("/interviews/me/realtime-session", { method: "POST", headers: keyHeaders() });
+        if (stale()) return;
+        if (res.status === 404 || res.status === 410) { stopVoice(); return show("ended"); }
+        if (res.status === 409 && (data.code === "completed" || data.code === "stopped")) return finishChat(data.code);
+        if (!res.ok) throw Object.assign(new Error(data.error || "음성 연결을 준비하지 못했어요. 글로 이어 갈게요."), { shown: true });
+        applyState(data);
+
+        const pc = new RTCPeerConnection();
+        voice.pc = pc;
+        pc.addEventListener("track", (e) => { $("voiceAudio").srcObject = e.streams[0]; });
+        mic.getTracks().forEach((t) => pc.addTrack(t, mic));
+        const dc = pc.createDataChannel("oai-events");
+        voice.dc = dc;
+        dc.addEventListener("open", () => {
+          if (stale()) return;
+          voice.on = true;
+          voice.starting = false;
+          voice.noticeLevel = null;
+          voice.overSince = 0;
+          setVoiceState("thinking");
+          voiceSend({ type: "response.create" }); // 모더레이터가 먼저 말을 건다 (첫 인사 또는 '이어서 할게요')
+          clearInterval(voice.pinger);
+          voice.pinger = setInterval(voicePing, 30000);
+        });
+        dc.addEventListener("message", (e) => {
+          if (stale()) return;
+          let ev;
+          try { ev = JSON.parse(e.data); } catch { return; }
+          onVoiceEvent(ev);
+        });
+        pc.addEventListener("connectionstatechange", () => {
+          if (stale()) return;
+          if (pc.connectionState === "failed") voiceDropped();
+          // 잠깐 끊긴 것은 기다려 본다
+          if (pc.connectionState === "disconnected") setTimeout(() => { if (!stale() && pc.connectionState === "disconnected") voiceDropped(); }, 6000);
+        });
+
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        const sdp = await fetch(REALTIME_CALLS, {
+          method: "POST", headers: { Authorization: `Bearer ${data.clientSecret}`, "Content-Type": "application/sdp" }, body: offer.sdp,
+        });
+        if (stale()) return;
+        if (!sdp.ok) throw new Error(`realtime call ${sdp.status}`);
+        const answer = await sdp.text();
+        if (stale()) return;
+        await pc.setRemoteDescription({ type: "answer", sdp: answer });
+      } catch (err) {
+        if (stale()) return;
+        console.warn("voice start failed", err);
+        stopVoice();
+        voiceToText(err.shown ? err.message : "음성 연결이 되지 않았어요. 글로 이어 갈게요.");
+      }
+    }
+
+    // 연결을 끊고 마이크를 놓는다. 이미 받아쓴 말은 끝까지 기록한다
+    function stopVoice() {
+      voice.gen++;
+      voice.on = voice.starting = false;
+      clearInterval(voice.pinger);
+      clearTimeout(voice.finishTimer);
+      voice.finishing = null;
+      try { voice.dc?.close(); } catch {}
+      try { voice.pc?.close(); } catch {}
+      voice.mic?.getTracks().forEach((t) => t.stop());
+      voice.pc = voice.dc = voice.mic = null;
+      $("voiceAudio").srcObject = null;
+      // 받아쓰기를 기다리던 말풍선은 거둔다 (글이 없으면 기록하지 않는다)
+      voice.queue.forEach((q) => { if (!q.done) { q.done = true; if (!q.text) q.el?.remove(); } });
+      voice.live.forEach((b) => { if (!b.text) b.el.remove(); });
+      voice.live.clear();
+      return flushLog();
+    }
+
+    // 음성을 끄고 글 대화로: 첫 인사 전이거나 참가자 말에서 끊겼으면 글로 이어서 답을 받는다
+    async function voiceToText(note) {
+      await stopVoice();
+      showVoiceBar(false);
+      if (finished) return;
+      if (note) addMessage("sys", note);
+      const msgs = [...$("chatIn").querySelectorAll(".msg.moderator:not(.typing), .msg.participant")];
+      if (!msgs.length || msgs.at(-1).classList.contains("participant")) requestModerator("");
+      else enableInput(true);
+    }
+    $("toTextBtn").addEventListener("click", () => voiceToText("글로 이어서 대화해요. 🎤 버튼으로 다시 음성을 켤 수 있어요."));
+
+    $("muteBtn").addEventListener("click", () => {
+      voice.muted = !voice.muted;
+      voice.mic?.getAudioTracks().forEach((t) => { t.enabled = !voice.muted; });
+      $("muteBtn").setAttribute("aria-pressed", String(voice.muted));
+      $("muteBtn").textContent = voice.muted ? "음소거 해제" : "음소거";
+      setVoiceState(voice.muted ? "muted" : "listening");
+    });
+
+    async function voiceDropped() {
+      await stopVoice();
+      showVoiceBar(false);
+      if (finished) return;
+      const el = addMessage("error", "음성 연결이 끊겼어요. 지금까지의 대화는 남아 있어요.");
+      const btns = Object.assign(document.createElement("div"), { className: "btns" });
+      const again = Object.assign(document.createElement("button"), { type: "button", textContent: "음성 다시 연결" });
+      again.addEventListener("click", () => { el.remove(); startVoice(); });
+      const text = Object.assign(document.createElement("button"), { type: "button", textContent: "글로 이어 가기" });
+      text.addEventListener("click", () => { el.remove(); voiceToText(""); });
+      btns.append(again, text);
+      el.append(btns);
+      enableInput(true);
+    }
+
+    // OpenAI가 보내는 이벤트: 누가 말하는지 표시하고, 받아쓴 글을 말풍선과 기록으로 옮긴다
+    function onVoiceEvent(ev) {
+      switch (ev.type) {
+        case "input_audio_buffer.speech_started": setVoiceState("hearing"); break;
+        case "input_audio_buffer.speech_stopped": setVoiceState("thinking"); break;
+        case "input_audio_buffer.committed": {
+          // 참가자가 한 마디를 마침 → 받아쓰기가 올 자리를 순서대로 잡아 둔다
+          const el = addMessage("participant", "받아쓰는 중…", { mode: "voice" });
+          el.classList.add("pending");
+          const q = { role: "participant", itemId: ev.item_id, el, text: "", done: false };
+          voice.queue.push(q);
+          setTimeout(() => { if (!q.done) settleHeard(q, ""); }, 20000);
+          break;
+        }
+        case "conversation.item.input_audio_transcription.completed":
+          settleHeard(voice.queue.find((q) => q.itemId === ev.item_id), (ev.transcript || "").trim());
+          break;
+        case "conversation.item.input_audio_transcription.failed":
+          settleHeard(voice.queue.find((q) => q.itemId === ev.item_id), "");
+          break;
+        case "response.output_audio_transcript.delta": {
+          let b = voice.live.get(ev.item_id);
+          if (!b) { b = { el: addMessage("moderator", "", { mode: "voice" }), text: "" }; voice.live.set(ev.item_id, b); }
+          b.text += ev.delta || "";
+          b.el.querySelector(".bubble").textContent = b.text;
+          scrollToEnd();
+          break;
+        }
+        case "output_audio_buffer.started": setVoiceState("speaking"); break;
+        case "output_audio_buffer.stopped":
+        case "output_audio_buffer.cleared":
+          setVoiceState("listening");
+          if (voice.finishing) { voice.finishing.audioDone = true; tryFinishVoice(); }
+          break;
+        case "response.done": onVoiceResponse(ev.response || {}); break;
+        case "error": console.warn("realtime error", ev.error?.message || ev.error); break;
+      }
+    }
+
+    function settleHeard(q, text) {
+      if (!q || q.done) return;
+      q.done = true;
+      q.text = text;
+      if (text) { q.el.classList.remove("pending"); q.el.querySelector(".bubble").textContent = text; }
+      else q.el.remove(); // 알아듣지 못한 소리는 남기지 않는다
+      flushLog();
+    }
+
+    // 모더레이터의 한 차례가 끝남: 한 말을 기록하고, 도구로 알린 진행 상황(단계·제외·마침)을 처리한다
+    function onVoiceResponse(response) {
+      let spoke = false, toolUsed = false, finishCalled = false;
+      for (const item of response.output || []) {
+        if (item.type === "message") {
+          const b = voice.live.get(item.id);
+          voice.live.delete(item.id);
+          // 끼어들어 끊긴 말은 화면에 나온 데까지만 남긴다
+          const full = (item.content || []).map((c) => c.transcript || c.text || "").join("").trim();
+          const text = (response.status === "cancelled" ? b?.text.trim() : full) || b?.text.trim() || "";
+          if (!text) { b?.el.remove(); continue; }
+          const el = b?.el || addMessage("moderator", text, { mode: "voice" });
+          el.querySelector(".bubble").textContent = text;
+          spoke = true;
+          voice.queue.push({ role: "moderator", el, text, done: true, excluded: voice.excludeNext });
+          voice.excludeNext = false;
+        } else if (item.type === "function_call") {
+          let args = {};
+          try { args = JSON.parse(item.arguments || "{}"); } catch {}
+          toolUsed = true;
+          if (item.name === "set_stage") voice.queue.push({ body: { tool: "set_stage", stage: args.stage }, done: true });
+          else if (item.name === "exclude_from_record") { voice.queue.push({ body: { tool: "exclude", scope: args.scope }, done: true }); voice.excludeNext = true; }
+          else if (item.name === "finish_interview") {
+            finishCalled = true;
+            voice.finishing = { status: null, audioDone: false, spoke };
+            voice.queue.push({ body: { tool: "finish", reason: args.reason }, done: true, finish: true });
+          }
+          voiceSend({ type: "conversation.item.create", item: { type: "function_call_output", call_id: item.call_id, output: JSON.stringify({ ok: true }) } });
+        }
+      }
+      flushLog();
+      // 도구만 부르고 말은 아직 안 했으면 이어서 말하게 한다 (마침은 서버 확인 뒤에 정한다)
+      if (toolUsed && !finishCalled && !spoke) voiceSend({ type: "response.create" });
+      else if (voice.finishing && !finishCalled && spoke) voice.finishing.spoke = true;
+    }
+
+    // 마침: 서버가 마침을 확인했고, 마무리 인사가 끝까지 들린 뒤에 연결을 닫는다
+    function tryFinishVoice() {
+      const f = voice.finishing;
+      if (!f || !f.status || !f.audioDone) return;
+      const status = f.status;
+      stopVoice();
+      finishChat(status);
+    }
+
+    // 기록 대기열을 앞에서부터 차례로 서버에 남긴다 (받아쓰기가 늦게 와도 말한 순서가 지켜진다)
+    function flushLog() {
+      if (!voice.flushing) voice.flushing = drainLog().finally(() => { voice.flushing = null; });
+      return voice.flushing;
+    }
+    async function drainLog() {
+      while (voice.queue.length && voice.queue[0].done) {
+        const q = voice.queue.shift();
+        const body = q.body || (q.text ? { role: q.role, text: q.text, ...(q.excluded ? { excluded: true } : {}) } : null);
+        if (!body) continue;
+        const data = await voiceLog(body);
+        if (!data) {
+          if (q.el) q.el.append(Object.assign(document.createElement("span"), { className: "tag", textContent: "기록되지 않았어요" }));
+          if (q.finish) { voice.finishing = null; voiceSend({ type: "response.create" }); }
+          continue;
+        }
+        if (data.id && q.el) q.el.dataset.id = data.id;
+        if (q.excluded && q.el) markExcluded(q.el);
+        if (data.excludedFrom) $("chatIn").querySelectorAll(".msg[data-id]").forEach((m) => { if (Number(m.dataset.id) >= data.excludedFrom) markExcluded(m); });
+        applyVoiceState(data);
+        if (q.finish && voice.finishing) {
+          if (data.ignored) { voice.finishing = null; voiceSend({ type: "response.create" }); continue; }
+          voice.finishing.status = data.status === "stopped" ? "stopped" : "completed";
+          // 인사를 아직 말하지 않았으면 짧게 말하게 하고, 소리가 끝나면 닫는다 (끝 신호가 안 오면 조금 기다렸다 닫는다)
+          if (!voice.finishing.spoke) voiceSend({ type: "response.create", response: { instructions: "참가자에게 짧은 마무리 감사 인사만 말하세요. 도구는 호출하지 않습니다." } });
+          voice.finishTimer = setTimeout(() => { if (voice.finishing) { voice.finishing.audioDone = true; tryFinishVoice(); } }, 15000);
+          tryFinishVoice();
+        }
+      }
+    }
+
+    // 기록 한 건 보내기: 연결이 흔들리면 몇 번 더 해 본다. 끝내 안 되면 null
+    async function voiceLog(body) {
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          const { res, data } = await api("/interviews/me/realtime-log", {
+            method: "POST", headers: { "Content-Type": "application/json", ...keyHeaders() }, body: JSON.stringify(body),
+          });
+          if (res.ok) return data;
+          if (res.status === 404 || res.status === 410) { stopVoice(); show("ended"); return null; }
+          if (res.status === 409) {
+            // 이미 마친 인터뷰이거나 발화 한도에 닿음 → 음성을 닫는다
+            const status = data.code === "stopped" ? "stopped" : "completed";
+            setTimeout(() => { stopVoice(); finishChat(status); });
+            return null;
+          }
+          if (res.status < 500) return null;
+        } catch {}
+        await new Promise((r) => setTimeout(r, 800 * (attempt + 1)));
+      }
+      return null;
+    }
+
+    // 서버가 알려 준 진행 상태를 화면과 음성 세션에 반영한다
+    function applyVoiceState(data) {
+      applyState(data);
+      // 시간이 얼마 안 남았을 때: 서버가 준 안내를 모더레이터에게 전한다 (단계마다 한 번)
+      if (data.notice && data.notice.level !== voice.noticeLevel && voice.on) {
+        voice.noticeLevel = data.notice.level;
+        voiceSend({ type: "conversation.item.create", item: { type: "message", role: "system", content: [{ type: "input_text", text: data.notice.text }] } });
+      }
+    }
+
+    // 30초마다: 남은 시간을 서버에 맞추고, 시간이 한참 지났으면 음성을 끊는다
+    async function voicePing() {
+      if (!voice.on) return;
+      const data = await voiceLog({ ping: true });
+      if (!data || !voice.on) return;
+      applyVoiceState(data);
+      if (data.remainingSec > 0) { voice.overSince = 0; return; }
+      voice.overSince = voice.overSince || Date.now();
+      if (Date.now() - voice.overSince > VOICE_OVERTIME_SEC * 1000) voiceToText("음성 대화 시간이 끝났어요. 남은 이야기는 글로 마무리해 주세요.");
+    }
+
+    // 창을 닫거나 다른 곳으로 가면 마이크와 연결을 놓는다
+    addEventListener("pagehide", () => { if (voice.on || voice.starting) stopVoice(); });
+
     // 잠시 쉬기 / 이어서 하기 — 시간이 멈춘다
     function showPause(on) { $("pauseOverlay").hidden = !on; paused = on; }
     $("pauseBtn").addEventListener("click", async () => {
+      // 음성 중이면 연결을 끊어 두고, 이어서 할 때 다시 연결한다
+      if (voice.on || voice.starting) { voice.resumeAfterPause = true; stopVoice(); }
       showPause(true);
       try { const { data } = await api("/interviews/me/pause", { method: "POST", headers: keyHeaders() }); applyState(data); } catch {}
     });
     $("resumeBtn").addEventListener("click", async () => {
       try { const { data } = await api("/interviews/me/resume", { method: "POST", headers: keyHeaders() }); applyState(data); } catch {}
       showPause(false);
+      if (voice.resumeAfterPause) { voice.resumeAfterPause = false; return startVoice(); }
       enableInput(!sending);
     });
 
@@ -682,6 +1075,8 @@
         const { res, data } = await api(`/interviews/me/${v}`, { method: "POST", headers: keyHeaders() });
         if (!res.ok) throw new Error(data.error || "처리하지 못했어요.");
         $("quitOverlay").hidden = true;
+        stopVoice();
+        showVoiceBar(false);
         if (v === "withdraw") {
           dropKey();
           clearInterval(ticker);

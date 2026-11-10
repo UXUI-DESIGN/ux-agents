@@ -7,10 +7,12 @@
 //     POST /api/p/:token/interviews      동의하고 시작 → P코드를 매겨 별도 인터뷰로 기록 → { interview, key }
 //     GET  /api/p/:token/interviews/me   X-Interview-Key로 자기 인터뷰 다시 열기 (새로고침해도 같은 참가자)
 //     /api/p/:token/interviews/me/{messages|pause|resume|end|withdraw}  AI 모더레이터와 대화 (moderator.js)
+//     /api/p/:token/interviews/me/{realtime-session|realtime-log}       음성으로 대화 (realtime.js)
 //   닫힌 세션·없는 세션은 모두 '이 인터뷰는 종료되었습니다'
 
 import { currentUser, rateLimit } from "./auth.js";
 import { moderate, stagesOf, timing } from "./moderator.js";
+import { realtime } from "./realtime.js";
 
 // 참가자에게 받을 수 있는 항목. 개인을 특정하지 않는 것만 둔다 (이름·연락처는 없다)
 export const COLLECT_OPTIONS = {
@@ -134,6 +136,7 @@ export async function participant(request, env, json, token, sub, me, action) {
       "SELECT id, code, status, consented_at, profile, stage, paused_at, paused_total, finished_at FROM interviews WHERE key_hash = ? AND session_id = ?"
     ).bind(await sha256Hex(key), s.id).first();
     if (!row) return json({ error: "인터뷰를 찾을 수 없어요.", code: "not_found" }, 404);
+    if (action?.startsWith("realtime-")) return realtime(request, env, json, s, row, action);
     if (action) return moderate(request, env, json, s, row, action);
     if (request.method !== "GET") return json({ error: "없는 경로예요." }, 404);
     const now = Math.floor(Date.now() / 1000);

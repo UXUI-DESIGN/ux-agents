@@ -68,6 +68,12 @@ async function route(request, env, cors) {
     return json(await checkOpenAI(env), 200, cors);
   }
 
+  // 음성 대화(Realtime) 모델을 이 키로 쓸 수 있는지 (비용 없음)
+  if (url.pathname === "/health/realtime" && request.method === "GET") {
+    if (!env.OPENAI_REALTIME_MODEL) return json({ openai: "미연결", reason: "OPENAI_REALTIME_MODEL 값이 없어요." }, 200, cors);
+    return json(await checkOpenAI(env, env.OPENAI_REALTIME_MODEL), 200, cors);
+  }
+
   // 이 키로 쓸 수 있는 이미지 모델 이름 (비용 없음, 키 값은 내보내지 않음)
   if (url.pathname === "/health/images" && request.method === "GET") {
     if (!env.OPENAI_API_KEY) return json({ images: [], reason: "OPENAI_API_KEY 비밀값이 없어요." }, 200, cors);
@@ -88,7 +94,7 @@ async function route(request, env, cors) {
   }
 
   const guidePath = url.pathname.match(/^\/api\/guides(?:\/([^/]+))?$/);
-  const participantPath = url.pathname.match(/^\/api\/p\/([^/]+)(?:\/(interviews)(?:\/(me)(?:\/(messages|pause|resume|end|withdraw))?)?)?$/);
+  const participantPath = url.pathname.match(/^\/api\/p\/([^/]+)(?:\/(interviews)(?:\/(me)(?:\/(messages|pause|resume|end|withdraw|realtime-session|realtime-log))?)?)?$/);
   const detailPath = url.pathname.match(/^\/api\/sessions\/([0-9a-f-]{36})(?:\/(close|interviews|messages|debrief)(?:\/([^/]+)(?:\/(note|redactions))?)?)?$/);
   // 페르소나 사진은 <img src> 로 읽으므로 Origin 검사 전에 처리한다 (id 가 열쇠, 로그인 없음)
   const imagePath = url.pathname.match(/^\/api\/personas\/image\/([0-9a-f]+)$/);
@@ -165,15 +171,15 @@ async function chat(request, env, cors) {
 }
 
 // 사용할 모델 정보를 조회해 키가 살아 있는지 본다 (생성 요청이 아니라 비용이 들지 않는다)
-async function checkOpenAI(env) {
+async function checkOpenAI(env, model = env.OPENAI_MODEL) {
   if (!env.OPENAI_API_KEY) return { openai: "미연결", reason: "OPENAI_API_KEY 비밀값이 없어요." };
   try {
-    const res = await fetch(`https://api.openai.com/v1/models/${env.OPENAI_MODEL}`, {
+    const res = await fetch(`https://api.openai.com/v1/models/${model}`, {
       headers: { Authorization: `Bearer ${env.OPENAI_API_KEY}` },
     });
-    if (res.ok) return { openai: "연결됨", model: env.OPENAI_MODEL };
+    if (res.ok) return { openai: "연결됨", model };
     if (res.status === 401) return { openai: "미연결", reason: "키가 올바르지 않아요." };
-    if (res.status === 404) return { openai: "미연결", reason: `이 키로는 ${env.OPENAI_MODEL} 모델을 쓸 수 없어요.` };
+    if (res.status === 404) return { openai: "미연결", reason: `이 키로는 ${model} 모델을 쓸 수 없어요.` };
     return { openai: "미연결", reason: `OpenAI 응답 오류 (${res.status})` };
   } catch {
     return { openai: "미연결", reason: "OpenAI에 접속하지 못했어요." };
