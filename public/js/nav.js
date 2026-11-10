@@ -3,13 +3,14 @@
 //   - 메뉴를 추가하려면 아래 MENU의 해당 단계 items에 한 줄만 넣으면 모든 페이지에 반영된다
 //   - 각 페이지의 <header class="nav"> 안 <nav>를 이 스크립트가 채운다
 (() => {
-  // path: 이 경로로 시작하는 페이지에서 '현재 메뉴'로 표시한다
+  // path: 이 경로로 시작하는 페이지에서 '현재 메뉴'로 표시한다. path가 없으면 아직 페이지가 없는 메뉴로 "준비 중" 표시만 한다
   const MENU = [
     {
       ko: "발견", en: "Discover", desc: "사용자를 만나 문제를 넓게 탐색합니다",
       items: [
         { label: "인터뷰 가이드", hint: "리서치 목표 → 인터뷰 질문지", path: "/guide/" },
         { label: "인터뷰 모더레이터", hint: "AI가 진행하는 사용자 인터뷰", path: "/moderator/" },
+        { label: "인터뷰 데이터분석", hint: "인터뷰 기록 → 핵심 발견 · 패턴" },
       ],
     },
     {
@@ -17,17 +18,21 @@
       items: [
         { label: "페르소나", hint: "인터뷰 기록 → 사용자 유형", path: "/persona/" },
         { label: "저니맵", hint: "단계별 행동 · 감정 · 페인포인트", path: "/journey/" },
+        { label: "아이데이션", hint: "정의한 문제 → 해결 아이디어" },
       ],
     },
     {
       ko: "발전", en: "Develop", desc: "해결 아이디어를 넓게 펼쳐 봅니다",
       items: [
         { label: "시나리오 보드", hint: "개선 경험을 콘티 · 컷으로", path: "/scenario/" },
+        { label: "PRD문서 작성하기", hint: "아이디어 → 제품 요구사항 문서" },
       ],
     },
     {
       ko: "전달", en: "Deliver", desc: "검증하고 다듬어 결과물로 전달합니다",
-      items: [],
+      items: [
+        { label: "사용성평가", hint: "시나리오 · 프로토타입 → 사용성 문제 발견" },
+      ],
     },
   ];
 
@@ -66,6 +71,10 @@
     .gnb-panel a:hover, .gnb-panel a[aria-current="page"] { background: var(--accent-soft); }
     .gnb-panel a:hover b, .gnb-panel a[aria-current="page"] b { color: var(--accent); }
     .gnb-empty { padding: 9px 10px; border-radius: 10px; background: var(--bg-soft, #f6f7fb); font-size: 13px; color: var(--text-sub); }
+    .gnb-soon { padding: 9px 10px; cursor: default; }
+    .gnb-soon b { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: var(--text-sub); }
+    .gnb-soon em { padding: 1px 7px; border-radius: 999px; background: var(--bg-soft, #f6f7fb); font-size: 11px; font-weight: 600; font-style: normal; color: var(--text-sub); }
+    .gnb-soon span { display: block; font-size: 12px; color: var(--text-sub); opacity: 0.75; }
     @media (hover: hover) {
       .gnb > li:hover > .gnb-top { background: var(--accent-soft); color: var(--accent); }
       .gnb > li:hover > .gnb-sub { display: block; }
@@ -102,6 +111,11 @@
     if (stage.items.length) {
       const sub = el("ul");
       for (const item of stage.items) {
+        if (!item.path) {
+          const soon = el("div", { className: "gnb-soon" }, el("b", {}, item.label, el("em", { textContent: "준비 중" })), el("span", { textContent: item.hint }));
+          sub.append(el("li", {}, soon));
+          continue;
+        }
         const a = el("a", { href: item.path }, el("b", { textContent: item.label }), el("span", { textContent: item.hint }));
         if (here.startsWith(item.path)) { a.setAttribute("aria-current", "page"); current = true; }
         sub.append(el("li", {}, a));
