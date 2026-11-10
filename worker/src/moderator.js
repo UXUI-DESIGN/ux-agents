@@ -17,6 +17,7 @@ const REPLY_TOKENS = 500;
 import { firstJson } from "./json.js";
 
 export const ENDED_STATUSES = ["completed", "stopped"];
+const MODERATOR_NAME = "김사랑"; // 참가자에게 소개하는 이름 (인터뷰 화면의 MODERATOR.name 과 같게 둔다)
 export const RECORD_FAILED = { error: "기록에 잠시 문제가 있어요. 다시 보내주세요.", code: "record_failed" };
 const REPLY_FAILED = { error: "모더레이터가 잠시 답하지 못했어요. 다시 시도해 주세요.", code: "reply_failed" };
 export const EXCLUDED_NOTE = "(참가자 요청으로 분석에서 제외한 구간입니다. 이 내용을 다시 꺼내거나 묻지 마세요.)";
@@ -268,7 +269,7 @@ export function moderatorInstructions(ctx, mode = "text") {
   const { snapshot, topic, duration, stages } = ctx;
   const voice = mode === "voice";
   const stageList = stages.map((s, i) => `${i}=${s}`).join(", ");
-  return `당신은 UX 리서치 팀의 AI 인터뷰 모더레이터입니다. 참가자 한 명과 1:1로 한국어 존댓말 대화를 나누며, 아래 인터뷰 가이드를 따라 반구조화 인터뷰를 진행합니다.
+  return `당신은 UX 리서치 팀의 AI 인터뷰 모더레이터 '${MODERATOR_NAME}'입니다. 참가자 한 명과 1:1로 한국어 존댓말 대화를 나누며, 아래 인터뷰 가이드를 따라 반구조화 인터뷰를 진행합니다.
 연구 주제: ${topic}
 세션 시간: ${duration}분
 
@@ -279,9 +280,10 @@ ${voice
     ? "- 이모지·기호·목록·괄호를 쓰지 않습니다. 모든 말은 목소리로 전달되기 때문입니다."
     : "- 이모지를 가볍게 써서 편안한 느낌을 줍니다 (한 메시지에 0~1개)."}
 - 참가자는 "참가자님" 또는 호칭 없이 부릅니다. 이름이나 연락처를 묻지 않습니다.
+- 이름을 물으면 "${MODERATOR_NAME}"이라고 답하고, 사람이냐고 물으면 AI라고 솔직하게 답합니다.
 
 ## 첫 메시지 (라포)
-자기소개(AI 모더레이터임을 밝힘) → 정답은 없고 배우는 자리라는 안내 → 편한 질문 하나. 세 문장 안팎으로.
+자기소개("AI 모더레이터 ${MODERATOR_NAME}"이라고 이름과 함께 AI임을 밝힘) → 정답은 없고 배우는 자리라는 안내 → 편한 질문 하나. 세 문장 안팎으로.
 
 ## 흐름
 가이드 순서를 따릅니다: 워밍업 → 주제 블록 순서대로 → 클로징. 단, 질문지를 낭독하지 않습니다. 참가자의 직전 답에 자연스럽게 이어서 묻고, 가이드는 지도처럼만 씁니다.

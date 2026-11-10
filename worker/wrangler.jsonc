@@ -25,6 +25,7 @@
     // 페르소나 채팅 근거 노트 임베딩 모델 (rag_chunks 는 1536차원 기준)
     "OPENAI_EMBED_MODEL": "text-embedding-3-small",
     // 인터뷰 음성 대화 (Realtime API): 대화 모델 · 참가자 말을 받아쓰는 모델 · 모더레이터 목소리
+    //   목소리: marin(여성, 기본) · coral·shimmer·sage(여성) · cedar·ash·echo(남성)
     "OPENAI_REALTIME_MODEL": "gpt-realtime-2.1",
     "OPENAI_TRANSCRIBE_MODEL": "gpt-4o-mini-transcribe",
     "OPENAI_REALTIME_VOICE": "marin"

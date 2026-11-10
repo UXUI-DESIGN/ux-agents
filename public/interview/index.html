@@ -122,6 +122,10 @@
     .chat-head .row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
     .chat-head .who { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: 14px; }
     .chat-head .who .logo { font-size: 16px; }
+    .chat-head .who .avatar { width: 30px; height: 30px; }
+    .chat-head .who .mod b { font-weight: 700; }
+    .chat-head .who .mod small { margin-left: 4px; font-size: 12px; color: var(--text-sub); }
+    .voice-state .avatar { width: 40px; height: 40px; }
     .chat-head .who .pcode { padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-weight: 700; font-size: 12.5px; }
     .chat-head .tools { display: flex; gap: 6px; }
     .tool-btn { min-height: 36px; padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; background: #fff; font-size: 13.5px; font-weight: 600; color: var(--text-sub); cursor: pointer; white-space: nowrap; }
@@ -135,7 +139,11 @@
     .chat-log { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
     .chat-log .in { max-width: 720px; margin: 0 auto; padding: 16px 14px 8px; display: flex; flex-direction: column; gap: 10px; }
     .msg { display: flex; flex-direction: column; max-width: 86%; }
-    .msg.moderator { align-self: flex-start; }
+    /* 모더레이터 말풍선: 왼쪽에 프로필 사진 */
+    .msg.moderator { align-self: flex-start; display: grid; grid-template-columns: 36px minmax(0, auto); column-gap: 8px; justify-content: start; }
+    .msg.moderator > .avatar { grid-row: 1 / span 3; margin-top: 2px; }
+    .msg.moderator > :not(.avatar) { grid-column: 2; justify-self: start; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; background: var(--accent-soft); }
     .msg.participant { align-self: flex-end; }
     .bubble { padding: 11px 14px; border-radius: 18px; font-size: 15.5px; line-height: 1.55; white-space: pre-wrap; }
     .moderator .bubble { background: #fff; border: 1px solid var(--line); border-bottom-left-radius: 6px; }
@@ -266,7 +274,7 @@
           </li>
           <li>
             <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="7" width="16" height="12" rx="3" stroke="currentColor" stroke-width="2"/><path d="M12 3v4M9 12h.01M15 12h.01" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></span>
-            <span><b>AI가 진행하는 인터뷰예요</b><small>사람 대신 AI 모더레이터가 질문하고, 리서처가 나중에 기록을 읽어요.</small></span>
+            <span><b>AI가 진행하는 인터뷰예요</b><small>사람 대신 AI 모더레이터 ‘김사랑’이 질문하고, 리서처가 나중에 기록을 읽어요.</small></span>
           </li>
         </ul>
       </section>
@@ -318,7 +326,7 @@
       <header class="chat-head">
         <div class="in">
           <div class="row">
-            <div class="who"><span class="logo">UX<span style="color:var(--accent)">A</span></span><span class="pcode" id="chatCode"></span><span>AI 모더레이터</span></div>
+            <div class="who"><span class="logo">UX<span style="color:var(--accent)">A</span></span><span class="pcode" id="chatCode"></span><img class="avatar" src="./moderator.webp" alt="" /><span class="mod"><b>김사랑</b><small>AI 모더레이터</small></span></div>
             <div class="tools">
               <button class="tool-btn" type="button" id="pauseBtn">잠시 쉬기</button>
               <button class="tool-btn" type="button" id="quitBtn">그만하기</button>
@@ -513,6 +521,9 @@
     });
 
     // ── AI 모더레이터와 대화 ──
+    // 모더레이터의 이름과 프로필 사진 (이름은 Worker 지침의 MODERATOR_NAME 과 같게 둔다)
+    const MODERATOR = { name: "김사랑", photo: "./moderator.webp" };
+    const moderatorAvatar = () => Object.assign(document.createElement("img"), { className: "avatar", src: MODERATOR.photo, alt: "" });
     const keyHeaders = () => ({ "X-Interview-Key": getKey() || "" });
     let remainingSec = 0, paused = false, ticker = null, sending = false;
 
@@ -575,7 +586,8 @@
       if (role === "sys") { el.className = "sys"; el.textContent = text; }
       else {
         el.className = `msg ${role}`;
-        if (role !== "error") el.innerHTML = `<span class="who-label">${role === "moderator" ? "AI 모더레이터" : interview.code}${meta.mode === "voice" ? " · 음성" : ""}</span>`;
+        if (role === "moderator") el.append(moderatorAvatar());
+        if (role !== "error") el.insertAdjacentHTML("beforeend", `<span class="who-label">${role === "moderator" ? `${MODERATOR.name} · AI 모더레이터` : interview.code}${meta.mode === "voice" ? " · 음성" : ""}</span>`);
         const b = document.createElement("div");
         b.className = "bubble";
         b.textContent = text;
@@ -598,7 +610,8 @@
       if (on && !t) {
         t = document.createElement("div");
         t.className = "msg moderator typing";
-        t.innerHTML = '<span class="who-label">AI 모더레이터가 쓰는 중</span><div class="bubble"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>';
+        t.innerHTML = `<span class="who-label">${MODERATOR.name} 님이 쓰는 중</span><div class="bubble"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>`;
+        t.prepend(moderatorAvatar());
         $("chatIn").append(t);
         scrollToEnd();
       } else if (!on && t) t.remove();
@@ -709,9 +722,9 @@
     const VOICE_STATES = {
       connecting: ["연결하는 중…", "마이크를 허용해 주세요."],
       listening: ["듣고 있어요", "편하게 말씀해 주세요."],
-      hearing: ["듣는 중…", "말씀이 끝나면 모더레이터가 답해요."],
+      hearing: ["듣는 중…", "말씀이 끝나면 김사랑 님이 답해요."],
       thinking: ["생각하는 중…", ""],
-      speaking: ["모더레이터가 말하는 중", "중간에 끼어들어 말씀하셔도 돼요."],
+      speaking: ["김사랑 님이 말하는 중", "중간에 끼어들어 말씀하셔도 돼요."],
       muted: ["음소거 중이에요", "‘음소거 해제’를 누르면 다시 들어요."],
     };
     const voice = {
