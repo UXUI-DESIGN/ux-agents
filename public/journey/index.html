@@ -571,7 +571,7 @@
   <main>
     <div class="container">
       <div class="page-head">
-        <span class="eyebrow"><span class="n">4</span>저니맵 생성</span>
+        <span class="eyebrow">정의 · Define<span aria-hidden="true">›</span>저니맵 생성</span>
         <h1>한 사람의 여정을 단계별로 펼쳐 봐요</h1>
         <p>페르소나가 목표를 이루기까지의 행동·생각·감정을 시간 순으로 놓고, 마찰(페인포인트)과 개선 기회를 찾습니다.</p>
       </div>
@@ -858,8 +858,8 @@
       }
       personas = list;
       $("pickerHint").innerHTML = !loggedIn()
-        ? `3단계에서 만든 내 페르소나를 쓰려면 <a href="${UXA.loginUrl("/journey/")}">로그인</a>해 주세요. 지금은 샘플로 체험할 수 있어요.`
-        : list.some((p) => !p.sample) ? "3단계(페르소나)에서 만든 페르소나 중 한 명을 골라요." : `아직 만든 페르소나가 없어요. <a href="/persona/new/">페르소나 만들기</a>`;
+        ? `정의 단계의 페르소나에서 만든 내 페르소나를 쓰려면 <a href="${UXA.loginUrl("/journey/")}">로그인</a>해 주세요. 지금은 샘플로 체험할 수 있어요.`
+        : list.some((p) => !p.sample) ? "정의 단계의 페르소나에서 만든 페르소나 중 한 명을 골라요." : `아직 만든 페르소나가 없어요. <a href="/persona/new/">페르소나 만들기</a>`;
       renderPicker(state.journey?.personaId);
     }
 
@@ -1346,7 +1346,7 @@
           ${unlinked.length ? `<p class="warn-line">${unlinked.map((o) => o.id).join(", ")}는 TO-BE에 반영되지 않았어요. 해당 단계의 ‘바뀐 점’을 고치거나 TO-BE를 다시 만들어 보세요.</p>` : ""}
         </div>
         <div class="scenes">
-          <h3>시나리오 보드로 보낼 핵심 장면 <small>5단계 시나리오 보드에서 불러가요 · 모두 가설</small></h3>
+          <h3>시나리오 보드로 보낼 핵심 장면 <small>발전 단계의 시나리오 보드에서 불러가요 · 모두 가설</small></h3>
           <div class="scene-grid">${(j.map.scenes || []).map((c) => {
             const st = S.find((s) => s.id === c.stage);
             return `<article class="scene cell ${c.by === "human" ? "is-human" : ""}" data-scene="${esc(c.id)}" ${ed ? 'data-edit="1" tabindex="0" role="button"' : ""}>

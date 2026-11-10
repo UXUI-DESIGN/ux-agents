@@ -309,7 +309,7 @@
   <main>
     <div class="container">
       <div class="page-head">
-        <span class="num">5</span>
+        <span class="num stage">발전 · Develop</span>
         <h1>시나리오 보드 생성</h1>
         <p>저니맵의 페인포인트 하나를 개선한 TO-BE 시나리오를 콘티와 컷 보드로 그려요.</p>
       </div>
@@ -319,7 +319,7 @@
         <summary><span class="step-no">?</span> 이 에이전트가 일하는 방식 — 프롬프트 체이닝과 확인 지점</summary>
         <div class="body">
           <div class="chain" aria-label="단계 흐름">
-            <div class="node"><b>저니맵 (4단계)</b><small>단계·감정·페인포인트</small></div><span class="arrow">→</span>
+            <div class="node"><b>저니맵 (정의 단계)</b><small>단계·감정·페인포인트</small></div><span class="arrow">→</span>
             <div class="node"><b>TO-BE 시나리오</b><small>고른 페인포인트를 푼 이야기</small></div><span class="arrow">→</span>
             <div class="gate">✋ 확인 1<br>시나리오 확정</div><span class="arrow">→</span>
             <div class="node"><b>콘티 표</b><small>컷마다 장면·감정·구도·장면 묘사</small></div><span class="arrow">→</span>
@@ -350,7 +350,7 @@
         <div class="inputs">
           <div class="stack">
             <div class="field">
-              <div class="label">저니맵 <small>4단계에서 저장한 것</small></div>
+              <div class="label">저니맵 <small>정의 단계에서 저장한 것</small></div>
               <div class="segmented" role="radiogroup" aria-label="저니맵 불러오기 방식">
                 <input type="radio" name="jmode" id="jmMine" value="mine" checked /><label for="jmMine">내 저니맵 불러오기</label>
                 <input type="radio" name="jmode" id="jmManual" value="manual" /><label for="jmManual">직접 입력</label>
@@ -372,7 +372,7 @@
           </div>
           <div class="stack">
             <div class="field">
-              <div class="label">등장 인물 <small>3단계 페르소나</small></div>
+              <div class="label">등장 인물 <small>정의 단계의 페르소나</small></div>
               <div id="personaBox"></div>
               <div id="personaPickBox" hidden style="margin-top:8px">
                 <select class="text-input" id="personaSelect" aria-label="페르소나 고르기"></select>
@@ -510,7 +510,7 @@
   <script src="/js/auth.js"></script>
   <script>
     // ─────────────────────────────────────────────────────────────
-    // 시나리오 보드 — 저니맵(4단계) → TO-BE 시나리오 → 콘티 → 컷 이미지
+    // 시나리오 보드 — 저니맵(정의 단계) → TO-BE 시나리오 → 콘티 → 컷 이미지
     //   시나리오·콘티: 아직 AI 를 부르지 않고 저니맵 내용을 규칙대로 이어 붙인 예시를 만든다
     //   이미지: 콘티를 확정·저장한 뒤 POST /api/boards/:id/generate → 202 '접수됨' → 컷마다 큐에서 처리 → GET 으로 상태를 읽어 채운다
     //   API: worker/src/boards.js

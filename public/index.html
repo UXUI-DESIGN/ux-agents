@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Janus AI · UX 디자인 AI 에이전트</title>
-  <meta name="description" content="Janus AI — UX 디자인의 전 과정을 돕는 AI 에이전트. 리서치부터 시나리오까지 함께하며, 제품·서비스 개선을 위한 새로운 인사이트를 전합니다." />
+  <meta name="description" content="Janus AI — UX 디자인의 전 과정을 돕는 AI 에이전트. 발견 · 정의 · 발전 · 전달의 더블 다이아몬드 4단계를 함께하며, 제품·서비스 개선을 위한 새로운 인사이트를 전합니다." />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
   <style>
     :root {
@@ -30,7 +30,7 @@
     a { color: inherit; text-decoration: none; }
     .container { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
 
-    /* 1. 내비게이션 */
+    /* 1. 내비게이션 (메뉴는 /js/nav.js 가 채운다) */
     .nav {
       position: sticky; top: 0; z-index: 10;
       background: rgba(255, 255, 255, 0.9);
@@ -43,13 +43,6 @@
     }
     .logo { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
     .logo span { color: var(--accent); }
-    .nav nav { min-width: 0; }
-    .menu { display: flex; gap: 4px; list-style: none; overflow-x: auto; }
-    .menu a {
-      display: block; padding: 8px 14px; border-radius: 999px;
-      font-size: 14px; font-weight: 500; color: var(--text-sub); white-space: nowrap;
-    }
-    .menu a:hover { background: var(--accent-soft); color: var(--accent); }
 
     /* 2. 히어로 */
     .hero { padding: 120px 0 100px; text-align: center; }
@@ -62,65 +55,73 @@
       font-size: clamp(32px, 5vw, 52px); font-weight: 800;
       line-height: 1.25; letter-spacing: -0.03em;
     }
-    .hero p { margin: 20px auto 40px; max-width: 560px; font-size: 18px; color: var(--text-sub); }
+    .hero p { margin: 20px auto 40px; max-width: 600px; font-size: 18px; color: var(--text-sub); }
+    .hero .cta { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 12px 20px; }
     .btn {
       display: inline-block; padding: 16px 36px; border-radius: 12px;
       background: var(--accent); color: #fff; font-size: 16px; font-weight: 700;
       transition: transform 0.15s, box-shadow 0.15s;
     }
     .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(79, 70, 229, 0.3); }
+    .hero .more { font-size: 15px; font-weight: 700; color: var(--accent); }
+    .hero .more::after { content: " ↓"; }
+    .hero .count { margin-top: 28px; font-size: 14px; color: var(--text-sub); }
+    .hero .count b { color: var(--text); font-weight: 700; }
 
     /* 공통 섹션 */
     section.block { padding: 100px 0; }
     section.block.soft { background: var(--bg-soft); }
     .section-head { margin-bottom: 48px; text-align: center; }
     .section-head h2 { font-size: clamp(26px, 3.5vw, 34px); font-weight: 800; letter-spacing: -0.02em; }
-    .section-head p { margin-top: 10px; color: var(--text-sub); }
+    .section-head p { margin: 10px auto 0; max-width: 640px; color: var(--text-sub); }
 
-    /* 3. 에이전트 카드 */
-    .agents {
-      display: grid;
-      grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr auto 1fr;
-      align-items: stretch; list-style: none;
+    /* 3. 전체 프로세스 — 더블 다이아몬드 */
+    .diamonds { display: grid; grid-template-columns: repeat(4, 1fr); margin-bottom: 12px; }
+    .diamonds .shape {
+      display: flex; flex-direction: column; justify-content: center; height: 132px;
+      font-weight: 800; font-size: 18px; color: var(--accent);
     }
-    .card {
-      display: flex; flex-direction: column;
-      padding: 24px 20px; background: #fff;
-      border: 1px solid var(--line); border-radius: var(--radius);
-      transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
-    }
-    .card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: 0 12px 28px rgba(20, 22, 31, 0.08); }
-    .card .num {
-      display: grid; place-items: center; width: 40px; height: 40px; margin-bottom: 16px;
-      border-radius: 50%; background: var(--accent); color: #fff; font-weight: 800; font-size: 16px;
-    }
-    .card h3 { font-size: 17px; font-weight: 700; line-height: 1.4; }
-    .card .io { margin: 10px 0 20px; font-size: 14px; color: var(--text-sub); flex: 1; }
-    .card .io b { color: var(--text); font-weight: 600; }
-    .card .open { font-size: 14px; font-weight: 700; color: var(--accent); }
-    .card .open::after { content: " →"; }
-    .flow-arrow {
-      display: grid; place-items: center; width: 28px;
-      color: var(--accent); font-size: 20px; font-weight: 700;
-    }
+    .diamonds .shape small { font-size: 12px; font-weight: 600; opacity: 0.75; }
+    .diamonds .diverge { clip-path: polygon(0 50%, 100% 0, 100% 100%); padding-left: 46%; background: linear-gradient(90deg, #e3e6ff, #d5d9ff); }
+    .diamonds .converge { clip-path: polygon(0 0, 100% 50%, 0 100%); padding-left: 18%; background: linear-gradient(90deg, #d5d9ff, #e3e6ff); }
+    .diamonds .solution.diverge { background: linear-gradient(90deg, #6d66ee, var(--accent)); color: #fff; }
+    .diamonds .solution.converge { background: linear-gradient(90deg, var(--accent), #6d66ee); color: #fff; }
+    .diamond-names { display: grid; grid-template-columns: 1fr 1fr; margin-bottom: 36px; text-align: center; font-size: 14px; color: var(--text-sub); }
+    .diamond-names b { color: var(--text); font-weight: 700; }
 
-    /* 4. 작동 방식 타임라인 */
-    .timeline { position: relative; display: grid; grid-template-columns: repeat(5, 1fr); list-style: none; }
-    .timeline::before {
-      content: ""; position: absolute; top: 23px; left: 10%; right: 10%;
-      height: 2px; background: linear-gradient(90deg, var(--accent-soft), var(--accent));
+    .stages { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; align-items: stretch; }
+    .stage {
+      display: flex; flex-direction: column; padding: 24px 20px 20px;
+      background: #fff; border: 1px solid var(--line); border-radius: var(--radius);
     }
-    .step { position: relative; text-align: center; padding: 0 8px; }
-    .step .dot {
-      display: grid; place-items: center; width: 48px; height: 48px; margin: 0 auto 16px;
-      border-radius: 50%; background: #fff; border: 2px solid var(--accent);
-      color: var(--accent); font-weight: 800;
-    }
-    .step:last-child .dot { background: var(--accent); color: #fff; }
-    .step h4 { font-size: 16px; font-weight: 700; }
-    .step p { margin-top: 6px; font-size: 13px; color: var(--text-sub); }
+    .stage-top { display: flex; align-items: center; gap: 10px; }
+    .stage-top .no { font-size: 13px; font-weight: 800; color: var(--accent); letter-spacing: 0.04em; }
+    .stage-top h3 { flex: 1; font-size: 20px; font-weight: 800; letter-spacing: -0.02em; }
+    .stage-top h3 small { margin-left: 4px; font-size: 12px; font-weight: 500; color: var(--text-sub); }
+    .mode { padding: 3px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-size: 12px; font-weight: 700; white-space: nowrap; }
+    .stage .q { margin-top: 14px; font-size: 15px; font-weight: 700; line-height: 1.45; }
+    .stage .desc { margin-top: 4px; font-size: 13px; color: var(--text-sub); }
+    .tools { display: grid; gap: 8px; margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--line); list-style: none; }
+    .tool { display: block; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s; }
+    .tool b { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 15px; font-weight: 700; }
+    .tool span { display: block; margin-top: 2px; font-size: 13px; color: var(--text-sub); }
+    .tool i { font-style: normal; font-size: 13px; font-weight: 700; color: var(--accent); white-space: nowrap; }
+    a.tool:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(20, 22, 31, 0.08); }
+    .tool.soon { border-style: dashed; background: var(--bg-soft); }
+    .tool.soon b { color: var(--text-sub); }
+    .tool.soon i { padding: 1px 8px; border-radius: 999px; background: #fff; border: 1px solid var(--line); font-size: 11px; font-weight: 600; color: var(--text-sub); }
 
-    /* 5. 푸터 */
+    /* 4. 일하는 방식 */
+    .ways { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; list-style: none; }
+    .way { padding: 24px 20px; border: 1px solid var(--line); border-radius: var(--radius); background: #fff; }
+    .way .n {
+      display: grid; place-items: center; width: 36px; height: 36px; margin-bottom: 14px;
+      border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-weight: 800; font-size: 15px;
+    }
+    .way h3 { font-size: 17px; font-weight: 700; line-height: 1.4; }
+    .way p { margin-top: 8px; font-size: 14px; color: var(--text-sub); }
+
+    /* 5. 푸터 (내용은 /js/nav.js 가 채운다) */
     footer { padding: 40px 0; border-top: 1px solid var(--line); }
     footer .container {
       display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px;
@@ -129,22 +130,16 @@
     footer .logo { font-size: 18px; color: var(--text); }
 
     /* 반응형 */
-    @media (max-width: 960px) {
-      .agents { grid-template-columns: 1fr; gap: 0; }
-      .flow-arrow { width: auto; height: 36px; transform: rotate(90deg); }
-      .timeline { grid-template-columns: 1fr; gap: 28px; }
-      .timeline::before { top: 24px; bottom: 24px; left: 23px; right: auto; width: 2px; height: auto;
-        background: linear-gradient(180deg, var(--accent-soft), var(--accent)); }
-      .step { display: grid; grid-template-columns: 48px 1fr; column-gap: 16px; text-align: left; padding: 0; }
-      .step .dot { grid-row: span 2; margin: 0; }
-      .step h4 { align-self: end; }
+    @media (max-width: 1080px) {
+      .diamonds, .diamond-names { display: none; }
+      .stages, .ways { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 640px) {
       .nav .container { flex-direction: column; align-items: flex-start; height: auto; padding-top: 12px; padding-bottom: 8px; gap: 6px; }
       .nav nav { width: 100%; }
-      .menu a { padding: 8px 12px 8px 0; }
       .hero { padding: 80px 0 72px; }
       section.block { padding: 72px 0; }
+      .stages, .ways { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -165,89 +160,59 @@
       <div class="container">
         <span class="eyebrow">Janus AI · UX Design AI Agent</span>
         <h1>지금의 경험을 보고,<br />더 나은 경험을 그립니다</h1>
-        <p>Janus AI는 UX 디자인의 전 과정을 돕는 AI 에이전트입니다. 인터뷰 가이드부터 인터뷰, 페르소나, 저니맵, 시나리오 보드까지 함께하며, 사용자의 목소리에서 제품·서비스 개선을 위한 새로운 인사이트를 전합니다.</p>
-        <a href="guide/index.html" class="btn">시작하기</a>
+        <p>Janus AI는 UX 디자인의 전 과정을 돕는 AI 에이전트입니다. 발견 · 정의 · 발전 · 전달의 4단계를 함께하며, 사용자의 목소리에서 제품·서비스 개선을 위한 새로운 인사이트를 전합니다.</p>
+        <div class="cta">
+          <a href="/guide/" class="btn">발견부터 시작하기</a>
+          <a href="#process" class="more">전체 프로세스 보기</a>
+        </div>
+        <p class="count" id="count" hidden></p>
       </div>
     </section>
 
-    <!-- 3. 에이전트 소개 -->
-    <section class="block soft" id="agents">
+    <!-- 3. 전체 프로세스: 단계와 도구는 /js/nav.js 의 메뉴 정의(window.JANUS_PROCESS)로 그린다 -->
+    <section class="block soft" id="process">
       <div class="container">
         <div class="section-head">
-          <h2>5개의 UX 에이전트</h2>
-          <p>UX 디자인 프로세스의 각 단계를 맡은 에이전트가, 앞 단계의 결과물을 이어받아 인사이트를 쌓아갑니다.</p>
+          <h2>더블 다이아몬드로 이어지는 전체 프로세스</h2>
+          <p>문제를 넓게 발견하고 좁혀 정의한 뒤, 해결책을 넓게 발전시키고 좁혀 전달합니다. 각 단계에 그 일을 맡은 AI 에이전트가 있습니다.</p>
         </div>
-        <ol class="agents">
-          <li class="card">
-            <span class="num">1</span>
-            <h3>인터뷰 가이드 설계</h3>
-            <p class="io"><b>리서치 목표</b> → 인터뷰 질문지</p>
-            <a href="guide/index.html" class="open">열기</a>
-          </li>
-          <li class="flow-arrow" aria-hidden="true">→</li>
-          <li class="card">
-            <span class="num">2</span>
-            <h3>AI 인터뷰 모더레이터</h3>
-            <p class="io"><b>인터뷰 가이드</b> → 인터뷰 기록</p>
-            <a href="moderator/index.html" class="open">열기</a>
-          </li>
-          <li class="flow-arrow" aria-hidden="true">→</li>
-          <li class="card">
-            <span class="num">3</span>
-            <h3>페르소나 생성</h3>
-            <p class="io"><b>인터뷰 기록</b> → 페르소나 프로필</p>
-            <a href="persona/index.html" class="open">열기</a>
-          </li>
-          <li class="flow-arrow" aria-hidden="true">→</li>
-          <li class="card">
-            <span class="num">4</span>
-            <h3>저니맵 생성</h3>
-            <p class="io"><b>페르소나</b> → 고객 여정 지도</p>
-            <a href="journey/index.html" class="open">열기</a>
-          </li>
-          <li class="flow-arrow" aria-hidden="true">→</li>
-          <li class="card">
-            <span class="num">5</span>
-            <h3>시나리오 보드 생성</h3>
-            <p class="io"><b>저니맵</b> → 사용 시나리오 보드</p>
-            <a href="scenario/index.html" class="open">열기</a>
-          </li>
-        </ol>
+        <div class="diamonds" id="diamonds" aria-hidden="true"></div>
+        <div class="diamond-names" aria-hidden="true">
+          <span><b>문제 다이아몬드</b> · 올바른 문제 찾기</span>
+          <span><b>해결 다이아몬드</b> · 올바른 해결책 만들기</span>
+        </div>
+        <div class="stages" id="stages"></div>
+        <noscript><p style="text-align:center;color:var(--text-sub)">발견(인터뷰 가이드 · 인터뷰 모더레이터) → 정의(페르소나 · 저니맵) → 발전(시나리오 보드) → 전달</p></noscript>
       </div>
     </section>
 
-    <!-- 4. 작동 방식 -->
+    <!-- 4. 일하는 방식 -->
     <section class="block" id="how">
       <div class="container">
         <div class="section-head">
-          <h2>작동 방식</h2>
-          <p>목표 입력부터 시나리오 완성까지, 5단계로 이어집니다.</p>
+          <h2>일하는 방식</h2>
+          <p>어느 단계에서든 같은 원칙으로 일합니다.</p>
         </div>
-        <ol class="timeline">
-          <li class="step">
-            <span class="dot">1</span>
-            <h4>리서치 목표 입력</h4>
-            <p>알고 싶은 것을 한 문장으로</p>
+        <ol class="ways">
+          <li class="way">
+            <span class="n">1</span>
+            <h3>넓히고 좁히기를 두 번</h3>
+            <p>해결책부터 만들지 않습니다. 문제를 넓게 보고 좁혀 정의한 다음, 해결책을 넓게 펼치고 좁혀 검증합니다.</p>
           </li>
-          <li class="step">
-            <span class="dot">2</span>
-            <h4>인터뷰</h4>
-            <p>질문지 설계와 AI 진행 인터뷰</p>
+          <li class="way">
+            <span class="n">2</span>
+            <h3>결과물이 다음 단계의 입력</h3>
+            <p>인터뷰 기록이 페르소나가 되고, 페르소나가 저니맵과 시나리오로 이어집니다. 앞에서 만든 것을 다시 입력하지 않습니다.</p>
           </li>
-          <li class="step">
-            <span class="dot">3</span>
-            <h4>페르소나</h4>
-            <p>인터뷰에서 사용자 유형 도출</p>
+          <li class="way">
+            <span class="n">3</span>
+            <h3>AI가 초안, 사람이 확정</h3>
+            <p>에이전트가 초안을 만들면 사람이 검수하고 고쳐서 확정합니다. 판단은 디자이너의 몫으로 남깁니다.</p>
           </li>
-          <li class="step">
-            <span class="dot">4</span>
-            <h4>저니맵</h4>
-            <p>단계별 행동·감정·페인포인트</p>
-          </li>
-          <li class="step">
-            <span class="dot">5</span>
-            <h4>시나리오</h4>
-            <p>개선 경험을 시나리오 보드로</p>
+          <li class="way">
+            <span class="n">4</span>
+            <h3>근거에서 출발한 인사이트</h3>
+            <p>인사이트에는 인터뷰에서 나온 근거를 함께 보여 주고, 근거가 없는 추론은 가설로 구분해 표시합니다.</p>
           </li>
         </ol>
       </div>
@@ -264,5 +229,51 @@
 
   <script src="/js/nav.js"></script>
   <script src="/js/auth.js"></script>
+  <script>
+    // 전체 프로세스: 메뉴 정의(단계 · 도구)를 그대로 그린다. 메뉴에 도구를 추가하면 여기도 함께 바뀐다.
+    (() => {
+      const process = window.JANUS_PROCESS;
+      if (!process) return;
+      const $ = (id) => document.getElementById(id);
+      const el = (tag, props = {}, ...children) => {
+        const node = Object.assign(document.createElement(tag), props);
+        node.append(...children);
+        return node;
+      };
+
+      // 다이아몬드 그림: 넓히기 · 좁히기가 한 쌍씩 (앞 두 단계 = 문제, 뒤 두 단계 = 해결)
+      process.forEach((stage, i) => {
+        const cls = `shape ${stage.mode === "넓히기" ? "diverge" : "converge"} ${i >= 2 ? "solution" : ""}`;
+        $("diamonds").append(el("div", { className: cls }, stage.ko, el("small", { textContent: stage.mode })));
+      });
+
+      // 단계 카드
+      process.forEach((stage, i) => {
+        const tools = el("ul", { className: "tools" });
+        for (const item of stage.items) {
+          const ready = !!item.path;
+          const tool = el(ready ? "a" : "div", { className: ready ? "tool" : "tool soon" },
+            el("b", {}, item.label, el("i", { textContent: ready ? "열기 →" : "준비 중" })),
+            el("span", { textContent: item.hint }));
+          if (ready) tool.href = item.path;
+          tools.append(el("li", {}, tool));
+        }
+        $("stages").append(el("article", { className: "stage" },
+          el("div", { className: "stage-top" },
+            el("span", { className: "no", textContent: String(i + 1).padStart(2, "0") }),
+            el("h3", {}, stage.ko, el("small", { textContent: stage.en })),
+            el("span", { className: "mode", textContent: stage.mode })),
+          el("p", { className: "q", textContent: stage.question }),
+          el("p", { className: "desc", textContent: stage.desc }),
+          tools));
+      });
+
+      const all = process.flatMap((s) => s.items);
+      const ready = all.filter((t) => t.path).length;
+      const count = $("count");
+      count.append(el("b", { textContent: `${process.length}단계 · ${all.length}개 에이전트` }), ` · 지금 ${ready}개를 쓸 수 있고, ${all.length - ready}개는 준비 중이에요`);
+      count.hidden = false;
+    })();
+  </script>
 </body>
 </html>

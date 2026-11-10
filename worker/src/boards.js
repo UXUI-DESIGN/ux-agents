@@ -352,7 +352,7 @@ async function settleBoard(env, boardId) {
   }
 }
 
-// 페르소나 프로필 사진 (3단계에서 저장한 것) — 참조 이미지로 보낸다
+// 페르소나 프로필 사진 (정의 단계의 페르소나에서 저장한 것) — 참조 이미지로 보낸다
 async function personaReference(env, personaId) {
   const img = await env.DB.prepare("SELECT mime, bytes FROM persona_images WHERE persona_id = ? ORDER BY created_at DESC LIMIT 1").bind(personaId).first();
   return img ? { mime: img.mime, bytes: blobBytes(img.bytes) } : null;
