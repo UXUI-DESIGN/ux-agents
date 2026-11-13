@@ -471,6 +471,40 @@
     .toast { position: fixed; left: 50%; bottom: 24px; z-index: 60; transform: translate(-50%, 20px); padding: 10px 18px; border-radius: 999px; background: var(--text); color: #fff; font-size: 14px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; }
     .toast.on { opacity: 1; transform: translate(-50%, 0); }
 
+    /* 세로 저니맵: 왼쪽 감정 곡선 + 오른쪽 단계 카드 */
+    .vmap-head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 18px; font-size: 12.5px; font-weight: 600; color: var(--text-sub); }
+    .vmap { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 14px; margin-top: 8px; }
+    .vcurve { position: relative; min-height: 100%; border: 1px solid var(--line); border-radius: 12px; background: linear-gradient(90deg, #fff7f7, #fff 45%, #fff 55%, #f4fbf7); overflow: hidden; }
+    .vcurve svg { position: absolute; inset: 0; display: block; }
+    .vstages { display: grid; gap: 14px; min-width: 0; }
+    .vstage { position: relative; border: 1px solid var(--line); border-radius: 14px; background: #fff; overflow: hidden; }
+    .vstage[style*="--kc"] { border-left: 4px solid var(--kc); }
+    .vstage > .stage-h { padding: 12px 16px; border-bottom: 1px solid var(--line); background: #fafbfd; }
+    .vstage > .stage-h b { font-size: 17px; }
+    .vkey { position: absolute; top: 12px; right: 12px; padding: 1px 9px; border-radius: 999px; background: var(--kc); color: #fff; font-size: 11.5px; font-weight: 800; }
+    .vlanes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .vlanes.one { grid-template-columns: minmax(0, 1fr); }
+    .vlane { min-width: 0; border-bottom: 1px solid var(--line); }
+    .vlanes:not(.one) .vlane:nth-child(odd) { border-right: 1px solid var(--line); }
+    .vlanes:not(.one) .vlane:nth-last-child(-n+2), .vlanes.one .vlane:last-child { border-bottom: 0; }
+    .vlane h4 { padding: 8px 16px 0; font-size: 12.5px; font-weight: 800; color: var(--text); }
+    .vlane h4 small { margin-left: 6px; font-size: 11px; font-weight: 500; color: var(--text-faint); }
+    .vlane.pain h4 { color: var(--danger); }
+    .vlane.opp h4 { color: var(--accent); }
+    .vlane > .cell { padding: 8px 16px 12px; }
+    .vlane.pain > .cell.pain { margin: 6px 0 0; }
+    .vpair { display: grid; gap: 0; }
+    .vpair.side { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .vpair > div { min-width: 0; }
+    .vpair.side > div + div { border-left: 1px solid var(--line); }
+    .vpair .vtag { display: inline-block; margin: 6px 16px 0; padding: 0 7px; border-radius: 5px; background: #f1f2f7; color: var(--text-faint); font-size: 10.5px; font-weight: 800; }
+    .vpair .vtag.tobe { background: var(--accent-soft); color: var(--accent); }
+    .vpair .cell { padding: 6px 16px 12px; }
+    .vnotes { margin-top: 10px; }
+    .vnotes .peak-end, .vnotes .band-note { position: static; width: auto; max-width: none; padding: 4px 0 0; }
+    #result.ev-on .vlane h4.weak { background: #fff4e0; color: #7a4a00; padding-bottom: 6px; }
+    #result.ev-on .vlane h4.weak::after { content: "조사 필요"; margin-left: 6px; padding: 0 6px; border-radius: 5px; background: #d97706; color: #fff; font-size: 10.5px; font-weight: 800; }
+
     /* 감정 곡선: 근거 띠 */
     .band-n { font-size: 10.5px; font-weight: 600; fill: var(--text-faint); }
     .band-n.weak { fill: #b45309; font-weight: 800; }
@@ -548,6 +582,15 @@
     .ev-quotes cite { display: block; margin-top: 4px; font-size: 11.5px; font-style: normal; color: var(--text-faint); }
 
     @media (max-width: 720px) {
+      .vmap { grid-template-columns: 76px minmax(0, 1fr); gap: 8px; }
+      .vlanes, .vpair.side { grid-template-columns: minmax(0, 1fr); }
+      .vlanes .vlane { border-right: 0 !important; border-bottom: 1px solid var(--line) !important; }
+      .vlanes .vlane:last-child { border-bottom: 0 !important; }
+      .vpair.side > div + div { border-left: 0; border-top: 1px dashed var(--line); }
+      .vkey { position: static; display: inline-block; margin: 0 16px 0; }
+      .vstage > .stage-h { padding: 10px 12px; }
+      .vlane h4 { padding: 8px 12px 0; }
+      .vlane > .cell, .vpair .cell { padding: 6px 12px 10px; }
       .memo-grid { grid-template-columns: 1fr; }
       .link-list li { grid-template-columns: 1fr; gap: 4px; }
       .link-list .arrow { display: none; }
@@ -958,84 +1001,82 @@
       return { low, peak, end: vals.length - 1, drop, dropAt, gaps };
     }
 
-    // colW 마다 한 점(열 가운데)이라 표의 단계 열과 정확히 맞는다. ghost 가 있으면 AS-IS 곡선을 회색 점선으로 겹쳐 그린다.
-    function curveSvg(pts, sig, { colW, h, mini = false, active = -1, ghost = null, owner = "main", band = false }) {
-      const w = colW * pts.length;
-      const pad = mini ? 18 : 46;
-      const bottom = mini ? 18 : 0;
-      const y = (v) => pad + ((2 - v) / 4) * (h - bottom - pad * 2);
-      const path = (arr, val = (p) => p.score) => {
-        const xy = arr.map((p, i) => [colW * i + colW / 2, y(val(p))]);
+    // 세로 감정 곡선: 가로 = 감정 점수(−2 왼쪽 ~ +2 오른쪽), 세로 = 단계.
+    //   ys 는 화면에 그려진 단계 카드 머리의 세로 가운데라, 점이 단계와 정확히 같은 높이에 온다 (drawVCurve 가 잰다).
+    //   ghost 가 있으면 AS-IS 곡선을 회색 점선으로 겹쳐 그린다. band 면 참가자 점수의 근거 띠를 좌우로 그린다.
+    function vCurveSvg(pts, sig, { W, H, ys, ghost = null, owner = "main", band = false }) {
+      const compact = W < 130;
+      const pad = compact ? 12 : 26;
+      const x = (v) => pad + ((v + 2) / 4) * (W - pad * 2);
+      const path = (vals) => {
+        const xy = vals.map((v, i) => [x(v), ys[i]]);
         let d = `M${xy[0][0]},${xy[0][1]}`;
-        for (let i = 1; i < xy.length; i++) { const [x0, y0] = xy[i - 1], [x1, y1] = xy[i], dx = (x1 - x0) / 2; d += ` C${x0 + dx},${y0} ${x1 - dx},${y1} ${x1},${y1}`; }
+        for (let i = 1; i < xy.length; i++) { const [x0, y0] = xy[i - 1], [x1, y1] = xy[i], dy = (y1 - y0) / 2; d += ` C${x0},${y0 + dy} ${x1},${y1 - dy} ${x1},${y1}`; }
         return { d, xy };
       };
-      const main = path(pts);
-      const area = `${main.d} L${main.xy.at(-1)[0]},${h - bottom} L${main.xy[0][0]},${h - bottom} Z`;
-      const fid = `emoFill-${owner}${mini ? "M" : ""}`;
-      const guides = mini ? "" : [-2, -1, 0, 1, 2].map((v) => `<line x1="0" x2="${w}" y1="${y(v)}" y2="${y(v)}" stroke="${v === 0 ? "#d3d6e2" : "#eef0f5"}" ${v === 0 ? 'stroke-dasharray="4 4"' : ""}/><text x="6" y="${y(v) - 4}" font-size="10" fill="var(--text-faint)">${fmtEmo(v)}</text>`).join("");
-      const cols = mini ? "" : pts.slice(1).map((_, i) => `<line x1="${colW * (i + 1)}" x2="${colW * (i + 1)}" y1="0" y2="${h}" stroke="var(--line)"/>`).join("");
-      // 근거 띠: 평균 ± 폭. 참가자 점수가 하나라도 있는 지도에서만 그린다
+      const main = path(pts.map((p) => p.score));
+      const top = 30, bottom = H - 4;
+      const guides = [-2, -1, 0, 1, 2].map((v) => `<line x1="${x(v)}" x2="${x(v)}" y1="${top}" y2="${bottom}" stroke="${v === 0 ? "#d3d6e2" : "#eef0f5"}" ${v === 0 ? 'stroke-dasharray="4 4"' : ""}/>${compact && Math.abs(v) !== 2 ? "" : `<text x="${x(v)}" y="${top - 8}" text-anchor="middle" font-size="10" fill="var(--text-faint)">${fmtEmo(v)}</text>`}`).join("");
+      const axis = compact ? "" : `<text x="${pad}" y="11" font-size="10" font-weight="700" fill="var(--danger)">불만</text><text x="${W - pad}" y="11" text-anchor="end" font-size="10" font-weight="700" fill="var(--good)">만족</text>`;
       let bandEls = "";
       if (band && pts.some((p) => p.n)) {
         const lim = (v) => Math.max(-2.4, Math.min(2.4, v));
-        const up = path(pts, (p) => lim(p.score + p.half)), lo = path([...pts].reverse(), (p) => lim(p.score - p.half));
-        const loXY = lo.xy.map(([, yy], i) => [colW * (pts.length - 1 - i) + colW / 2, yy]);
-        let d = up.d + ` L${loXY[0][0]},${loXY[0][1]}`;
-        for (let i = 1; i < loXY.length; i++) { const [x0, y0] = loXY[i - 1], [x1, y1] = loXY[i], dx = (x1 - x0) / 2; d += ` C${x0 + dx},${y0} ${x1 - dx},${y1} ${x1},${y1}`; }
-        bandEls = `<path class="band" d="${d} Z" fill="#4f46e5" fill-opacity="${mini ? 0.14 : 0.13}" stroke="#4f46e5" stroke-opacity=".25" stroke-dasharray="3 3"/>`;
-        if (!mini) bandEls += pts.map((p, i) => `<text x="${colW * i + colW / 2}" y="${h - 8}" text-anchor="middle" class="band-n ${p.n <= 1 || p.sd >= 1.2 ? "weak" : ""}">${p.n ? `근거 ${p.n}명` : "참가자 점수 없음"}${p.n === 1 ? " · 근거 약함" : ""}${p.sd >= 1.2 ? " · 의견 갈림" : ""} · ±${p.half.toFixed(1)}</text>`).join("");
+        const right = path(pts.map((p) => lim(p.score + p.half)));
+        const left = path([...pts].reverse().map((p) => lim(p.score - p.half)));
+        // 왼쪽 가장자리는 아래에서 위로 되짚어 올라간다
+        const lxy = left.xy.map(([xx], i) => [xx, ys[pts.length - 1 - i]]);
+        let d = right.d + ` L${lxy[0][0]},${lxy[0][1]}`;
+        for (let i = 1; i < lxy.length; i++) { const [x0, y0] = lxy[i - 1], [x1, y1] = lxy[i], dy = (y1 - y0) / 2; d += ` C${x0},${y0 + dy} ${x1},${y1 - dy} ${x1},${y1}`; }
+        bandEls = `<path class="band" d="${d} Z" fill="#4f46e5" fill-opacity=".13" stroke="#4f46e5" stroke-opacity=".25" stroke-dasharray="3 3"/>`;
       }
       let ghostEls = "";
       if (ghost && ghost.length === pts.length) {
-        const g = path(ghost);
-        ghostEls = `<path d="${g.d}" fill="none" stroke="#9aa0b4" stroke-width="${mini ? 1.5 : 2}" stroke-dasharray="5 5"/>` +
-          g.xy.map(([x, py], i) => `<circle cx="${x}" cy="${py}" r="${mini ? 2.5 : 4}" fill="#fff" stroke="#9aa0b4" stroke-width="2"/>${mini ? "" : `<circle class="emo-hit" data-owner="${owner}" data-ghost="1" data-i="${i}" cx="${x}" cy="${py}" r="12" fill="transparent" tabindex="0" role="button" aria-label="AS-IS ${i + 1}단계 ${esc(ghost[i].name)} 감정 ${fmtEmo(ghost[i].score)}"/>`}`).join("");
+        const g = path(ghost.map((p) => p.score));
+        ghostEls = `<path d="${g.d}" fill="none" stroke="#9aa0b4" stroke-width="2" stroke-dasharray="5 5"/>` +
+          g.xy.map(([gx, gy], i) => `<circle cx="${gx}" cy="${gy}" r="4" fill="#fff" stroke="#9aa0b4" stroke-width="2"/><circle class="emo-hit" data-owner="${owner}" data-ghost="1" data-i="${i}" cx="${gx}" cy="${gy}" r="12" fill="transparent" tabindex="0" role="button" aria-label="AS-IS ${i + 1}단계 ${esc(ghost[i].name)} 감정 ${fmtEmo(ghost[i].score)}"/>`).join("");
       }
-      const marks = main.xy.map(([x, py], i) => {
-        const s = pts[i];
+      const marks = main.xy.map(([px, py], i) => {
+        const p = pts[i];
         const roles = keyRoles(sig, i);
         const kc = keyColor(roles);
-        const up = s.score >= 0;
+        const cx = Math.max(pad + 20, Math.min(W - pad - 20, px));
         let out = "";
-        if (mini && i === active) out += `<circle cx="${x}" cy="${py}" r="10" fill="none" stroke="var(--accent)" stroke-width="2"/>`;
-        if (kc && !mini) out += `<circle cx="${x}" cy="${py}" r="13" fill="${kc}" opacity=".16"/>`;
+        if (kc) out += `<circle cx="${px}" cy="${py}" r="13" fill="${kc}" opacity=".16"/>`;
         out += kc
-          ? `<circle cx="${x}" cy="${py}" r="${mini ? 5 : 7.5}" fill="${kc}" stroke="#fff" stroke-width="2.5"/>`
-          : `<circle cx="${x}" cy="${py}" r="${mini ? 4 : 6}" fill="#fff" stroke="var(--accent)" stroke-width="3"/>`;
-        if (!mini) {
-          out += `<text class="curve-label" x="${x}" y="${up ? py - 18 : py + 26}" text-anchor="middle">${esc(s.feel)} ${fmtEmo(s.score)}</text>`;
-          if (roles.length) {
-            const txt = roles.map((r) => KEY[r].label).join(" · ");
-            const tw = txt.length * 12 + 18, th = 20, ty = up ? py + 18 : py - 18 - th;
-            out += `<g aria-hidden="true"><rect x="${x - tw / 2}" y="${ty}" width="${tw}" height="${th}" rx="10" fill="${kc}"/><text class="curve-tag" x="${x}" y="${ty + 14}" text-anchor="middle" fill="#fff">${txt}</text></g>`;
-          }
+          ? `<circle cx="${px}" cy="${py}" r="7.5" fill="${kc}" stroke="#fff" stroke-width="2.5"/>`
+          : `<circle cx="${px}" cy="${py}" r="6" fill="#fff" stroke="var(--accent)" stroke-width="3"/>`;
+        if (roles.length) {
+          const txt = roles.map((r) => KEY[r].label).join(compact ? "·" : " · ");
+          const tw = txt.length * (compact ? 10 : 12) + 14, th = 18;
+          const tx = Math.max(2, Math.min(W - tw - 2, px - tw / 2)), ty = py - 16 - th;
+          out += `<g aria-hidden="true"><rect x="${tx}" y="${ty}" width="${tw}" height="${th}" rx="9" fill="${kc}"/><text class="curve-tag" x="${tx + tw / 2}" y="${ty + 13}" text-anchor="middle" fill="#fff" ${compact ? 'font-size="9.5"' : ""}>${txt}</text></g>`;
         }
-        out += `<circle class="emo-hit" data-owner="${owner}" data-i="${i}" cx="${x}" cy="${py}" r="${mini ? 14 : 20}" fill="transparent" tabindex="0" role="button" aria-label="${i + 1}단계 ${esc(s.name)} 감정 ${esc(s.feel)} ${fmtEmo(s.score)}${roles.length ? " · " + roles.map((r) => KEY[r].label).join(" · ") : ""}"/>`;
+        if (!compact) {
+          out += `<text class="curve-label" x="${cx}" y="${py + 26}" text-anchor="middle">${esc(p.feel)} ${fmtEmo(p.score)}</text>`;
+          if (band && pts.some((q) => q.n)) out += `<text x="${cx}" y="${py + 41}" text-anchor="middle" class="band-n ${p.n <= 1 || p.sd >= 1.2 ? "weak" : ""}">${p.n ? `근거 ${p.n}명` : "점수 없음"}${p.n === 1 ? " · 약함" : ""}${p.sd >= 1.2 ? " · 갈림" : ""} ±${p.half.toFixed(1)}</text>`;
+        } else {
+          out += `<text class="curve-label" x="${cx}" y="${py + 22}" text-anchor="middle" font-size="10.5">${fmtEmo(p.score)}</text>`;
+        }
+        out += `<circle class="emo-hit" data-owner="${owner}" data-i="${i}" cx="${px}" cy="${py}" r="18" fill="transparent" tabindex="0" role="button" aria-label="${i + 1}단계 ${esc(p.name)} 감정 ${esc(p.feel)} ${fmtEmo(p.score)}${roles.length ? " · " + roles.map((r) => KEY[r].label).join(" · ") : ""}"/>`;
         return out;
       }).join("");
-      const miniLabels = mini ? pts.map((s, i) => `<text x="${colW * i + colW / 2}" y="${h - 4}" text-anchor="middle" font-size="10" font-weight="${i === active ? 800 : 500}" fill="${i === active ? "var(--accent)" : "var(--text-faint)"}">${esc(s.name)}</text>`).join("") : "";
-      return `<svg ${mini ? 'width="100%"' : `width="${w}" height="${h}"`} viewBox="0 0 ${w} ${h}" role="group" aria-label="감정 곡선: ${esc(pts.map((s) => `${s.name} ${s.feel}(${fmtEmo(s.score)})`).join(", "))}">
-        <defs><linearGradient id="${fid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4f46e5" stop-opacity=".14"/><stop offset="1" stop-color="#4f46e5" stop-opacity="0"/></linearGradient></defs>
-        ${guides}${cols}
-        ${bandEls ? "" : `<path d="${area}" fill="url(#${fid})"/>`}
-        ${bandEls}
-        ${ghostEls}
-        <path d="${main.d}" fill="none" stroke="var(--accent)" stroke-width="${mini ? 2 : 2.5}" stroke-linecap="round"/>
-        ${marks}${miniLabels}
+      return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="group" aria-label="감정 곡선: ${esc(pts.map((q) => `${q.name} ${q.feel}(${fmtEmo(q.score)})`).join(", "))}">
+        ${axis}${guides}${bandEls}${ghostEls}
+        <path d="${main.d}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round"/>
+        ${marks}
       </svg>`;
     }
 
     const bandNote = () => `<div class="band-note"><span class="pe-keys"><b class="pe-band"></b>근거 띠</span> 띠가 넓을수록 근거가 약하거나 의견이 갈린 단계입니다.
         <details><summary>띠 넓이는 어떻게 정했나요?</summary>
-          <p>곡선의 점은 그 단계에서 감정을 말한 참가자들의 <b>평균 점수</b>예요. 띠는 “이 평균이 위아래로 얼마나 흔들릴 수 있나”를 점수 단위로 그린 거예요.</p>
+          <p>곡선의 점은 그 단계에서 감정을 말한 참가자들의 <b>평균 점수</b>예요. 띠는 “이 평균이 좌우로 얼마나 흔들릴 수 있나”를 점수 단위로 그린 거예요.</p>
           <p><b>띠 폭 = √(의견 차이² + 1) ÷ √(근거 참가자 수)</b> (최대 ±1.6)</p>
           <ul><li><b>근거 참가자 수</b>: 말한 사람이 많을수록 좁아져요. 4배 많아지면 폭이 절반.</li>
             <li><b>의견 차이</b>: 참가자 점수가 서로 얼마나 다른지(표준편차). 모두 같은 점수면 0, −2와 +2로 갈리면 커져요.</li>
             <li><b>+1</b>: 한 사람의 말만 있을 때도 최소 ±1점은 불확실하다고 보는 바닥값이에요.</li></ul>
           <p>예) 1명뿐 ±1.0 · 5명이 같은 점수 ±0.45 · 5명이 −2~+2로 갈림 ±0.9 · 참가자 점수 없음 ±1.6</p>
         </details></div>`;
-    const peakEndNote = (overlay, band = false) => `${band ? bandNote() : ""}<p class="peak-end"><span class="pe-keys"><i style="background:${KEY.peak.color}"></i>정점 <i style="background:${KEY.low.color}"></i>저점 <i style="background:${KEY.end.color}"></i>종점${overlay ? ` <b class="pe-line"></b>TO-BE <b class="pe-line ghost"></b>AS-IS` : ""}</span>사람은 정점과 마지막 순간으로 경험을 기억해요 (피크엔드 법칙). <span class="hint-hover">점에 마우스를 올리면 감정 설명과 근거 인용이 보여요.</span><span class="hint-touch">점을 누르면 그 단계 카드로 넘어가요.</span></p>`;
+    const peakEndNote = (overlay, band = false) => `${band ? bandNote() : ""}<p class="peak-end"><span class="pe-keys"><i style="background:${KEY.peak.color}"></i>정점 <i style="background:${KEY.low.color}"></i>저점 <i style="background:${KEY.end.color}"></i>종점${overlay ? ` <b class="pe-line"></b>TO-BE <b class="pe-line ghost"></b>AS-IS` : ""}</span>사람은 정점과 마지막 순간으로 경험을 기억해요 (피크엔드 법칙). <span class="hint-hover">점에 마우스를 올리면 감정 설명과 근거 인용이 보여요.</span><span class="hint-touch">점을 누르면 감정 설명과 근거 인용이 보여요.</span></p>`;
 
     // ── 감정 점 툴팁 ──
     const tipData = {};   // owner → { pts, sig, ghost }
@@ -1206,102 +1247,64 @@
       return `<div class="opp-block" data-pain="${esc(p.id)}">${chosen}${drafts}${tools}</div>`;
     }
 
-    function headHtml(j, s, i, span) {
+    function headHtml(j, s, i) {
       const ed = editable();
-      return `<div class="stage-h cell lane-head ${s.headBy === "human" ? "is-human" : s.headBy === "ai-rewrite" ? "is-rewrite" : ""}" style="${span ? "grid-column: span 2" : ""}" data-stage="${s.id}" data-lane="head" ${ed ? 'data-edit="1" tabindex="0" role="button"' : ""} role="columnheader"><span class="no">STAGE ${i + 1}</span><b>${esc(s.name)}</b><small>${esc(s.goal)}</small>${s.headBy && s.headBy !== "ai" ? byTag(s.headBy) : ""}</div>`;
+      return `<div class="stage-h cell lane-head ${s.headBy === "human" ? "is-human" : s.headBy === "ai-rewrite" ? "is-rewrite" : ""}" data-stage="${s.id}" data-lane="head" ${ed ? 'data-edit="1" tabindex="0" role="button"' : ""}><span class="no">STAGE ${i + 1} / ${j.map.stages.length}</span><b>${esc(s.name)}</b><small>${esc(s.goal)}</small>${s.headBy && s.headBy !== "ai" ? byTag(s.headBy) : ""}</div>`;
     }
 
-    // ── 표 (데스크톱) ──
-    function gridHtml(j) {
-      const S = j.map.stages, n = S.length;
-      const tobe = j.lens === "to-be";
+    // ── 세로 저니맵: 왼쪽 감정 곡선 + 오른쪽 단계 카드 (위에서 아래로 시간 순) ──
+    //   TO-BE 비교: '위아래로 겹쳐 보기'는 레인 안에서 AS-IS 위·TO-BE 아래, '단계별 나란히'는 AS-IS | TO-BE 두 칸
+    function vmapHtml(j) {
+      const S = j.map.stages, tobe = j.lens === "to-be";
       const A = tobe ? j.parent?.map.stages : null;
-      const side = tobe && A && state.view === "side";
-      const colW = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--col-w"), 10) || 232;
-      const curveW = side ? colW * 2 : colW;
-      const template = `var(--lane-w) repeat(${side ? n * 2 : n}, ${side ? colW : colW}px)`;
-      const rows = [];
-      rows.push(`<div class="lane corner" role="columnheader">레인 \\ 단계</div>${S.map((s, i) => headHtml(j, s, i, side)).join("")}`);
-      if (side) rows.push(`<div class="lane sub" role="rowheader">비교</div>${S.map(() => `<div class="subhead asis">AS-IS</div><div class="subhead tobe">TO-BE · 가설</div>`).join("")}`);
-      const lanes = tobe ? ["change", "actions", "thought", "curve", "emotion", "touchpoints", "applied"] : ["actions", "thought", "curve", "emotion", "touchpoints", "pains", "hmw"];
-      const compare = new Set(["actions", "thought", "emotion", "touchpoints"]);
-      for (const lane of lanes) {
-        if (lane === "curve") {
-          const pts = points(S), sig = analyze(S);
-          const band = !tobe;
-          tipData.main = { pts, sig, ghost: A ? points(A) : null, band };
-          rows.push(`<div class="lane" role="rowheader" data-lane-h="curve">감정 곡선<small>${A ? "AS-IS ┅ / TO-BE ━" : "참가자 평균 · 근거 띠"}</small></div><div class="curve-cell" role="cell">${curveSvg(pts, sig, { colW: curveW, h: band ? 240 : 210, ghost: A ? points(A) : null, owner: "main", band })}${peakEndNote(!!A, band && pts.some((p) => p.n))}</div>`);
-          continue;
-        }
-        const cls = lane === "pains" ? "pain" : lane === "hmw" || lane === "applied" ? "opp" : "";
-        if (tobe && A && compare.has(lane)) {
-          if (side) {
-            rows.push(`<div class="lane ${cls}" role="rowheader">${LANE_LABEL[lane]}<small>${LANE_SUB[lane]}</small></div>${S.map((s, i) => cellHtml(j, A[i], lane, { asis: true }) + cellHtml(j, s, lane)).join("")}`);
-          } else {
-            rows.push(`<div class="lane asis-lane" role="rowheader">${LANE_LABEL[lane]}<small>AS-IS</small></div>${A.map((a) => cellHtml(j, a, lane, { asis: true })).join("")}`);
-            rows.push(`<div class="lane ${cls}" role="rowheader">${LANE_LABEL[lane]}<small>TO-BE · 가설</small></div>${S.map((s) => cellHtml(j, s, lane)).join("")}`);
-          }
-          continue;
-        }
-        const span = side ? "span2" : "";
-        rows.push(`<div class="lane ${cls}" role="rowheader" data-lane-h="${lane}">${LANE_LABEL[lane]}<small>${LANE_SUB[lane]}</small></div>${S.map((s) => cellHtml(j, s, lane, { extra: span })).join("")}`);
-      }
-      return `<div class="map-scroll" tabindex="0" aria-label="저니맵 표 (좌우로 스크롤)"><div class="map ${side ? "side" : ""}" role="table" style="grid-template-columns:${template}">${rows.join("")}</div></div>
-        <div class="scroll-hint"><span>레인 이름은 고정돼요${editable() ? " · 칸을 누르면 고칠 수 있어요" : ""}</span><span>${n}단계 · 좌우로 스크롤 →</span></div>`;
-    }
-
-    // ── 모바일 카드 ──
-    function deckHtml(j) {
-      const S = j.map.stages, n = S.length, tobe = j.lens === "to-be", A = tobe ? j.parent?.map.stages : null;
-      const sig = analyze(S);
+      const side = !!(tobe && A && state.view === "side");
       const lanes = tobe ? ["change", "actions", "thought", "emotion", "touchpoints", "applied"] : ["actions", "thought", "emotion", "touchpoints", "pains", "hmw"];
-      const cards = S.map((s, i) => `
-        <article class="scard" id="sc-${i}" aria-label="${i + 1}단계 ${esc(s.name)}">
-          <div class="scard-head ${editable() ? "tap" : ""}" data-stage="${s.id}" data-lane="head" ${editable() ? 'data-edit="1"' : ""}>
-            <span class="no">STAGE ${i + 1} / ${n}${tobe ? " · TO-BE 가설" : ""}</span><b>${esc(s.name)}</b><small>${esc(s.goal)}</small>
-            <span class="emo" style="background:${EMO_BG(s.emotion.score)};color:${EMO_COLOR(s.emotion.score)}">감정 ${esc(s.emotion.feel)} ${fmtEmo(s.emotion.score)}${i === sig.low ? " · 저점" : i === sig.peak ? " · 정점" : ""}${i === sig.end ? " · 종점" : ""}</span>
-            ${A ? `<span class="emo asis-emo">AS-IS ${esc(A[i].emotion.feel)} ${fmtEmo(A[i].emotion.score)}</span>` : ""}
-          </div>
-          ${lanes.map((lane) => `<div class="scard-sec ${lane === "pains" ? "pain" : lane === "hmw" || lane === "applied" ? "opp" : ""}"><h3>${LANE_LABEL[lane]}</h3>${cellHtml(j, s, lane)}</div>`).join("")}
-        </article>`).join("");
-      return `<div class="deck-wrap">
-          <div class="mini-curve"><div id="miniCurve"></div>${peakEndNote(!!A, !A && points(S).some((p) => p.n))}</div>
-          <div class="deck" id="deck">${cards}</div>
-          <div class="deck-nav">
-            <button class="btn" type="button" id="prevCard" aria-label="이전 단계">←</button>
-            <div class="dots" id="dots">${S.map((s, i) => `<button type="button" aria-label="${i + 1}단계 ${esc(s.name)}로"></button>`).join("")}</div>
-            <span class="pos" id="pos"></span>
-            <button class="btn" type="button" id="nextCard" aria-label="다음 단계">→</button>
-          </div>
-        </div>`;
+      const compare = new Set(["actions", "thought", "emotion", "touchpoints"]);
+      const pts = points(S), sig = analyze(S), band = !tobe;
+      tipData.main = { pts, sig, ghost: A ? points(A) : null, band };
+      const cards = S.map((s, i) => {
+        const roles = keyRoles(sig, i);
+        const lanesHtml = lanes.map((lane) => {
+          const cls = lane === "pains" ? "pain" : lane === "hmw" || lane === "applied" ? "opp" : "";
+          const head = `<h4 data-lane-h="${lane}">${LANE_LABEL[lane]}<small>${LANE_SUB[lane]}</small></h4>`;
+          if (A && compare.has(lane)) {
+            return `<div class="vlane ${cls}">${head}<div class="vpair ${side ? "side" : ""}"><div><span class="vtag">AS-IS</span>${cellHtml(j, A[i], lane, { asis: true })}</div><div><span class="vtag tobe">TO-BE · 가설</span>${cellHtml(j, s, lane)}</div></div></div>`;
+          }
+          return `<div class="vlane ${cls}">${head}${cellHtml(j, s, lane)}</div>`;
+        }).join("");
+        return `<section class="vstage" aria-label="${i + 1}단계 ${esc(s.name)}" ${roles.length ? `style="--kc:${keyColor(roles)}"` : ""}>
+          ${headHtml(j, s, i)}${roles.length ? `<span class="vkey">${roles.map((r) => KEY[r].label).join(" · ")}</span>` : ""}
+          <div class="vlanes ${side ? "one" : ""}">${lanesHtml}</div>
+        </section>`;
+      }).join("");
+      return `<div class="vmap-head"><span>감정 곡선${A ? " · AS-IS ┅ / TO-BE ━" : band && pts.some((p) => p.n) ? " · 참가자 평균 · 근거 띠" : ""}</span><span>단계 ${S.length}개 · 위에서 아래로 시간 순${editable() ? " · 칸을 누르면 고칠 수 있어요" : ""}</span></div>
+        <div class="vmap">
+          <div class="vcurve" id="vcurve" aria-label="감정 곡선"></div>
+          <div class="vstages" id="vstages">${cards}</div>
+        </div>
+        <div class="vnotes">${peakEndNote(!!A, band && pts.some((p) => p.n))}</div>`;
     }
 
-    function wireDeck(j) {
-      const S = j.map.stages, n = S.length, A = j.lens === "to-be" ? j.parent?.map.stages : null;
-      const deck = $("deck");
-      const dots = [...$("dots").children];
-      const sig = analyze(S);
-      tipData.mini = { pts: points(S), sig, ghost: A ? points(A) : null, band: !A };
-      let cur = -1;
-      const setCur = (i) => {
-        if (i === cur) return;
-        cur = i;
-        dots.forEach((d, k) => d.setAttribute("aria-current", String(k === i)));
-        $("pos").textContent = `${i + 1} / ${n}`;
-        $("prevCard").disabled = i === 0;
-        $("nextCard").disabled = i === n - 1;
-        $("miniCurve").innerHTML = curveSvg(points(S), sig, { colW: 60, h: 104, mini: true, active: i, ghost: A ? points(A) : null, owner: "mini", band: !A });
-      };
-      const go = (i) => { const c = $(`sc-${Math.max(0, Math.min(n - 1, i))}`); deck.scrollTo({ left: c.offsetLeft - deck.offsetLeft - parseFloat(getComputedStyle(deck).paddingLeft), behavior: "smooth" }); };
-      deck.addEventListener("scroll", () => {
-        const w = deck.firstElementChild.getBoundingClientRect().width + 10;
-        setCur(Math.max(0, Math.min(n - 1, Math.round(deck.scrollLeft / w))));
-      }, { passive: true });
-      dots.forEach((d, k) => d.addEventListener("click", () => go(k)));
-      $("prevCard").addEventListener("click", () => go(cur - 1));
-      $("nextCard").addEventListener("click", () => go(cur + 1));
-      $("miniCurve").addEventListener("click", (e) => { const el = e.target.closest(".emo-hit"); if (el) go(Number(el.dataset.i)); });
-      setCur(0);
+    // 단계 카드 머리의 세로 가운데를 재서 곡선을 그린다. 카드 높이가 바뀌면(창 크기·글꼴·편집) 다시 그린다.
+    let vObserver = null;
+    function drawVCurve() {
+      const j = state.journey, box = $("vcurve"), list = $("vstages");
+      if (!j || !box || !list) return;
+      const S = j.map.stages, A = j.lens === "to-be" ? j.parent?.map.stages : null;
+      const base = box.getBoundingClientRect().top;
+      const ys = [...list.querySelectorAll(".vstage > .stage-h")].map((h) => { const r = h.getBoundingClientRect(); return r.top - base + r.height / 2; });
+      if (ys.length !== S.length) return;
+      const H = Math.ceil(list.getBoundingClientRect().height), W = box.clientWidth;
+      box.innerHTML = vCurveSvg(points(S), analyze(S), { W, H, ys, ghost: A ? points(A) : null, owner: "main", band: j.lens !== "to-be" });
+    }
+    function wireVmap() {
+      vObserver?.disconnect();
+      const list = $("vstages");
+      if (!list) return;
+      vObserver = new ResizeObserver(() => drawVCurve());
+      vObserver.observe(list);
+      vObserver.observe($("vcurve"));
+      drawVCurve();
     }
 
     // ── 표 아래: 해석 메모 · 분석 신호 · TO-BE 점검·장면 ──
@@ -1382,12 +1385,11 @@
         ${inputsHtml(j)}
         ${tobe && j.parent ? `<div class="view-toggle segmented" role="radiogroup" aria-label="비교 보기"><input type="radio" name="cmp" id="cmpOverlay" value="overlay" ${state.view === "overlay" ? "checked" : ""}/><label for="cmpOverlay">위아래로 겹쳐 보기</label><input type="radio" name="cmp" id="cmpSide" value="side" ${state.view === "side" ? "checked" : ""}/><label for="cmpSide">단계별 나란히</label></div>` : ""}
         ${tobe ? "" : `<div class="ev-toolbar"><label class="switch"><input type="checkbox" id="evToggle" role="switch" ${state.evidence ? "checked" : ""}/><span class="track" aria-hidden="true"></span><b>근거 보기</b></label><span class="ev-hint">${state.evidence ? "칸 색 = 근거의 양 · 칸을 누르면 근거 패널이 열려요" : "켜면 칸마다 근거가 얼마나 있는지 히트맵으로 보여요"}</span></div>${state.evidence ? evSummaryHtml(j) : ""}`}
-        ${gridHtml(j)}
-        ${deckHtml(j)}
+        ${vmapHtml(j)}
         ${memosHtml(j)}
         ${tobe ? tobeExtrasHtml(j) : signalsHtml(j)}
         ${!tobe && j.status === "confirmed" ? `<p class="next-note">다음: 이 AS-IS를 바탕으로 ‘TO-BE 만들기’를 눌러 같은 단계 골격에 개선된 경험을 설계해요.</p>` : !tobe ? `<p class="next-note">검수 순서: 칸을 눌러 고치기 → 페인포인트마다 기회(HMW) 고르기 → 저점·정점·종점 해석 메모 → 확정.</p>` : ""}`;
-      wireDeck(j);
+      wireVmap();
       document.querySelectorAll('input[name="cmp"]').forEach((r) => r.addEventListener("change", () => { state.view = r.value; render(); }));
       const evOn = state.evidence && !tobe;
       $("result").classList.toggle("ev-on", evOn);
@@ -1531,7 +1533,7 @@
       log("칸 고르기", `${esc(s.name)} · ${esc(LANE_LABEL[lane] || lane)}${pain ? ` · ${esc(pain)}` : ""}`, "done");
       log("근거 다시 찾기", j.analysisId ? "이 칸과 가까운 근거 노트를 벡터 검색으로 찾아요(처음이면 색인부터)." : "근거 노트가 없는 페르소나라 페르소나 문서만 다시 읽어요.");
       lock(true, "칸을 다시 쓰는 중…");
-      const cell = document.querySelector(`.map [data-stage="${stage}"][data-lane="${lane === "hmw" ? "hmw" : lane}"]`);
+      const cell = document.querySelector(`.vstages [data-stage="${stage}"][data-lane="${lane}"]`);
       cell?.classList.add("working");
       const { res, data } = await UXA.api(`/api/journeys/${j.id}/rewrite`, { method: "POST", body: { stage, lane, pain } }).catch(() => ({ res: { ok: false }, data: {} }));
       lock(false);
@@ -1540,7 +1542,7 @@
       endLog();
       state.journey = data.journey;
       render();
-      document.querySelector(`.map [data-stage="${stage}"][data-lane="${lane}"]`)?.classList.add("flash");
+      document.querySelector(`.vstages [data-stage="${stage}"][data-lane="${lane}"]`)?.classList.add("flash");
     }
 
     // ── 확정 ──
@@ -1663,7 +1665,7 @@
       const cell = e.target.closest("[data-edit]");
       if (cell) {
         if (cell.dataset.scene) return openEditor({ scene: cell.dataset.scene });
-        if (cell.closest(".map") || cell.closest(".deck") || cell.classList.contains("scard-head")) return openEditor({ stage: cell.dataset.stage, lane: cell.dataset.lane });
+        if (cell.closest(".vstages")) return openEditor({ stage: cell.dataset.stage, lane: cell.dataset.lane });
       }
     });
     $("result").addEventListener("keydown", (e) => {
