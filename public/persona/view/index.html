@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>페르소나 · Janus AI</title>
+  <title>페르소나 · AI Tools for UX Design</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <meta name="description" content="인터뷰에서 정리한 페르소나 1장." />
   <meta name="robots" content="noindex" />
@@ -332,7 +332,7 @@
 
   <header class="nav">
     <div class="container">
-      <a href="/index.html" class="logo">Janus <span>AI</span></a>
+      <a href="/index.html" class="logo">AI Tools <span>for UX Design</span></a>
       <nav aria-label="에이전트 메뉴">
       </nav>
     </div>
@@ -404,7 +404,7 @@
 
   <footer>
     <div class="container">
-      <span class="logo">Janus <span>AI</span></span>
+      <span class="logo">AI Tools <span>for UX Design</span></span>
       <span>운영 인공지능디자인협회 · © 2026 AI Design Association</span>
     </div>
   </footer>
@@ -481,7 +481,7 @@
     const ed = (path, kind) => `data-edit="${path}"${kind ? ` data-kind="${kind}"` : ""}`;
 
     function render(p) {
-      document.title = `${p.profile.name} · 페르소나 · Janus AI`;
+      document.title = `${p.profile.name} · 페르소나 · AI Tools for UX Design`;
       $("crumbName").textContent = p.profile.name;
       $("personaTitle").textContent = PRIORITY_LABEL[p.priority] || PRIORITY_LABEL.primary;
       $("personaTitle").dataset.priority = p.priority;
@@ -606,7 +606,7 @@
         if (m) { persona.behavior.tagGroups[m[1]].tags.splice(Number(m[2]), 1); render(persona); return; }
       }
       // 제목 · 이름이 바뀌면 문서 밖(탭 제목·빵부스러기)도 맞춘다
-      if (path === "profile.name") { document.title = `${persona.profile.name} · 페르소나 · Janus AI`; $("crumbName").textContent = persona.profile.name; }
+      if (path === "profile.name") { document.title = `${persona.profile.name} · 페르소나 · AI Tools for UX Design`; $("crumbName").textContent = persona.profile.name; }
     }
 
     function markDirty() { dirty = true; $("saveBtn").textContent = "저장"; $("saveBtn").disabled = false; }

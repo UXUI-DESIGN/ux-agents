@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>인터뷰 데이터분석 · Janus AI</title>
+  <title>인터뷰 데이터분석 · AI Tools for UX Design</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <meta name="robots" content="noindex" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
@@ -251,7 +251,7 @@
 <body>
   <header class="nav">
     <div class="container">
-      <a href="/index.html" class="logo">Janus <span>AI</span></a>
+      <a href="/index.html" class="logo">AI Tools <span>for UX Design</span></a>
       <nav aria-label="에이전트 메뉴"></nav>
     </div>
   </header>
@@ -378,7 +378,7 @@
 
   <footer>
     <div class="container">
-      <span class="logo">Janus <span>AI</span></span>
+      <span class="logo">AI Tools <span>for UX Design</span></span>
       <span>운영 인공지능디자인협회 · © 2026 AI Design Association</span>
     </div>
   </footer>
@@ -742,7 +742,7 @@
       const cell = (x) => String(x ?? "").replace(/\|/g, "\\|").replace(/\n/g, " ");
       const total = c.participants.length;
       const L = [];
-      L.push(`# 인터뷰 분석 리포트 — ${a.title}`, "", `- 작성: ${fmtDate(a.created_at)} · Janus AI 인터뷰 데이터분석`, `- 참가자 ${total}명 · 발췌 ${c.excerpts.length}개 · 코드 ${c.codebook.length}개 · 테마 ${s.themes.length}개 · 인사이트 ${s.insights.length}개`);
+      L.push(`# 인터뷰 분석 리포트 — ${a.title}`, "", `- 작성: ${fmtDate(a.created_at)} · AI Tools for UX Design 인터뷰 데이터분석`, `- 참가자 ${total}명 · 발췌 ${c.excerpts.length}개 · 코드 ${c.codebook.length}개 · 테마 ${s.themes.length}개 · 인사이트 ${s.insights.length}개`);
       if (a.options.goal) L.push(`- 리서치 질문: ${a.options.goal}`);
       if (a.options.stage) L.push(`- 제품 단계: ${a.options.stage}`);
       L.push("", "## TL;DR", ...s.tldr.map((t) => `- **${t.theme}** — ${t.finding} → ${t.action}${t.clip && ex.get(t.clip) ? ` (클립: ${ex.get(t.clip).participant}@${ex.get(t.clip).timecode || ex.get(t.clip).ref})` : ""}`));

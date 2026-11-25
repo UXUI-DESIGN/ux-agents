@@ -1,4 +1,4 @@
-// Janus AI 공통 상단 메뉴
+// AI Tools for UX Design 공통 상단 메뉴
 //   - 대메뉴는 더블 다이아몬드 4단계(발견 · 정의 · 발전 · 전달), 각 에이전트는 그 아래 하위 메뉴
 //   - 메뉴를 추가하려면 아래 MENU의 해당 단계 items에 한 줄만 넣으면 모든 페이지에 반영된다
 //   - 각 페이지의 <header class="nav"> 안 <nav>를 이 스크립트가 채운다
@@ -160,7 +160,7 @@
   nav.replaceChildren(list);
 })();
 
-// Janus AI 공통 푸터 — 운영 주체(인공지능디자인협회) 정보 표기
+// AI Tools for UX Design 공통 푸터 — 운영 주체(인공지능디자인협회) 정보 표기
 //   협회 사이트(https://www.ai-design.kr) 푸터의 사업자정보와 같은 내용이다. 협회 정보가 바뀌면 여기 한 곳만 고친다.
 (() => {
   const box = document.querySelector("body > footer .container");
@@ -184,7 +184,7 @@
   ft.className = "ft";
   ft.innerHTML = `
     <div class="ft-brand">
-      <a href="/" class="logo">Janus <span>AI</span></a>
+      <a href="/" class="logo">AI Tools <span>for UX Design</span></a>
       <span><a href="https://www.ai-design.kr/" target="_blank" rel="noopener noreferrer">인공지능디자인협회</a> (AI DESIGN ASSOCIATION)가 운영하는 서비스입니다.</span>
     </div>
     <p class="ft-info">

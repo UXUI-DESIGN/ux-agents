@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>페르소나와 대화 · Janus AI</title>
+  <title>페르소나와 대화 · AI Tools for UX Design</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <meta name="robots" content="noindex" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
@@ -168,7 +168,7 @@
 
   <header class="nav">
     <div class="container">
-      <a href="/index.html" class="logo">Janus <span>AI</span></a>
+      <a href="/index.html" class="logo">AI Tools <span>for UX Design</span></a>
       <nav aria-label="에이전트 메뉴">
       </nav>
     </div>
@@ -212,7 +212,7 @@
 
   <footer>
     <div class="container">
-      <span class="logo">Janus <span>AI</span></span>
+      <span class="logo">AI Tools <span>for UX Design</span></span>
       <span>운영 인공지능디자인협회 · © 2026 AI Design Association</span>
     </div>
   </footer>
@@ -241,7 +241,7 @@
     function renderPersona(p) {
       persona = p;
       const wa = (w) => { const c = w.charCodeAt(w.length - 1); return c >= 0xac00 && c <= 0xd7a3 && (c - 0xac00) % 28 ? "과" : "와"; };
-      document.title = `${p.name}${wa(p.name)} 대화 · 페르소나 · Janus AI`;
+      document.title = `${p.name}${wa(p.name)} 대화 · 페르소나 · AI Tools for UX Design`;
       $("pname").textContent = p.name;
       $("psub").textContent = `${p.job} · ${p.age}세`;
       $("ptag").innerHTML = emph(p.tagline);
