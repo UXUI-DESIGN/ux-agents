@@ -143,7 +143,8 @@ const GENERATE_RULES = `너는 UX 리서처를 돕는 저니맵 작성 에이전
 - 감정 score 는 -2(매우 부정)~+2(매우 긍정) 정수. feel 은 감정 단어 1~2개, note 는 왜 그런 감정인지 한 줄.
 - 감정 votes 에는 근거 노트에서 그 단계의 감정을 드러낸 참가자마다 한 줄씩: code(P01 형식), score(-2~+2), refs(그 참가자의 노트 ID), quote(그 참가자의 말, 없으면 빈 문자열). 근거가 없는 참가자는 넣지 않는다. 지어내지 않는다. 근거 노트가 없으면 빈 배열.
 - 감정이 낮은 단계(score -1 이하)와 행동이 끊기는 지점은 반드시 페인포인트로 표시한다. 감정이 높은 단계는 페인포인트가 없을 수 있다.
-- 페인포인트마다 'How might we…' 기회 초안을 2~3개 쓴다. 한국어로 "어떻게 하면 …할 수 있을까?" 형식, 해결책을 못 박지 말고 기회의 방향을 연다.
+- 페인포인트마다 'How might we…' 기회 질문(hmw)을 2~3개 쓴다. 한국어로 "어떻게 하면 …할 수 있을까?" 형식. 페인포인트를 문제로 되풀이하지 말고, 해결할 수 있는 긍정적인 기회로 해석해 묻는다. 질문 자체에는 해결책을 못 박지 않는다.
+- 이어서 그 페인포인트의 solution 을 한두 문장으로 쓴다. 첫 번째 hmw 질문에 답하는 구체적인 해결 아이디어이며, 페르소나가 무엇을 할 수 있게 되고 어떤 좋은 경험을 얻는지가 드러나게 쓴다. 검증 전 가설이므로 "…한다"로 단정하되 과장하지 않는다.
 - 정점(가장 높은 감정)과 종점(마지막 단계)의 감정을 실제 근거대로 쓴다. 희망 사항으로 끌어올리지 않는다(AS-IS).
 - 모든 문장은 한국어, 짧고 구체적으로. 개인정보([REDACTED])는 추측하지 않는다.`;
 
@@ -165,7 +166,7 @@ const GENERATE_SCHEMA = {
             properties: { score: { type: "integer", enum: [-2, -1, 0, 1, 2] }, feel: { type: "string" }, note: { type: "string" }, quote: { type: "string" }, quote_ref: { type: "string" }, refs: strArr, votes: { type: "array", items: { type: "object", additionalProperties: false, required: ["code", "score", "refs", "quote"], properties: { code: { type: "string" }, score: { type: "integer", enum: [-2, -1, 0, 1, 2] }, refs: strArr, quote: { type: "string" } } } } },
           },
           touchpoints: { type: "object", additionalProperties: false, required: ["items", "refs"], properties: { items: strArr, refs: strArr } },
-          pains: { type: "array", items: { type: "object", additionalProperties: false, required: ["text", "refs", "hmw"], properties: { text: { type: "string" }, refs: strArr, hmw: strArr } } },
+          pains: { type: "array", items: { type: "object", additionalProperties: false, required: ["text", "refs", "hmw", "solution"], properties: { text: { type: "string" }, refs: strArr, hmw: strArr, solution: { type: "string" } } } },
         },
       },
     },
@@ -181,7 +182,7 @@ function buildAsIs(out, noteIds) {
     const pains = arr(s.pains, 4).map((x) => {
       const pid = `P${++p}`;
       const drafts = strs(x.hmw, 3, 300);
-      opps.push({ id: `O${opps.length + 1}`, pain: pid, drafts, chosen: drafts[0] || "", by: "ai" });   // 첫 초안을 기회로 둔다 (화면은 카드 한 장만 보여 준다)
+      opps.push({ id: `O${opps.length + 1}`, pain: pid, drafts, chosen: drafts[0] || "", solution: str(x.solution, 400), by: "ai" });   // 첫 초안을 기회로 둔다 (화면은 카드 한 장만 보여 준다)
       return { id: pid, text: str(x.text, 300), refs: refs(x.refs) };
     });
     const e = s.emotion || {};
@@ -306,7 +307,7 @@ function inputSummary(src, scenario, map) {
     lines.push({ k: "근거 노트", v: "없음 — 인터뷰 근거가 없어 모든 칸이 추론(가설)이에요" });
   }
   lines.push({ k: "시나리오", v: `‘${scenario}’ 하나만 범위로 삼았어요` });
-  lines.push({ k: "지킨 규칙", v: "단계 4~7개 시간 순 · 인용 우선 · 감정 -2~+2(참가자별 점수와 근거 노트) · 낮은 감정은 페인포인트로 · 페인포인트마다 HMW 초안 2~3개" });
+  lines.push({ k: "지킨 규칙", v: "단계 4~7개 시간 순 · 인용 우선 · 감정 -2~+2(참가자별 점수와 근거 노트) · 낮은 감정은 페인포인트로 · 페인포인트마다 HMW 질문과 솔루션" });
   lines.push({ k: "결과", v: `칸 ${cells.length}개 중 ${grounded}개는 근거 노트를 인용했고, ${cells.length - grounded}개는 근거 없이 추론했어요(가설 표시)${top.length ? `. 가장 많이 쓴 근거: ${top.join(", ")}` : ""}` });
   lines.push({ k: "보내지 않은 것", v: "인터뷰 원문 전체와 참가자 개인정보는 보내지 않았어요(노트는 마스킹된 전사에서 만든 것)" });
   return lines;
@@ -371,11 +372,12 @@ function mergeEdits(old, incoming, lens) {
     if (!painIds.includes(o.pain)) continue;
     const n = incOpps.get(o.id);
     const chosen = n ? str(n.chosen, 300) : o.chosen;
-    opps.push({ ...o, chosen, by: chosen === o.chosen ? o.by : chosen && o.drafts.includes(chosen) ? "ai" : "human" });
+    const solution = n && typeof n.solution === "string" ? str(n.solution, 400) : o.solution || "";
+    opps.push({ ...o, chosen, solution, by: chosen === o.chosen && solution === (o.solution || "") ? o.by : chosen === o.chosen || !chosen || !o.drafts.includes(chosen) ? "human" : "ai" });
   }
   for (const pid of painIds) if (!opps.some((o) => o.pain === pid)) {
     const n = [...incOpps.values()].find((o) => o?.pain === pid);
-    opps.push({ id: `O${Date.now().toString(36)}${opps.length}`, pain: pid, drafts: [], chosen: n ? str(n.chosen, 300) : "", by: "human" });
+    opps.push({ id: `O${Date.now().toString(36)}${opps.length}`, pain: pid, drafts: [], chosen: n ? str(n.chosen, 300) : "", solution: n ? str(n.solution, 400) : "", by: "human" });
   }
   const memos = { low: str(incoming.memos?.low, 600), peak: str(incoming.memos?.peak, 600), end: str(incoming.memos?.end, 600) };
   const map = { ...old, stages, opps, memos };
@@ -452,7 +454,8 @@ async function rewrite(request, env, json, user, row) {
     const o = map.opps.find((x) => x.pain === pain.id);
     const drafts = strs(out.items, 3, 300);
     // 'AI로 다시 쓰기' — 새 첫 초안이 기회 카드를 바꾼다
-    if (o) Object.assign(o, { drafts, chosen: drafts[0] || o.chosen, by: drafts[0] ? by : o.by }); else map.opps.push({ id: `O${Date.now().toString(36)}`, pain: pain.id, drafts, chosen: drafts[0] || "", by });
+    const solution = str(out.solution, 400);
+    if (o) Object.assign(o, { drafts, chosen: drafts[0] || o.chosen, solution: solution || o.solution || "", by: drafts[0] ? by : o.by }); else map.opps.push({ id: `O${Date.now().toString(36)}`, pain: pain.id, drafts, chosen: drafts[0] || "", solution, by });
   }
   const byId = new Map(retrieved.map((c) => [c.ref_id, c]));
   for (const id of refs) if (!map.evidence[id] && byId.has(id)) { const c = byId.get(id); map.evidence[id] = { text: c.text, code: c.code || "", ref: c.source_ref || "" }; }
@@ -464,7 +467,7 @@ async function rewrite(request, env, json, user, row) {
   });
 }
 
-const LANE_LABEL = { head: "단계 이름과 목표", actions: "행동", thought: "생각", emotion: "감정", touchpoints: "터치포인트", pains: "페인포인트", hmw: "기회(How might we) 초안", change: "AS-IS 대비 바뀐 점" };
+const LANE_LABEL = { head: "단계 이름과 목표", actions: "행동", thought: "생각", emotion: "감정", touchpoints: "터치포인트", pains: "페인포인트", hmw: "기회 — How might we 질문(items)과 그에 답하는 솔루션(solution)", change: "AS-IS 대비 바뀐 점" };
 function laneText(s, lane, pain) {
   if (lane === "head") return `${s.name} — ${s.goal}`;
   if (lane === "actions" || lane === "touchpoints") return (s[lane]?.items || []).join(" / ");
@@ -483,7 +486,7 @@ const REWRITE_SCHEMA = {
   change: withRefs({ text: { type: "string" } }, ["text"]),
   emotion: withRefs({ score: { type: "integer", enum: [-2, -1, 0, 1, 2] }, feel: { type: "string" }, note: { type: "string" }, quote: { type: "string" }, quote_ref: { type: "string" }, votes: { type: "array", items: { type: "object", additionalProperties: false, required: ["code", "score", "refs", "quote"], properties: { code: { type: "string" }, score: { type: "integer", enum: [-2, -1, 0, 1, 2] }, refs: strArr, quote: { type: "string" } } } } }, ["score", "feel", "note", "quote", "quote_ref", "votes"]),
   pains: withRefs({ items: strArr }, ["items"]),
-  hmw: withRefs({ items: strArr }, ["items"]),
+  hmw: withRefs({ items: strArr, solution: { type: "string" } }, ["items", "solution"]),
 };
 
 // ── 4. 확정 ──
@@ -496,7 +499,7 @@ async function confirm(request, env, json, row) {
     const missing = map.stages.flatMap((s) => s.pains.items.filter((p) => !map.opps.some((o) => o.pain === p.id && o.chosen)).map((p) => ({ id: p.id, stage: s.name, text: p.text })));
     if (missing.length) {
       await env.DB.prepare("UPDATE journeys SET map = ?, updated_at = ? WHERE id = ?").bind(JSON.stringify(map), now(), row.id).run();
-      return json({ error: `기회(HMW)가 하나도 없는 페인포인트가 ${missing.length}개 있어요.`, code: "missing_opps", missing }, 409);
+      return json({ error: `기회가 하나도 없는 페인포인트가 ${missing.length}개 있어요.`, code: "missing_opps", missing }, 409);
     }
   }
   const t = now();
@@ -521,7 +524,7 @@ async function toBe(env, json, user, row) {
     `  터치포인트: ${s.touchpoints.items.join(", ") || "없음"}`,
     `  페인포인트: ${s.pains.items.map((p) => `${p.id} ${p.text}`).join(" / ") || "없음"}`,
   ].join("\n")).join("\n");
-  const hmwText = chosen.map((o) => { const x = painOf(o.pain); return `[${o.id}] ${o.chosen} (← ${o.pain} ${x?.pain.text || ""} · ${x?.stage.name || ""})`; }).join("\n");
+  const hmwText = chosen.map((o) => { const x = painOf(o.pain); return `[${o.id}] ${o.chosen}${o.solution ? ` / 솔루션 가설: ${o.solution}` : ""} (← ${o.pain} ${x?.pain.text || ""} · ${x?.stage.name || ""})`; }).join("\n");
   const memoText = ["low", "peak", "end"].map((k) => asis.memos?.[k] ? `${{ low: "저점", peak: "정점", end: "종점" }[k]}(${asis.stages[sig[k]].name}): ${asis.memos[k]}` : "").filter(Boolean).join("\n");
 
   const started = Date.now();
@@ -572,7 +575,7 @@ async function toBe(env, json, user, row) {
     model: env.OPENAI_MODEL, ms: Date.now() - started,
     inputs: [
       { k: "바탕", v: `확정된 AS-IS 버전 ${row.version}의 단계 ${asis.stages.length}개(이름·목표 그대로)와 각 단계의 행동·생각·감정·터치포인트·페인포인트` },
-      { k: "기회", v: `리서처가 확정한 HMW ${chosen.length}개${unlinked.length ? ` — 이 중 ${unlinked.join(", ")}는 TO-BE 에 반영되지 않았어요` : " — 모두 어느 단계엔가 반영했어요"}` },
+      { k: "기회", v: `리서처가 확정한 기회 ${chosen.length}개${unlinked.length ? ` — 이 중 ${unlinked.join(", ")}는 TO-BE 에 반영되지 않았어요` : " — 모두 어느 단계엔가 반영했어요"}` },
       { k: "해석 메모", v: memoText ? "저점·정점·종점에 리서처가 쓴 메모" : "없음" },
       { k: "지킨 규칙", v: "같은 단계 골격 · 모든 칸은 검증 전 가설 · 종점이 긍정인지 점검(피크엔드)" },
     ],

@@ -19,6 +19,8 @@
       --accent-soft: #202227;
       --good: #4cd4a0;
       --good-soft: #10261e;
+      --pos: #f2c94c;        /* 긍정 감정 (노랑) */
+      --pos-soft: #2b2410;
       --danger: #ff6b5e;
       --danger-soft: #2a1513;
       --danger-line: #5a2622;
@@ -199,6 +201,8 @@
     .opp-card .top { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 4px; font-size: 11px; font-weight: 800; color: var(--accent); letter-spacing: .04em; }
     .opp-card .top span:last-child { padding: 0 6px; border-radius: 5px; background: var(--danger-soft); color: var(--danger); letter-spacing: 0; }
     .opp-card p { font-size: 13px; line-height: 1.55; }
+    .opp-card .sol { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--hairline); }
+    .opp-card .sol span { display: block; margin-bottom: 4px; font-size: 11px; font-weight: 800; letter-spacing: .04em; color: var(--text-sub); }
 
     /* 감정 곡선 */
     .curve-cell { grid-column: 2 / -1; padding: 0; background: var(--surface); }
@@ -463,13 +467,13 @@
     /* 세로 저니맵: 왼쪽 감정 곡선 + 오른쪽 단계 카드 */
     .vmap-head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 18px; font-size: 12.5px; font-weight: 600; color: var(--text-sub); }
     .vmap { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 14px; margin-top: 8px; }
-    .vcurve { position: relative; min-height: 100%; border: 1px solid var(--line); border-radius: 12px; background: linear-gradient(90deg, #2b1010, var(--surface) 45%, var(--surface) 55%, #102b1b); overflow: hidden; }
+    .vcurve { position: relative; min-height: 100%; border: 1px solid var(--line); border-radius: 12px; background: linear-gradient(90deg, #2b1010, var(--surface) 45%, var(--surface) 55%, #2b2410); overflow: hidden; }
     .vcurve svg { position: absolute; inset: 0; display: block; }
     .vstages { display: grid; gap: 14px; min-width: 0; }
     .vstage { position: relative; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); overflow: hidden; }
     .vstage > .stage-h { padding: 12px 16px; border-bottom: 1px solid var(--line); background: #141518; }
     .vstage > .stage-h b { font-size: 17px; }
-    .vkey { position: absolute; top: 12px; right: 12px; padding: 1px 9px; border-radius: 999px; background: var(--kc); color: #fff; font-size: 11.5px; font-weight: 800; }
+    .vkey { position: absolute; top: 12px; right: 12px; padding: 1px 9px; border-radius: 999px; background: var(--kc); color: #0a0a0a; font-size: 11.5px; font-weight: 800; }
     .vlanes { display: grid; grid-template-columns: minmax(0, 1fr); }
     .vlane { min-width: 0; border-bottom: 1px solid var(--line); }
     .vlanes .vlane:last-child { border-bottom: 0; }
@@ -715,7 +719,7 @@
 
   <dialog class="dlg" id="warnDlg" aria-labelledby="warnTitle">
     <div class="dlg-body">
-      <h2 id="warnTitle">기회(HMW)가 없는 페인포인트가 있어요</h2>
+      <h2 id="warnTitle">기회가 없는 페인포인트가 있어요</h2>
       <p class="dlg-note">페인만 나열하고 기회를 잇지 않으면 ‘액션 없는 보고서’가 돼요. 페인포인트마다 기회를 하나 이상 고르는 것을 권해요.</p>
       <ul class="warn-list" id="warnList"></ul>
       <div class="dlg-actions">
@@ -777,31 +781,31 @@
         thought: C("다들 이거 본다던데, 나도 이번 주에 봐야지", ["N007"]),
         emotion: { feel: "기대", note: "지인 추천은 믿을 만해서 기대가 생긴다", votes: [V("P01", 1, "N007", "친구가 카톡으로 보내 준 건 거의 다 끝까지 봤어요"), V("P02", 1, "N014", "추천받으면 일단 ‘나중에 봐야지’ 해요"), V("P03", 2, "N019", "지인들이 올린 감상 보고 고르는 게 제일 많아요"), V("P04", 0, "N027", "친구 추천보다는 평점을 더 믿어요"), V("P05", 1, "N031", "동생이 추천해 주면 그날 바로 틀어 봐요")] },
         touchpoints: C(["메신저 단톡방", "메모 앱"], ["N007"]),
-        pains: [["추천 이유가 대화 속에 흩어져 왜 보려 했는지 잊는다", ["N014"], "어떻게 하면 지인의 추천을 ‘이유’와 함께 한곳에 모아 둘 수 있을까?"]] },
+        pains: [["추천 이유가 대화 속에 흩어져 왜 보려 했는지 잊는다", ["N014"], "어떻게 하면 지인의 추천을 ‘이유’와 함께 한곳에 모아 둘 수 있을까?", "대화 속 추천을 한 번에 ‘볼 것’ 목록에 담고 추천한 사람과 이유를 함께 남긴다. 왜 보고 싶었는지 떠올리며 바로 볼 수 있다."]] },
       { name: "탐색", goal: "어디서 볼 수 있는지 찾는다",
         actions: C(["OTT 앱 3개를 번갈아 열어 제목을 검색한다", "포털에서 ‘제공처’를 다시 찾아본다"], ["N002", "N005", "N032"]),
         thought: C("이거 대체 어느 앱에 있는 거지?", ["N002"]),
         emotion: { feel: "번거로움", note: "앱을 오가며 찾느라 지친다", votes: [V("P01", -1, "N002", "보고 싶은 게 어디 있는지 매번 찾아봐야 해요"), V("P02", -1, "N013", "검색은 귀찮아서 거의 안 해요"), V("P03", -2, "N018", "인기작만 밀어서 정작 찾는 건 안 보여요"), V("P05", -1, "N032", "앱 세 개를 다 열어 봐요")] },
         touchpoints: C(["OTT 앱 A·B·C", "포털 검색"]),
-        pains: [["서비스마다 검색 결과가 달라 제공처 확인에 시간이 든다", ["N002", "N032"], "어떻게 하면 볼 수 있는 곳을 한 번의 검색으로 알려 줄 수 있을까?"]] },
+        pains: [["서비스마다 검색 결과가 달라 제공처 확인에 시간이 든다", ["N002", "N032"], "어떻게 하면 볼 수 있는 곳을 한 번의 검색으로 알려 줄 수 있을까?", "제목을 한 번 검색하면 볼 수 있는 서비스를 모두 보여 주고 바로 재생으로 잇는다. 찾는 시간 대신 보는 시간이 늘어난다."]] },
       { name: "결정", goal: "오늘 볼 작품을 고른다",
         actions: C(["추천 탭을 열지만 취향과 먼 작품만 보여 닫는다", "평점과 리뷰를 훑어본다"], ["N004", "N006", "N012", "N025"]),
         thought: C("추천은 내 취향이랑 하나도 안 맞네…", ["N004"]),
         emotion: { feel: "실망 · 엇갈림", note: "추천을 믿는 사람과 못 믿는 사람의 경험이 정반대다", votes: [V("P01", -2, "N004", "내가 본 거랑 비슷한 것만 계속 떠요"), V("P02", 2, "N012", "첫 줄에 뜬 거 그냥 눌러요, 편해요"), V("P03", -2, "N020", "분위기가 다르면 실망해서 못 고르겠어요"), V("P04", 1, "N025", "리뷰 30분 읽고 고르면 실패가 없어요"), V("P05", -2, "N033", "고르다 지쳐서 그냥 꺼요")] },
         touchpoints: C(["추천 탭", "리뷰 사이트"], ["N028"]),
-        pains: [["평가·기호를 반영하지 않는 추천이 믿음을 깎는다", ["N004", "N018"], "어떻게 하면 평가와 지인 취향을 추천에 녹일 수 있을까?"], ["선택지가 너무 많아 고르는 데 지친다", ["N006", "N033"], "어떻게 하면 ‘오늘 밤 볼 3편’처럼 선택지를 좁혀 줄 수 있을까?"]] },
+        pains: [["평가·기호를 반영하지 않는 추천이 믿음을 깎는다", ["N004", "N018"], "어떻게 하면 평가와 지인 취향을 추천에 녹일 수 있을까?", "내가 남긴 평가와 취향이 비슷한 지인의 감상을 추천 이유로 함께 보여 준다. 추천을 믿고 고르는 즐거움이 생긴다."], ["선택지가 너무 많아 고르는 데 지친다", ["N006", "N033"], "어떻게 하면 ‘오늘 밤 볼 3편’처럼 선택지를 좁혀 줄 수 있을까?", "남은 시간과 기분에 맞춰 오늘 볼 만한 작품을 세 편만 골라 준다. 가볍게 고르고 바로 볼 수 있다."]] },
       { name: "공유", goal: "감상을 나눈다",
         actions: C(["단톡방에 짧은 후기를 남긴다", "SNS 스토리에 한 줄 감상을 올린다"], ["N017"]),
         thought: C("역시 같이 얘기하니까 훨씬 재밌다!"),
         emotion: { feel: "즐거움", note: "지인과 이야기를 나누며 가장 즐겁다", votes: [V("P03", 2, "N021", "친구들이랑 단톡방에서 토론하는 게 제일 재밌어요")] },
         touchpoints: C(["메신저 단톡방", "SNS 스토리"], [], "human"),
-        pains: [["후기가 대화에 묻혀 금방 사라진다", [], "어떻게 하면 짧은 후기를 작품 옆에 남겨 다시 볼 수 있게 할까?"]] },
+        pains: [["후기가 대화에 묻혀 금방 사라진다", [], "어떻게 하면 짧은 후기를 작품 옆에 남겨 다시 볼 수 있게 할까?", "다 본 직후 한 줄 감상을 작품에 남기고 지인과 나눌 수 있게 한다. 나눈 감상을 언제든 다시 꺼내 볼 수 있다."]] },
       { name: "다음 탐색", goal: "다음에 볼 작품을 찾는다",
         actions: C(["친구가 추천해 준 작품을 떠올리려 한다", "기억이 안 나 처음부터 다시 검색한다"], ["N009"]),
         thought: C("그때 뭐 추천해 줬더라… 다시 찾아야겠네"),
         emotion: { feel: "허탈함", note: "주고받은 추천을 다시 찾지 못하고 끝난다", votes: [V("P01", -1, "N009", "친구가 추천해 준 게 분명 있었는데 못 찾겠더라고요"), V("P02", 0, "N015", "다음엔 뭐 볼지 딱히 생각 안 해요"), V("P03", -1, "N023", "취향 비슷한 사람을 만날 통로가 없어요"), V("P04", -1, "N028", "결국 또 평점 사이트로 가요"), V("P05", 0, "N034", "그냥 메인에 뜨는 거 봐요")] },
         touchpoints: C([]),
-        pains: [["주고받은 추천이 기록으로 남지 않아 매번 처음부터 시작한다", ["N009"], "어떻게 하면 공유가 자연스럽게 다음 추천으로 이어지게 할 수 있을까?"]] },
+        pains: [["주고받은 추천이 기록으로 남지 않아 매번 처음부터 시작한다", ["N009"], "어떻게 하면 공유가 자연스럽게 다음 추천으로 이어지게 할 수 있을까?", "주고받은 추천과 감상을 기록으로 모아 다음에 볼 작품 후보로 보여 준다. 다음에 볼 작품이 자연스럽게 정해진다."]] },
     ];
     function exampleJourney(p, scenario) {
       let k = 0;
@@ -812,7 +816,7 @@
           id: `s${i + 1}`, name: x.name, goal: x.goal, headBy: "ai",
           actions: x.actions, thought: x.thought, touchpoints: x.touchpoints,
           emotion: { score: Math.round(x.emotion.votes.reduce((a, v) => a + v.score, 0) / x.emotion.votes.length), feel: x.emotion.feel, note: x.emotion.note, quote: rep.quote, quoteRef: rep.code, refs: [], votes: x.emotion.votes, by: "ai" },
-          pains: { by: "ai", items: x.pains.map(([text, refs, hmw]) => { const id = `P${++k}`; opps.push({ id: `O${k}`, pain: id, drafts: [hmw], chosen: hmw, by: "ai" }); return { id, text, refs }; }) },
+          pains: { by: "ai", items: x.pains.map(([text, refs, hmw, solution]) => { const id = `P${++k}`; opps.push({ id: `O${k}`, pain: id, drafts: [hmw], chosen: hmw, solution, by: "ai" }); return { id, text, refs }; }) },
         };
       });
       const evidence = Object.fromEntries(Object.entries(EXAMPLE_NOTES).map(([id, [code, ref, text]]) => [id, { code, ref, text }]));
@@ -943,10 +947,10 @@
     const editable = () => !!state.journey && !state.journey.demo && state.journey.status === "draft" && !busy;
 
     // ── 감정 곡선 ──
-    const EMO_COLOR = (v) => (v <= -1 ? "var(--danger)" : v >= 1 ? "var(--good)" : "var(--text-sub)");
-    const EMO_BG = (v) => (v <= -1 ? "var(--danger-soft)" : v >= 1 ? "var(--good-soft)" : "var(--bg-soft)");
+    const EMO_COLOR = (v) => (v <= -1 ? "var(--danger)" : v >= 1 ? "var(--pos)" : "var(--text-sub)");
+    const EMO_BG = (v) => (v <= -1 ? "var(--danger-soft)" : v >= 1 ? "var(--pos-soft)" : "var(--bg-soft)");
     const fmtEmo = (v) => `${v > 0 ? "+" : v < 0 ? "−" : ""}${Number.isInteger(v) ? Math.abs(v) : Math.abs(v).toFixed(1)}`;
-    const KEY = { peak: { label: "정점", color: "#4cd4a0" }, low: { label: "저점", color: "#ff6b5e" }, end: { label: "종점", color: "#d97706" } };
+    const KEY = { peak: { label: "정점", color: "#f2c94c" }, low: { label: "저점", color: "#ff6b5e" }, end: { label: "종점", color: "#d97706" } };
     const keyRoles = (sig, i) => ["peak", "low", "end"].filter((k) => sig[k] === i);
     const keyColor = (roles) => (roles.includes("end") ? KEY.end.color : roles.includes("low") ? KEY.low.color : roles.includes("peak") ? KEY.peak.color : null);
     // 근거 띠: 평균 점수가 얼마나 흔들릴 수 있는지 (위아래 각각의 폭, 점수 단위)
@@ -997,7 +1001,7 @@
       const main = path(pts.map((p) => p.score));
       const top = 30, bottom = H - 4;
       const guides = [-2, -1, 0, 1, 2].map((v) => `<line x1="${x(v)}" x2="${x(v)}" y1="${top}" y2="${bottom}" stroke="${v === 0 ? "#3d404d" : "#161a25"}" ${v === 0 ? 'stroke-dasharray="4 4"' : ""}/>${compact && Math.abs(v) !== 2 ? "" : `<text x="${x(v)}" y="${top - 8}" text-anchor="middle" font-size="10" fill="var(--text-faint)">${fmtEmo(v)}</text>`}`).join("");
-      const axis = compact ? "" : `<text x="${pad}" y="11" font-size="10" font-weight="700" fill="var(--danger)">불만</text><text x="${W - pad}" y="11" text-anchor="end" font-size="10" font-weight="700" fill="var(--good)">만족</text>`;
+      const axis = compact ? "" : `<text x="${pad}" y="11" font-size="10" font-weight="700" fill="var(--danger)">불만</text><text x="${W - pad}" y="11" text-anchor="end" font-size="10" font-weight="700" fill="var(--pos)">만족</text>`;
       let bandEls = "";
       if (band && pts.some((p) => p.n)) {
         const lim = (v) => Math.max(-2.4, Math.min(2.4, v));
@@ -1029,7 +1033,7 @@
           const txt = roles.map((r) => KEY[r].label).join(compact ? "·" : " · ");
           const tw = txt.length * (compact ? 10 : 12) + 14, th = 18;
           const tx = Math.max(2, Math.min(W - tw - 2, px - tw / 2)), ty = py - 16 - th;
-          out += `<g aria-hidden="true"><rect x="${tx}" y="${ty}" width="${tw}" height="${th}" rx="9" fill="${kc}"/><text class="curve-tag" x="${tx + tw / 2}" y="${ty + 13}" text-anchor="middle" fill="#fff" ${compact ? 'font-size="9.5"' : ""}>${txt}</text></g>`;
+          out += `<g aria-hidden="true"><rect x="${tx}" y="${ty}" width="${tw}" height="${th}" rx="9" fill="${kc}"/><text class="curve-tag" x="${tx + tw / 2}" y="${ty + 13}" text-anchor="middle" fill="#0a0a0a" ${compact ? 'font-size="9.5"' : ""}>${txt}</text></g>`;
         }
         if (!compact) {
           out += `<text class="curve-label" x="${cx}" y="${py + 26}" text-anchor="middle">${esc(p.feel)} ${fmtEmo(p.score)}</text>`;
@@ -1209,17 +1213,18 @@
       }
       if (lane === "applied") {
         const ids = s.applied || [];
-        return `<div class="${cls} opp" ${attrs}>${ids.length ? ids.map((id) => { const x = painLookup(j, id); return `<div class="opp-card linked" data-opp="${esc(id)}"><div class="top"><span>HMW ${esc(id)}</span><span>← ${esc(x?.stage?.name || "")} ${esc(x?.pain?.id || "")}</span></div><p>${esc(x?.opp.chosen || "")}</p></div>`; }).join("") : `<span class="none">—</span>`}</div>`;
+        return `<div class="${cls} opp" ${attrs}>${ids.length ? ids.map((id) => { const x = painLookup(j, id); return `<div class="opp-card linked" data-opp="${esc(id)}"><div class="top"><span>HMW ${esc(id)}</span><span>← ${esc(x?.stage?.name || "")} ${esc(x?.pain?.id || "")}</span></div><p>${esc(x?.opp.chosen || "")}</p>${solHtml(x?.opp)}</div>`; }).join("") : `<span class="none">—</span>`}</div>`;
       }
       return "";
     }
 
     // 페인포인트 하나의 HMW: 기회 카드 한 장 (AI 초안 목록은 카드와 겹쳐 보이므로 따로 보여 주지 않는다 — 첫 초안이 카드가 된다)
+    const solHtml = (o) => (o?.solution ? `<div class="sol"><span>솔루션</span><p>${esc(o.solution)}</p></div>` : "");
     function oppBlock(j, s, p) {
       const o = oppOf(j, p.id) || { id: "", drafts: [], chosen: "" };
       const ed = editable();
       const chosen = o.chosen
-        ? `<div class="opp-card chosen" data-opp="${esc(o.id)}"><div class="top"><span>HMW ${esc(o.id)}</span><span>${esc(p.id)}</span></div><p>${esc(o.chosen)}</p></div>`
+        ? `<div class="opp-card chosen" data-opp="${esc(o.id)}"><div class="top"><span>HMW ${esc(o.id)}</span><span>${esc(p.id)}</span></div><p>${esc(o.chosen)}</p>${solHtml(o)}</div>`
         : `<div class="opp-missing">${esc(p.id)}에 기회가 없어요${ed ? " — 직접 쓰거나 AI로 다시 써 주세요" : ""}</div>`;
       const tools = ed ? `<div class="opp-tools"><button type="button" class="btn-link" data-write="${esc(p.id)}">직접 쓰기·고치기</button><button type="button" class="btn-link" data-redraft="${esc(p.id)}" data-lockable>AI로 다시 쓰기</button></div>` : "";
       return `<div class="opp-block" data-pain="${esc(p.id)}">${chosen}${tools}</div>`;
@@ -1325,7 +1330,7 @@
           ${ec.suggestions?.length ? `<b class="ec-sub">제안</b><ul>${ec.suggestions.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
         </div>
         <div class="links">
-          <h3>HMW 반영 연결</h3>
+          <h3>기회 반영 연결</h3>
           <ul class="link-list">${chosen.map((o) => {
             const x = painLookup(j, o.id);
             const at = S.filter((s) => (s.applied || []).includes(o.id));
@@ -1348,7 +1353,7 @@
     function inputsHtml(j) {
       const inputs = j.meta?.inputs;
       if (!inputs?.length) return "";
-      return `<details class="inputs-card"><summary><b>AI가 받은 정보</b><span>${j.meta.model ? `${esc(j.meta.model)} · ` : ""}${j.meta.ms ? `${Math.round(j.meta.ms / 1000)}초` : ""}</span></summary>
+      return `<details class="inputs-card" open><summary><b>AI가 받은 정보</b><span>${j.meta.model ? `${esc(j.meta.model)} · ` : ""}${j.meta.ms ? `${Math.round(j.meta.ms / 1000)}초` : ""}</span></summary>
         <dl>${inputs.map((x) => `<div><dt>${esc(x.k)}</dt><dd>${esc(x.v)}</dd></div>`).join("")}</dl>
         ${j.meta.warnings?.length ? `<p class="warn-line">${j.meta.warnings.map(esc).join(" ")}</p>` : ""}</details>`;
     }
@@ -1367,7 +1372,6 @@
         ${inputsHtml(j)}
         ${tobe && j.parent ? `<div class="view-toggle segmented" role="radiogroup" aria-label="비교 보기"><input type="radio" name="cmp" id="cmpOverlay" value="overlay" ${state.view === "overlay" ? "checked" : ""}/><label for="cmpOverlay">위아래로 겹쳐 보기</label><input type="radio" name="cmp" id="cmpSide" value="side" ${state.view === "side" ? "checked" : ""}/><label for="cmpSide">단계별 나란히</label></div>` : ""}
         ${vmapHtml(j)}
-        ${memosHtml(j)}
         ${tobe ? tobeExtrasHtml(j) : signalsHtml(j)}
         ${tobeCtaHtml(j)}`;
       wireVmap();
@@ -1397,7 +1401,7 @@
       if (j.lens === "to-be") return j.status === "draft" ? `<div class="tobe-cta"><div><b>다 확인했다면 TO-BE를 확정해요</b><p>확정하면 마이페이지에 저장되고 시나리오 보드에서 불러갈 수 있어요. 확정한 뒤에는 칸을 고칠 수 없어요.</p></div><button class="btn btn-accent-solid" type="button" id="confirmBtn" data-lockable>TO-BE 확정</button></div>` : "";
       const child = j.children?.[j.children.length - 1];
       const draft = j.status === "draft";
-      return `<div class="tobe-cta"><div><b>${child ? "TO-BE를 이미 만들었어요" : "다 확인했다면 TO-BE를 만들어요"}</b><p>${draft ? "누르면 지금 AS-IS가 확정돼 마이페이지에 저장되고, 같은 단계 골격 위에 개선된 경험(TO-BE)을 설계해요. 확정한 뒤에는 칸을 고칠 수 없어요." : "확정한 AS-IS의 단계 골격과 고른 기회(HMW)로 개선된 경험을 설계해요."}</p></div>
+      return `<div class="tobe-cta"><div><b>${child ? "TO-BE를 이미 만들었어요" : "다 확인했다면 TO-BE를 만들어요"}</b><p>${draft ? "누르면 지금 AS-IS가 확정돼 마이페이지에 저장되고, 같은 단계 골격 위에 개선된 경험(TO-BE)을 설계해요. 확정한 뒤에는 칸을 고칠 수 없어요." : "확정한 AS-IS의 단계 골격과 기회로 개선된 경험을 설계해요."}</p></div>
         ${child ? `<a class="btn btn-accent-solid" href="?id=${encodeURIComponent(child.id)}">TO-BE 열기</a><button class="btn" type="button" id="tobeBtn" data-lockable>TO-BE 다시 만들기</button>` : `<button class="btn btn-accent-solid" type="button" id="tobeBtn" data-lockable>TO-BE 만들기</button>`}</div>`;
     }
 
@@ -1469,7 +1473,7 @@
         if (lane === "hmw-write") {
           const p = s.pains.items.find((x) => x.id === target.pain), o = oppOf(j, target.pain);
           title = `${p.id} 기회 (How might we…)`;
-          html = `<p class="dlg-pain"><span class="id">${esc(p.id)}</span>${esc(p.text)}</p><label class="field-l">확정할 기회<textarea class="text-input" name="chosen" rows="3" maxlength="300" placeholder="어떻게 하면 …할 수 있을까?">${esc(o?.chosen || o?.drafts?.[0] || "")}</textarea></label>`;
+          html = `<p class="dlg-pain"><span class="id">${esc(p.id)}</span>${esc(p.text)}</p><label class="field-l">HMW 질문<textarea class="text-input" name="chosen" rows="3" maxlength="300" placeholder="어떻게 하면 …할 수 있을까?">${esc(o?.chosen || o?.drafts?.[0] || "")}</textarea></label><label class="field-l">솔루션<textarea class="text-input" name="solution" rows="3" maxlength="400" placeholder="이 질문에 답하는 해결 아이디어와, 그래서 얻는 좋은 경험">${esc(o?.solution || "")}</textarea></label>`;
         }
       }
       $("editTitle").textContent = title;
@@ -1498,7 +1502,8 @@
       if (t.lane === "hmw-write") {
         const o = oppOf(j, t.pain);
         const chosen = fd.get("chosen").trim();
-        if (o) o.chosen = chosen; else j.map.opps.push({ id: "", pain: t.pain, drafts: [], chosen });
+        const solution = (fd.get("solution") || "").trim();
+        if (o) Object.assign(o, { chosen, solution }); else j.map.opps.push({ id: "", pain: t.pain, drafts: [], chosen, solution });
       }
     }
 
@@ -1571,8 +1576,8 @@
       const j = state.journey;
       startLog("TO-BE 생성");
       const chosen = j.map.opps.filter((o) => o.chosen).length;
-      log("입력 확인", `확정한 AS-IS 버전 ${esc(j.version)} · 단계 ${j.map.stages.length}개 골격 · 확정한 HMW ${chosen}개`, "done");
-      log("AI 생성 요청", "같은 단계 위에 개선된 행동·생각·감정·터치포인트를 설계하고, HMW가 어느 단계에 들어가는지 연결해요.");
+      log("입력 확인", `확정한 AS-IS 버전 ${esc(j.version)} · 단계 ${j.map.stages.length}개 골격 · 확정한 기회 ${chosen}개`, "done");
+      log("AI 생성 요청", "같은 단계 위에 개선된 행동·생각·감정·터치포인트를 설계하고, 기회가 어느 단계에 들어가는지 연결해요.");
       lock(true, "TO-BE를 만드는 중…");
       const { res, data } = await UXA.api(`/api/journeys/${j.id}/tobe`, { method: "POST" }).catch(() => ({ res: { ok: false }, data: {} }));
       lock(false);
@@ -1580,7 +1585,7 @@
       const t = data.journey;
       log("종점 점검", t.map.endCheck.positive ? "종점이 긍정으로 설계됐어요." : "종점이 아직 긍정이 아니에요. 제안을 확인해 주세요.", "done");
       log("핵심 장면 저장", `시나리오 보드로 보낼 장면 ${t.map.scenes.length}개`, "done");
-      if (t.meta.unlinked?.length) log("반영 안 된 HMW", esc(t.meta.unlinked.join(", ")), "fail");
+      if (t.meta.unlinked?.length) log("반영 안 된 기회", esc(t.meta.unlinked.join(", ")), "fail");
       endLog();
       state.justMade = true;
       setJourney(t);
@@ -1611,7 +1616,7 @@
       }
       const j = data.journey, S = j.map.stages;
       const pains = S.reduce((k, s) => k + s.pains.items.length, 0);
-      log("결과 받음", `단계 ${S.length}개(${S.map((s) => esc(s.name)).join(" → ")}) · 페인포인트 ${pains}개 · HMW 초안 ${j.map.opps.reduce((k, o) => k + o.drafts.length, 0)}개`, "done");
+      log("결과 받음", `단계 ${S.length}개(${S.map((s) => esc(s.name)).join(" → ")}) · 페인포인트 ${pains}개 · 기회 초안 ${j.map.opps.reduce((k, o) => k + o.drafts.length, 0)}개`, "done");
       const result = j.meta.inputs.find((x) => x.k === "결과");
       if (result) log("근거 확인", esc(result.v), "done");
       if (j.meta.warnings?.length) log("확인 필요", esc(j.meta.warnings.join(" ")), "fail");
