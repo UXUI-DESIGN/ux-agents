@@ -130,9 +130,10 @@
     .chip:hover { border-color: var(--accent); color: var(--accent); }
 
 
-    .generate { display: flex; align-items: center; gap: 14px; margin-top: 22px; }
+    .generate { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 10px 14px; margin-top: 22px; }
     .generate .btn-primary { width: auto; flex: none; padding: 13px 28px; }
-    .generate .why { font-size: 13px; color: var(--text-sub); }
+    .generate .why { flex-basis: 100%; text-align: center; font-size: 13px; color: var(--text-sub); }
+    .generate .why:empty { display: none; }
 
     /* 결과 */
     .result-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
@@ -853,7 +854,7 @@
       $("genWhy").textContent = !loggedIn() ? "AI 생성은 로그인 후 쓸 수 있어요. 예시는 바로 볼 수 있어요."
         : !p ? (mode === "manual" ? "페르소나 이름을 적어 주세요." : "페르소나를 한 명 골라 주세요.")
         : !s ? "시나리오를 하나 적어 주세요."
-        : mode === "load" ? `${p.name}의 페르소나 문서(이용 동기·Painpoint)를 바탕으로 대표 여정을 만들어요.`
+        : mode === "load" ? ""
         : `${p.name} × ‘${s.length > 24 ? s.slice(0, 24) + "…" : s}’ 저니맵을 만들어요.`;
     }
 
