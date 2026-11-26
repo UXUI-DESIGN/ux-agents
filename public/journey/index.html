@@ -51,12 +51,13 @@
     .menu a[aria-current="page"] { background: var(--accent-soft); color: var(--accent); font-weight: 700; }
 
     /* 본문 */
-    main { flex: 1; padding: 56px 0 100px; background: var(--bg-soft); }
-    .page-head { margin-bottom: 20px; }
-    .page-head .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--accent); }
-    .page-head .eyebrow .n { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: var(--on-accent); font-size: 12px; font-weight: 800; }
-    .page-head h1 { margin-top: 6px; font-size: clamp(26px, 3.5vw, 34px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.3; }
-    .page-head p { margin-top: 8px; font-size: 16px; color: var(--text-sub); }
+    main { flex: 1; padding: 72px 0 100px; background: var(--bg-soft); }
+    .page-head { text-align: center; margin-bottom: 40px; }
+    .page-head .num { display: inline-grid; place-items: center; margin-bottom: 16px; }
+    .page-head h1 { font-size: clamp(28px, 4vw, 40px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.3; }
+    .page-head p { margin-top: 12px; font-size: 17px; color: var(--text-sub); }
+    /* 한 열: 위에서 입력하고 바로 아래에서 결과를 본다 (다른 기능 페이지와 같은 폭) */
+    .wrap { max-width: 880px; margin: 0 auto; }
 
     /* 원칙 안내 */
     .rule {
@@ -78,9 +79,8 @@
     .btn-primary:disabled { background: #3d4147; cursor: not-allowed; }
     .btn-link { padding: 0; border: 0; background: none; color: var(--accent); font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 
-    /* 작업 영역: 왼쪽 입력·결과, 오른쪽 실행 로그 */
-    .workspace { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; align-items: start; }
-    .workspace.log-closed { grid-template-columns: minmax(0, 1fr) 52px; }
+    /* 작업 영역: 한 열 — 입력 → 결과 → 실행 로그·근거 */
+    .workspace { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
     .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
     .card + .card { margin-top: 20px; }
     .section { padding: 26px 28px; }
@@ -246,7 +246,7 @@
     .deck-wrap { display: none; }
 
     /* 실행 로그 패널 */
-    .log { position: sticky; top: 84px; max-height: calc(100vh - 104px); display: flex; flex-direction: column; overflow: hidden; }
+    .log { display: flex; flex-direction: column; overflow: hidden; scroll-margin-top: 84px; }
     .log-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 16px 16px 12px 18px; border-bottom: 1px solid var(--line); }
     .log-head h2 { font-size: 15px; font-weight: 700; }
     .log-head .meta { font-size: 12px; color: var(--text-faint); font-weight: 500; margin-left: 6px; }
@@ -267,26 +267,17 @@
     .log-list p { margin-top: 2px; color: var(--text-sub); line-height: 1.5; }
     .log-list code { padding: 0 4px; border-radius: 4px; background: var(--bg-soft); font-size: 12px; font-family: ui-monospace, Consolas, monospace; }
     .log-rail { display: none; }
-    .workspace.log-closed .log-head h2, .workspace.log-closed .log-body { display: none; }
-    .workspace.log-closed .log-head { flex-direction: column; padding: 12px 10px; border-bottom: 0; }
-    .workspace.log-closed .log-rail { display: block; writing-mode: vertical-rl; margin-top: 10px; font-size: 13px; font-weight: 700; color: var(--text-sub); letter-spacing: .1em; cursor: pointer; border: 0; background: none; }
-    .workspace.log-closed .icon-btn svg { transform: rotate(180deg); }
+    .log-body { max-height: 360px; }
+    .log .icon-btn svg { transform: rotate(90deg); }
+    .workspace.log-closed .log-body { display: none; }
+    .workspace.log-closed .log-head { border-bottom: 0; }
+    .workspace.log-closed .icon-btn svg { transform: rotate(-90deg); }
 
     /* 푸터 (랜딩과 동일) */
     footer { padding: 40px 0; border-top: 1px solid var(--line); }
     footer .container { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font-size: 14px; color: var(--text-sub); }
     footer .logo { font-size: 18px; color: var(--text); }
 
-    @media (max-width: 980px) {
-      .workspace, .workspace.log-closed { grid-template-columns: minmax(0, 1fr); }
-      .log { position: static; max-height: none; }
-      .workspace.log-closed .log-head { flex-direction: row; padding: 14px 16px 14px 18px; }
-      .workspace.log-closed .log-head h2 { display: block; }
-      .workspace.log-closed .log-rail { display: none; }
-      .log .icon-btn svg { transform: rotate(90deg); }
-      .workspace.log-closed .icon-btn svg { transform: rotate(-90deg); }
-      .log-body { max-height: 360px; }
-    }
     @media (max-width: 720px) {
       .inputs { grid-template-columns: 1fr; }
       .signals { grid-template-columns: 1fr; }
@@ -616,12 +607,13 @@
   <main>
     <div class="container">
       <div class="page-head">
-        <span class="eyebrow">정의 · Define<span aria-hidden="true">›</span>저니맵 생성</span>
-        <h1>한 사람의 여정을 단계별로 펼쳐 봐요</h1>
-        <p>페르소나가 목표를 이루기까지의 행동·생각·감정을 시간 순으로 놓고, 마찰(페인포인트)과 개선 기회를 찾습니다.</p>
+        <span class="num stage">정의 · Define</span>
+        <h1>저니맵 생성</h1>
+        <p>페르소나의 단계별 행동·생각·감정을 펼쳐 놓고, 페인포인트와 개선 기회를 찾습니다.</p>
         <button class="try-btn" type="button" id="tryBtn">테스트로 사용해보기<small>로그인 없이 · 예시 페르소나와 시나리오로 저니맵 보기</small></button>
       </div>
 
+      <div class="wrap">
       <p class="rule">
         <span class="formula"><span>페르소나 1명</span>×<span>시나리오 1개</span>= 저니맵 1장</span>
         여러 사람이나 여러 상황을 한 장에 섞으면 마찰이 평균으로 흐려져요. 다른 사람·상황은 따로 그려 주세요.
@@ -708,6 +700,7 @@
             <p class="log-empty">‘근거 보기’를 켜고 표의 칸을 누르면 그 칸의 근거 노트와 인용 원문이 여기에 보여요.</p>
           </div>
         </aside>
+      </div>
       </div>
     </div>
   </main>
@@ -926,7 +919,7 @@
       $("logList").innerHTML = "";
       $("logMeta").textContent = ` · ${label}`;
       setAsideTab("log");
-      if ($("workspace").classList.contains("log-closed") && innerWidth > 980) setLogOpen(true);
+      if ($("workspace").classList.contains("log-closed")) setLogOpen(true);
     }
     function endLog(ok = true) {
       $("logList").querySelectorAll('li[data-state="run"]').forEach((li) => (li.dataset.state = ok ? "done" : "fail"));
@@ -1173,7 +1166,7 @@
         ${quotes.length ? `<h3>인용 원문</h3><ul class="ev-quotes">${quotes.map((q) => `<li><blockquote>“${esc(q.text)}”<cite>${esc(q.who)}${q.refs.length ? ` · ${esc(q.refs.join(", "))}` : ""}</cite></blockquote></li>`).join("")}</ul>` : ""}`;
       setAsideTab("ev");
       if ($("workspace").classList.contains("log-closed")) setLogOpen(true);
-      if (innerWidth <= 980) document.querySelector(".log").scrollIntoView({ behavior: "smooth", block: "start" });
+      document.querySelector(".log").scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
     // ── 칸 그리기 ──

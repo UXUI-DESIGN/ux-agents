@@ -25,11 +25,13 @@
     .logo { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
     .logo span { color: var(--accent); }
 
-    main { flex: 1; padding: 48px 0 100px; background: var(--bg-soft); }
-    .page-head { margin-bottom: 24px; }
-    .page-head .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; color: var(--accent); }
-    .page-head h1 { margin-top: 6px; font-size: clamp(26px, 3.5vw, 34px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.3; }
-    .page-head p { margin-top: 8px; font-size: 16px; color: var(--text-sub); }
+    main { flex: 1; padding: 72px 0 100px; background: var(--bg-soft); }
+    .page-head { text-align: center; margin-bottom: 40px; }
+    .page-head .num { display: inline-grid; place-items: center; margin-bottom: 16px; }
+    .page-head h1 { font-size: clamp(28px, 4vw, 40px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.3; }
+    .page-head p { margin-top: 12px; font-size: 17px; color: var(--text-sub); }
+    /* 한 열: 위에서 입력하고 바로 아래에서 결과를 본다 (다른 기능 페이지와 같은 폭) */
+    .wrap { max-width: 880px; margin: 0 auto; }
 
     /* 5단계 파이프라인 (진행 상태 겸용) */
     .pipeline { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 24px; list-style: none; }
@@ -48,7 +50,7 @@
     .pipe[data-state="plan"] .no::after { content: " 계획만"; font-weight: 600; }
     .pipe[data-state="error"] { border-color: var(--bad); background: var(--bad-soft); }
 
-    .layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 20px; align-items: start; }
+    .layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
     .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
     .card + .card { margin-top: 16px; }
     .section { padding: 24px 28px; }
@@ -113,10 +115,13 @@
     .log .row.sub { color: var(--text-faint); padding-left: 8px; }
     .log .row.error { color: var(--bad); font-weight: 600; }
 
-    /* 옆: 안내 · 기록 */
-    .aside .section { padding: 20px 22px; }
+    /* 아래: 안내 · 기록 */
+    .aside { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+    .aside .card + .card { margin-top: 0; }
+    .aside .section { padding: 22px 28px; }
     .aside h3 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
-    .aside ul { list-style: none; display: grid; gap: 6px; font-size: 13.5px; color: var(--text-sub); }
+    .aside ul { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 20px; font-size: 13.5px; color: var(--text-sub); }
+    .history #history { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 4px; }
     .aside .principle { padding: 12px 14px; border-radius: 12px; background: var(--accent-soft); color: #aeace2; font-size: 13.5px; font-weight: 600; }
     .history a { display: block; padding: 8px 10px; border-radius: 10px; }
     .history a:hover, .history a[aria-current="true"] { background: var(--accent-soft); }
@@ -229,7 +234,6 @@
     footer .logo { font-size: 18px; color: var(--text); }
 
     @media (max-width: 960px) {
-      .layout { grid-template-columns: 1fr; }
       .pipeline { grid-template-columns: repeat(5, minmax(120px, 1fr)); overflow-x: auto; }
     }
     @media (max-width: 640px) {
@@ -239,7 +243,7 @@
       .result-head { padding: 20px 16px; }
       .guest-note { margin: 0 16px 14px; }
       .rtabs { padding: 0 8px; }
-      .two, .pair { grid-template-columns: 1fr; }
+      .two, .pair, .aside ul { grid-template-columns: 1fr; }
       .formula { grid-template-columns: 1fr 1fr; }
       .interview { grid-template-columns: auto 1fr; }
       .interview .status { display: none; }
@@ -260,12 +264,13 @@
   <main>
     <div class="container">
       <div class="page-head">
-        <span class="eyebrow">발견 · Discover<span aria-hidden="true">›</span>인터뷰 데이터분석</span>
-        <h1>흩어진 인터뷰 기록을 근거 있는 인사이트로</h1>
-        <p>여러 인터뷰를 한 보드에 모아 코딩하고, 어피니티로 테마를 묶고, 원문까지 역추적되는 인사이트 카드로 정리해요.</p>
+        <span class="num stage">발견 · Discover</span>
+        <h1>인터뷰 데이터분석</h1>
+        <p>여러 인터뷰를 모아 코딩하고 테마로 묶어, 원문까지 역추적되는 인사이트로 정리합니다.</p>
         <button class="try-btn" type="button" id="tryBtn">테스트로 사용해보기<small>로그인 없이 · 샘플 인터뷰 3건으로 분석하기</small></button>
       </div>
 
+      <div class="wrap">
       <ol class="pipeline" id="pipeline" aria-label="분석 5단계">
         <li class="pipe"><span class="no">①</span><b>준비·정제</b><small>참가자 매트릭스 · 관찰/해석 분리</small></li>
         <li class="pipe"><span class="no">②</span><b>코딩</b><small>한 발화 = 한 노트 · 코드북</small></li>
@@ -375,6 +380,7 @@
       </div>
 
       <section class="card result" id="result" hidden aria-labelledby="resultTitle"></section>
+      </div>
     </div>
   </main>
 
