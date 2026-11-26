@@ -5,7 +5,7 @@
 //   PUT    /api/boards/:id                  { title?, scenario?, contiStatus?, sheet?, cuts? } 고치기 · 순서 바꾸기 · 컷 추가/삭제
 //   DELETE /api/boards/:id
 //   POST   /api/boards/:id/generate         아직 만들지 않은 컷(+캐릭터 시트)을 컷마다 큐에 넣고 바로 202 '접수됨'
-//   POST   /api/boards/:id/cuts/:cid/generate  { scene? } 이 컷만 다시 만들기 (장면 묘사를 고쳐서 보낼 수 있다)
+//   POST   /api/boards/:id/cuts/:cid/generate  { scene? } 이 컷만 다시 만들기 (장면 묘사를 고쳐서 보낼 수 있다). 캐릭터 시트는 콘티 확정 전에도 된다
 //   POST   /api/boards/:id/cuts/:cid/revert    { imageId } 이전 이미지 버전으로 되돌리기
 //   GET    /api/boards/image/:imageId       컷 이미지 바이트 (로그인 없음: id 가 추측 불가능한 값)
 //
@@ -219,10 +219,12 @@ async function generateBoard(env, json, board, origin) {
 
 // ── 이 컷만 다시 만들기 ──
 async function regenerateCut(request, env, json, board, cutId, origin) {
-  if (board.conti_status !== "confirmed") return json({ error: "콘티를 먼저 확정해 주세요.", code: "conti_not_confirmed" }, 409);
   if (!env.CUT_QUEUE) return json({ error: "Worker 에 작업 큐(CUT_QUEUE)가 연결되지 않았어요." }, 500);
   const cut = await env.DB.prepare("SELECT * FROM board_cuts WHERE id = ? AND board_id = ?").bind(cutId, board.id).first();
   if (!cut) return json({ error: "컷을 찾을 수 없어요." }, 404);
+  // 캐릭터 시트는 콘티와 상관없이(페르소나 사진만으로) 그리므로 확정 전에도 만든다. 컷은 확정한 콘티로만
+  const sheetEarly = cut.kind === "sheet" && board.conti_status !== "confirmed";
+  if (cut.kind !== "sheet" && board.conti_status !== "confirmed") return json({ error: "콘티를 먼저 확정해 주세요.", code: "conti_not_confirmed" }, 409);
   const body = (await readBody(request)) || {};
   const t = now();
   // 장면 묘사를 고쳐서 보낸 경우 (정책 실패 뒤 고치기)
@@ -237,7 +239,9 @@ async function regenerateCut(request, env, json, board, cutId, origin) {
     "UPDATE board_cuts SET status = 'queued', job_id = ?, attempts = 0, error = NULL, error_code = NULL, updated_at = ? WHERE id = ? AND status IN ('idle', 'done', 'failed') RETURNING id"
   ).bind(jobId, t, cut.id).first();
   if (!claimed) return json({ error: "이 컷은 이미 만드는 중이에요.", code: "busy" }, 409);
-  await env.DB.prepare("UPDATE boards SET status = 'generating', completed_at = NULL, updated_at = ? WHERE id = ?").bind(t, board.id).run();
+  // 확정 전의 시트만 만드는 동안에는 보드를 초안 그대로 둔다 (컷 생성은 아직 시작하지 않았다)
+  if (sheetEarly) await env.DB.prepare("UPDATE boards SET updated_at = ? WHERE id = ?").bind(t, board.id).run();
+  else await env.DB.prepare("UPDATE boards SET status = 'generating', completed_at = NULL, updated_at = ? WHERE id = ?").bind(t, board.id).run();
   await env.CUT_QUEUE.send({ boardId: board.id, cutId: cut.id, jobId });
   const row = await env.DB.prepare("SELECT * FROM boards WHERE id = ?").bind(board.id).first();
   return json({ accepted: true, board: await view(env, row, origin) }, 202);

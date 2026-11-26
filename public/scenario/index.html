@@ -389,7 +389,7 @@
           <div class="section-head">
             <div>
               <h2 id="sheetTitle"><span class="step-no">3</span>캐릭터 시트</h2>
-              <p class="desc">페르소나 프로필 사진을 참조해 같은 사람으로 그려요. 컷도 같은 사진을 참조해요.</p>
+              <p class="desc">‘시나리오 보드 생성’을 누르면 바로 그려요. 페르소나 프로필 사진을 참조하고, 컷도 같은 사진을 참조해요.</p>
             </div>
           </div>
           <div class="sheet">
@@ -626,7 +626,7 @@
     }
 
     // ════════════════ 2. 예시 시나리오와 콘티 만들기 (AI 연결 전: 규칙대로 이어 붙이기) ════════════════
-    $("generateBtn").addEventListener("click", () => {
+    $("generateBtn").addEventListener("click", async () => {
       if (S.board?.id && !confirm("지금 보드는 그대로 두고, 새 보드를 만들까요?")) return;
       const manual = jmode() === "manual";
       const persona = inputPersona();
@@ -650,7 +650,17 @@
       stopPolling();
       renderAll();
       $("result").scrollIntoView({ behavior: "smooth", block: "start" });
+      await startSheet();
     });
+
+    // 캐릭터 시트는 콘티 확정을 기다리지 않는다: 초안을 저장하고 시트만 먼저 만든다 (로그인했을 때)
+    async function startSheet() {
+      if (!S.loggedIn) return;
+      if (!(await save({ quiet: true }))) return;
+      const sh = S.board.sheet;
+      if (!sh?.id || sh.status !== "idle") return;
+      await boardCall(`/api/boards/${S.board.id}/cuts/${sh.id}/generate`, {}, "캐릭터 시트를 만들고 있어요. 그동안 콘티를 확인해 주세요.");
+    }
 
     function buildDraft({ journey, pain, persona, n, style }) {
       const tobe = journey.tobe || journey.asis;
@@ -760,6 +770,7 @@
       else if (c.status === "running") inner = `<div class="ph">${PIC}<span>그리는 중이에요…</span></div>`;
       else if (c.status === "failed") inner = `<div class="ph">${PIC}<span>만들지 못했어요</span></div>`;
       else if (c.status === "queued") inner = `<div class="ph">${PIC}<span>${retrying ? "다시 시도할 차례를 기다려요" : "차례를 기다리는 중"}</span></div>`;
+      else if (c.kind === "sheet") inner = `<div class="ph">${PIC}<span>${S.loggedIn ? "캐릭터 시트를 준비하고 있어요" : "로그인하면 캐릭터 시트를 바로 그려요"}</span></div>`;
       else inner = `<div class="ph">${PIC}<span>${S.board.contiStatus === "confirmed" ? "보드 생성을 누르면 그려요" : "콘티를 확정하면 그릴 수 있어요"}</span></div>`;
       return `<div class="shot ${c.status}" aria-busy="${c.status === "running"}">${inner}<span class="status"><span class="pill ${stCls}">${stText}${retrying ? " · 재시도" : ""}</span></span></div>`;
     }
@@ -784,10 +795,11 @@
     }
 
     function regenBtn(c, idx) {
-      if (!S.board.id || S.board.contiStatus !== "confirmed") return "";
+      const sheet = c.kind === "sheet"; // 시트는 콘티 확정 전에도 만든다
+      if (!S.board.id || (!sheet && S.board.contiStatus !== "confirmed")) return "";
       if (c.status === "done") return `<button class="btn btn-sm" type="button" data-act="regen" data-idx="${idx}">다시 만들기</button>`;
       if (c.status === "failed" && c.errorCode !== "policy") return `<button class="btn btn-sm btn-solid" type="button" data-act="regen" data-idx="${idx}">이 컷만 다시 만들기</button>`;
-      if (c.status === "idle" && S.board.status !== "draft") return `<button class="btn btn-sm" type="button" data-act="regen" data-idx="${idx}">이 컷 만들기</button>`;
+      if (c.status === "idle" && (sheet || S.board.status !== "draft")) return `<button class="btn btn-sm" type="button" data-act="regen" data-idx="${idx}">${sheet ? "캐릭터 시트 만들기" : "이 컷 만들기"}</button>`;
       return "";
     }
     function failBox(c, idx) {
@@ -1140,7 +1152,7 @@
 
     $("saveBtn").addEventListener("click", () => save());
 
-    async function save() {
+    async function save({ quiet } = {}) {
       const b = S.board;
       S.saving = true; renderSaveState();
       const { res, data } = await (b.id ? UXA.api(`/api/boards/${b.id}`, { method: "PUT", body: payload() }) : UXA.api("/api/boards", { method: "POST", body: payload() }))
@@ -1156,7 +1168,7 @@
       S.dirty = false;
       applyServer(data.board, { full: true }); // 새 컷 id 를 받아야 하므로 전부 다시 그린다
       history.replaceState(null, "", `/scenario/?id=${encodeURIComponent(data.board.id)}`);
-      toast(b.contiStatus === "confirmed" ? "콘티를 확정하고 저장했어요. 이제 보드를 생성할 수 있어요." : "저장했어요.");
+      if (!quiet) toast(b.contiStatus === "confirmed" ? "콘티를 확정하고 저장했어요. 이제 보드를 생성할 수 있어요." : "저장했어요.");
       return true;
     }
 
@@ -1271,7 +1283,7 @@
         try {
           const d = JSON.parse(sessionStorage.getItem("uxa.boardDraft") || "null");
           sessionStorage.removeItem("uxa.boardDraft");
-          if (d) { S.board = d; S.dirty = true; renderAll(); toast("만들던 보드를 이어서 보여 드려요. 콘티를 확정해 주세요."); }
+          if (d) { S.board = d; S.dirty = true; renderAll(); toast("만들던 보드를 이어서 보여 드려요. 콘티를 확정해 주세요."); await startSheet(); }
         } catch {}
       }
     })();
