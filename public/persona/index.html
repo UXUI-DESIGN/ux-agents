@@ -87,7 +87,9 @@
     .boards { margin-top: 16px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
     .boards h3 { font-size: 14px; font-weight: 700; }
     .boards ul { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; margin-top: 10px; list-style: none; }
-    .boards a { display: grid; grid-template-columns: 72px 1fr; gap: 10px; align-items: center; padding: 8px; border: 1px solid var(--line); border-radius: 10px; font-size: 13px; }
+    /* 제목은 한 줄 말줄임 — 열·칸에 min-width: 0 이 없으면 긴 제목이 칸을 밀고 옆 카드 위로 넘친다 */
+    .boards li, .boards a > span:last-child { min-width: 0; }
+    .boards a { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 10px; align-items: center; padding: 8px; border: 1px solid var(--line); border-radius: 10px; font-size: 13px; }
     .boards a:hover { border-color: var(--accent); }
     .boards .bthumb { width: 72px; aspect-ratio: 3 / 2; border-radius: 6px; background: var(--bg-soft) center / cover no-repeat; }
     .boards b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13.5px; }
