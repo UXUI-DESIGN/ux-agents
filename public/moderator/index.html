@@ -236,9 +236,23 @@
         <span class="num stage">발견 · Discover</span>
         <h1>AI 인터뷰 모더레이터</h1>
         <p>인터뷰 가이드를 넣으면 AI가 참가자와 1:1 인터뷰를 대신 진행하고 기록합니다.</p>
+        <button class="try-btn" type="button" id="tryBtn">테스트로 사용해보기<small>로그인 없이 · 예시 가이드로 세션 설정과 인터뷰 보기</small></button>
       </div>
 
       <div class="wrap">
+        <!-- 테스트로 사용해보기: 예시 인터뷰 -->
+        <section class="card demo-card" id="demoCard" hidden aria-live="polite">
+          <span class="demo-tag">예시 결과</span>
+          <h2>AI 모더레이터가 이렇게 인터뷰를 진행해요</h2>
+          <p class="demo-desc">아래 세션 설정(예시 가이드 · 목적 · 동의서)으로 참가자 P01과 진행한 인터뷰의 앞부분이에요. 미리 만들어 둔 예시라서 AI를 부르지 않아요.</p>
+          <ol class="demo-chat" id="demoChat"></ol>
+          <p class="demo-note">실제로는 참가자에게 링크를 보내면 AI가 가이드의 질문을 따라가며 꼬리 질문을 이어 가고, 대화는 마이페이지의 세션에 기록돼요.</p>
+          <div class="row">
+            <a class="btn btn-accent" id="demoLogin" href="/login/">로그인하고 실제 세션 만들기</a>
+            <a class="btn" href="/guide/">인터뷰 가이드부터 만들기</a>
+          </div>
+        </section>
+
         <!-- 로그인 전 -->
         <section class="card gate" id="gate" hidden>
           <svg viewBox="0 0 56 56" fill="none" aria-hidden="true">
@@ -629,6 +643,69 @@
       clearTimeout(toastTimer);
       toastTimer = setTimeout(() => $("toast").classList.remove("show"), 2000);
     }
+  </script>
+  <script>
+    // 테스트로 사용해보기: 예시 가이드로 세션 설정을 채우고, 미리 만들어 둔 예시 인터뷰를 보여 준다 (서버 호출 없음)
+    (() => {
+      const DEMO_GUIDE = `RQ1. 1인 가구는 온라인 장보기 품목을 어떻게 정하는가?
+RQ2. 결제 직전에 그만두게 만드는 순간은 언제인가?
+
+[블록 A] 최근 장보기 경험
+Q1. 가장 최근에 온라인으로 장을 본 때를 처음부터 끝까지 이야기해 주세요.
+ - 꼬리: 무엇을 사려고 들어가셨나요? 그걸 어떻게 정하셨어요?
+
+[블록 B] 장바구니와 결제
+Q2. 장바구니에 담아 두고 결제하지 않은 적이 있다면, 그때 상황을 들려주세요.
+ - 꼬리: 그만두기 직전에 화면에서 무엇을 보고 계셨나요?
+
+[블록 C] 대안
+Q3. 온라인으로 사지 않기로 했을 때는 대신 어떻게 하셨나요?`;
+      const DEMO_CHAT = [
+        ["ai", "안녕하세요, 오늘 인터뷰를 진행할 AI 모더레이터 김사랑이에요. 정답은 없으니 겪은 그대로 편하게 이야기해 주세요. 먼저, 가장 최근에 온라인으로 장을 본 때를 처음부터 끝까지 들려주시겠어요?"],
+        ["p", "지난주 목요일 퇴근길이었어요. 냉장고에 계란이랑 우유가 떨어져서 지하철에서 앱을 열었고요."],
+        ["ai", "퇴근길 지하철에서 여셨군요. 계란과 우유 말고 다른 것도 담으셨나요? 무엇을 살지는 어떻게 정하셨어요?"],
+        ["p", "원래 두 개만 사려고 했는데 무료배송이 4만 원부터라서요. 채우려고 이것저것 담다 보니 필요 없는 것까지 들어갔어요."],
+        ["ai", "무료배송 금액을 채우려고 더 담으셨네요. 그렇게 담은 뒤에는 어떻게 하셨나요?"],
+        ["p", "결제 화면까지 갔다가 그냥 닫았어요. 혼자 사는데 양파 한 망을 다 못 먹을 것 같더라고요."],
+        ["ai", "결제 직전에 닫으셨군요. 닫기 바로 전에 화면에서 무엇을 보고 계셨는지 기억나세요?"],
+        ["p", "합계 금액이요. 4만 2천 원이 찍혀 있는데, 원래 사려던 건 만 원도 안 됐거든요. 그 차이를 보니까 손해 보는 기분이 들었어요."],
+        ["ai", "원래 사려던 금액과 합계의 차이가 크게 느껴지셨군요. 그날 계란과 우유는 결국 어떻게 하셨어요?"],
+        ["p", "집 앞 편의점에서 샀어요. 조금 비싸도 필요한 만큼만 살 수 있으니까요."],
+      ];
+      const el = (id) => document.getElementById(id);
+      let demo = false;
+
+      el("demoChat").innerHTML = DEMO_CHAT.map(([who, text]) =>
+        `<li class="${who}"><b>${who === "ai" ? "AI 모더레이터" : "참가자 P01"}</b><p>${esc(text)}</p></li>`).join("");
+      el("demoLogin").href = UXA.loginUrl();
+
+      el("tryBtn").addEventListener("click", () => {
+        demo = true;
+        if (!el("collectItems").innerHTML) {
+          el("collectItems").innerHTML = Object.entries(COLLECT_OPTIONS)
+            .map(([k, v]) => `<label class="check-chip"><input type="checkbox" name="collect" value="${k}" />${esc(v)}</label>`).join("");
+        }
+        source = "paste";
+        renderPicker();
+        el("guideText").value = DEMO_GUIDE;
+        el("name").value = "1인 가구 온라인 장보기 — 1차";
+        el("purpose").value = purposeText("1인 가구의 온라인 장보기");
+        el("expected").value = "5";
+        el("consent").value = consentText("1인 가구의 온라인 장보기");
+        showOnly("sessionForm");
+        el("demoCard").hidden = false;
+        el("demoCard").scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+
+      // 테스트 중에는 세션을 실제로 만들지 않는다 (로그인 없이는 서버가 받지 않는다)
+      document.addEventListener("submit", (e) => {
+        if (!demo || UXA.getSession() || e.target.id !== "sessionForm") return;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        el("demoCard").scrollIntoView({ behavior: "smooth", block: "start" });
+        showToast("테스트에서는 세션을 실제로 만들지 않아요. 로그인하면 만들 수 있어요.");
+      }, true);
+    })();
   </script>
 </body>
 </html>

@@ -308,6 +308,7 @@
         <span class="num stage">발견 · Discover</span>
         <h1>인터뷰 가이드 설계</h1>
         <p>리서치 목표를 입력하면 인터뷰 질문지를 설계해 줍니다.</p>
+        <button class="try-btn" type="button" id="tryBtn">테스트로 사용해보기<small>로그인 없이 · 예시 입력으로 가이드 만들기</small></button>
       </div>
 
       <div class="workspace">
@@ -1116,6 +1117,14 @@
       if (!res.ok) throw new Error(data.error || `API 서버 오류 (${res.status})`);
       return data;
     }
+  </script>
+  <script>
+    // 테스트로 사용해보기: 예시 입력을 채우고 바로 가이드를 생성한다
+    document.getElementById("tryBtn").addEventListener("click", () => {
+      document.getElementById("fillExample").click();
+      document.getElementById("guideForm").requestSubmit();
+      document.querySelector(".workspace").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   </script>
 </body>
 </html>

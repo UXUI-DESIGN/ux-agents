@@ -619,6 +619,7 @@
         <span class="eyebrow">정의 · Define<span aria-hidden="true">›</span>저니맵 생성</span>
         <h1>한 사람의 여정을 단계별로 펼쳐 봐요</h1>
         <p>페르소나가 목표를 이루기까지의 행동·생각·감정을 시간 순으로 놓고, 마찰(페인포인트)과 개선 기회를 찾습니다.</p>
+        <button class="try-btn" type="button" id="tryBtn">테스트로 사용해보기<small>로그인 없이 · 예시 페르소나와 시나리오로 저니맵 보기</small></button>
       </div>
 
       <p class="rule">
@@ -1732,6 +1733,15 @@
     updateGenerate();
     const openId = new URLSearchParams(location.search).get("id");
     if (openId) openSaved(openId);
+  </script>
+  <script>
+    // 테스트로 사용해보기: 예시 시나리오를 채우고 미리 만들어 둔 예시 여정을 보여 준다
+    document.getElementById("tryBtn").addEventListener("click", () => {
+      const sc = document.getElementById("scenario");
+      if (!sc.value.trim()) sc.value = EXAMPLE_SCENARIO;
+      document.getElementById("demoBtn").click();
+      document.getElementById("resultTitle").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   </script>
 </body>
 </html>
