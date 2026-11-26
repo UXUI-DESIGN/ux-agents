@@ -72,10 +72,8 @@
     .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
 
     /* 입력 영역 */
-    .input-panel { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 16px; padding: 32px 32px 28px; }
-    .input-panel > * { grid-column: 1 / -1; }
-    .input-panel > .field:has(.segmented) { grid-column: auto; }
-    .input-panel .btn-primary { justify-self: center; width: min(100%, 360px); }
+    .input-panel { padding: 32px 32px 28px; }
+    .input-panel .btn-primary { display: block; margin-left: auto; margin-right: auto; width: min(100%, 360px); }
     .panel-title { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
     .panel-desc { margin-top: 4px; font-size: 14px; color: var(--text-sub); }
     .field { margin-top: 22px; }
@@ -267,8 +265,6 @@
     @media (max-width: 960px) {
       .workspace { grid-template-columns: 1fr; }
       .input-panel { position: static; }
-      .input-panel { grid-template-columns: minmax(0, 1fr); }
-      .input-panel > .field:has(.segmented) { grid-column: 1 / -1; }
     }
     @media (max-width: 640px) {
       .container { padding: 0 16px; }
@@ -323,16 +319,20 @@
           <p class="panel-desc">몇 가지만 적으면 반구조화 인터뷰 가이드를 만들어 드려요.</p>
 
           <div class="field">
-            <label for="topic">연구 주제와 배경 <span class="req">*</span></label>
+            <label for="topic">연구 주제 <span class="req">*</span></label>
             <input class="text-input" id="topic" type="text" maxlength="60"
               placeholder="예) 1인 가구의 온라인 장보기" />
-            <textarea class="text-input" id="background" rows="3"
-              placeholder="예) 장바구니 이탈률이 40%로 높아요. 1인 가구가 왜 결제 직전에 그만두는지, 장보기를 어떻게 하고 있는지 알고 싶어요."></textarea>
             <p class="error" id="topicError">연구 주제를 한 줄로 적어 주세요.</p>
           </div>
 
           <div class="field">
-            <label for="rq">알고 싶은 것 <span class="opt">연구 질문 · 선택</span></label>
+            <label for="background">연구 배경 <span class="opt">선택</span></label>
+            <textarea class="text-input" id="background" rows="3"
+              placeholder="예) 장바구니 이탈률이 40%로 높아요. 1인 가구가 왜 결제 직전에 그만두는지, 장보기를 어떻게 하고 있는지 알고 싶어요."></textarea>
+          </div>
+
+          <div class="field">
+            <label for="rq">연구 질문 <span class="opt">선택</span></label>
             <textarea class="text-input" id="rq" rows="3"
               placeholder="예) 1인 가구는 장보기 품목을 어떻게 정하는가?&#10;결제 직전에 그만두게 만드는 순간은 언제인가?"></textarea>
             <p class="hint">한 줄에 하나씩, 2~3개가 적당해요. 비워 두면 AI가 제안해요.</p>
@@ -356,22 +356,26 @@
           </div>
 
           <div class="field">
-            <span class="label" id="durationLabel">세션 시간</span>
-            <div class="segmented" role="radiogroup" aria-labelledby="durationLabel">
-              <input type="radio" name="duration" id="dur45" value="45" />
-              <label for="dur45">45분</label>
-              <input type="radio" name="duration" id="dur60" value="60" checked />
-              <label for="dur60">60분</label>
-            </div>
-          </div>
-
-          <div class="field">
             <span class="label" id="modeLabel">진행 방식</span>
             <div class="segmented" role="radiogroup" aria-labelledby="modeLabel">
               <input type="radio" name="mode" id="modeOffline" value="offline" checked />
               <label for="modeOffline">대면</label>
               <input type="radio" name="mode" id="modeRemote" value="remote" />
               <label for="modeRemote">원격</label>
+            </div>
+          </div>
+
+          <div class="field">
+            <span class="label" id="durationLabel">세션 시간</span>
+            <div class="segmented" role="radiogroup" aria-labelledby="durationLabel">
+              <input type="radio" name="duration" id="dur15" value="15" />
+              <label for="dur15">15분</label>
+              <input type="radio" name="duration" id="dur30" value="30" />
+              <label for="dur30">30분</label>
+              <input type="radio" name="duration" id="dur45" value="45" />
+              <label for="dur45">45분</label>
+              <input type="radio" name="duration" id="dur60" value="60" checked />
+              <label for="dur60">60분</label>
             </div>
           </div>
 
@@ -385,7 +389,7 @@
             <div>
               <span class="badge">결과 미리보기</span>
               <h2>여기에 인터뷰 가이드가 나와요</h2>
-              <p>왼쪽을 채우고 ‘가이드 생성’을 눌러 주세요.</p>
+              <p>위를 채우고 ‘가이드 생성’을 눌러 주세요.</p>
               <ol>
                 <li>연구 질문 2~3개</li>
                 <li>세션 흐름과 시간 배분</li>
@@ -452,8 +456,10 @@
       return word + (hasJong ? withJong : withoutJong);
     }
 
-    // 스킬 §4.1 세션 흐름(60분 기준)을 45분으로 비례 축소한 값
+    // 스킬 §4.1 세션 흐름(60분 기준)을 45 · 30 · 15분으로 비례 축소한 값
     const FLOW = {
+      15: { rapport: 1, consent: 1, warmup: 2, blocks: [3, 3, 3], closing: 1, buffer: 1 },
+      30: { rapport: 2, consent: 2, warmup: 3, blocks: [6, 7, 6], closing: 2, buffer: 2 },
       60: { rapport: 5, consent: 3, warmup: 5, blocks: [12, 15, 13], closing: 5, buffer: 2 },
       45: { rapport: 3, consent: 2, warmup: 4, blocks: [9, 11, 10], closing: 4, buffer: 2 },
     };
@@ -1056,7 +1062,7 @@
       $("rq").value = (d.rqs || []).join("\n");
       $("target").value = d.target;
       document.querySelector(`input[name=type][value=${d.type === "validate" ? "validate" : "explore"}]`).checked = true;
-      document.querySelector(`input[name=duration][value="${d.duration === 45 ? 45 : 60}"]`).checked = true;
+      document.querySelector(`input[name=duration][value="${[15, 30, 45].includes(d.duration) ? d.duration : 60}"]`).checked = true;
       document.querySelector(`input[name=mode][value=${d.remote ? "remote" : "offline"}]`).checked = true;
     }
 

@@ -521,7 +521,7 @@
       if (!dirty.name) $("name").value = `${g.title} — 1차`;
       if (!dirty.purpose) $("purpose").value = purposeText(topic);
       if (!dirty.consent) $("consent").value = consentText(topic);
-      const dur = [30, 45, 60].includes(Number(g.input.duration)) ? Number(g.input.duration) : 60;
+      const gd = Number(g.input.duration), dur = [30, 45, 60].includes(gd) ? gd : gd === 15 ? 30 : 60; // 15분 가이드는 세션 최소 시간(30분)으로
       document.querySelector(`input[name=duration][value="${dur}"]`).checked = true;
       $("durationHint").textContent = `가이드의 세션 시간(${dur}분)으로 맞춰 뒀어요.`;
     }
