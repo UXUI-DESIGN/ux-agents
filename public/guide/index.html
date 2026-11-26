@@ -206,9 +206,11 @@
     .probes li { position: relative; padding-left: 18px; font-size: 14.5px; line-height: 1.65; color: var(--text-sub); }
     .probes li::before { content: "↳"; position: absolute; left: 0; color: var(--text-faint); }
     .probes .why { margin-left: 4px; font-size: 12px; color: var(--text-faint); }
-    .avoid { margin: 0 24px 20px; padding: 12px 16px; border-radius: 8px; background: #2a1513; font-size: 13.5px; line-height: 1.65; color: #ff8a80; }
-    .avoid b { color: var(--danger); }
-    .avoid .ok { color: var(--good); }
+    .avoid { display: grid; gap: 6px; margin: 0 24px 20px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 14px; line-height: 1.65; }
+    .avoid p { display: flex; gap: 12px; }
+    .avoid b { flex: none; width: 60px; font-weight: 500; }
+    .avoid .bad, .avoid .bad b { color: #ff8a80; }
+    .avoid .ok, .avoid .ok b { color: #f5c451; }
     .principles { margin-top: 24px; padding: 20px 24px; border: 1px solid var(--line); border-radius: 8px; font-size: 14px; line-height: 1.7; }
     .principles strong { display: block; margin-bottom: 8px; font-weight: 500; color: var(--text); }
     .principles ul { padding-left: 18px; color: var(--text-sub); }
@@ -649,7 +651,7 @@
             <div class="block-head"><h4>블록 ${"ABC"[i]} · ${ed(`blocks.${i}.title`, b.title)}</h4><span class="chip rq">${rqCode}</span><span class="chip">${esc(b.technique)}</span><span class="time">${f.blocks[i]}분</span></div>
             <p class="block-goal">${ed(`blocks.${i}.goal`, b.goal)}</p>
             ${qs}
-            <p class="avoid"><b>피할 질문</b> “${esc(b.avoid[0])}” → <span class="ok">이렇게</span> “${esc(b.avoid[1])}”</p>
+            <div class="avoid"><p class="bad"><b>피할 질문</b><span>“${esc(b.avoid[0])}”</span></p><p class="ok"><b>이렇게</b><span>“${esc(b.avoid[1])}”</span></p></div>
           </div>`;
       }).join("");
       const closing = `
