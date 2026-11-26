@@ -9,29 +9,29 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
   <style>
     :root {
-      --bg: #ffffff;
-      --bg-soft: #f6f7fb;
-      --text: #14161f;
-      --text-sub: #5b6072;
-      --text-faint: #a3a7b7;
-      --line: #e4e6ee;
-      --accent: #4f46e5;
-      --accent-soft: #eef0ff;
-      --good: #12805c;
-      --good-soft: #e6f6ef;
-      --warn: #8a5a00;
-      --warn-soft: #fff8e6;
-      --radius: 16px;
+      --bg: #0a0a0a;
+      --bg-soft: #121315;
+      --text: #ffffff;
+      --text-sub: #a4a8b0;
+      --text-faint: #7d8187;
+      --line: #2a2c31;
+      --accent: #ffffff;
+      --accent-soft: #202227;
+      --good: #4cd4a0;
+      --good-soft: #10261e;
+      --warn: #f5b657;
+      --warn-soft: #2a1f0c;
+      --radius: 8px;
       --max: 1160px;
       --persona-badge-bg: #d9f7a3;
       --persona-badge-text: #2d4a12;
-      --persona-photo-bg: #3b3b41;
-      --persona-photo-fg: #6a6a72;
-      --note-n: #eef0ff; --note-n-text: #3730a3;
-      --note-t: #e6f6ef; --note-t-text: #12805c;
-      --note-u: #fff4e5; --note-u-text: #9a5b00;
-      --note-d: #f1f3f7; --note-d-text: #4b4f5c;
-      --infer: #fde8e8; --infer-text: #9f1239;
+      --persona-photo-bg: #d0d2d6;
+      --persona-photo-fg: #8d9198;
+      --note-n: #202227; --note-n-text: #c9cbd0;
+      --note-t: #10261e; --note-t-text: #4cd4a0;
+      --note-u: #2a1f0c; --note-u-text: #f5b657;
+      --note-d: #1a1c20; --note-d-text: #c3c6cc;
+      --infer: #2b1010; --infer-text: #f49ab3;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; }
@@ -46,7 +46,7 @@
     .container { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
 
     /* 내비게이션 (랜딩과 동일) */
-    .nav { position: sticky; top: 0; z-index: 10; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+    .nav { position: sticky; top: 0; z-index: 10; background: rgba(10, 10, 10, 0.85); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
     .nav .container { display: flex; align-items: center; justify-content: space-between; gap: 24px; height: 64px; }
     .logo { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
     .logo span { color: var(--accent); }
@@ -62,7 +62,7 @@
 
     /* 왼쪽: 페르소나 카드 + 색인 상태 */
     .side { display: flex; flex-direction: column; gap: 14px; }
-    .pcard { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+    .pcard { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
     .pcard .photo { position: relative; aspect-ratio: 4 / 3; background: var(--persona-photo-bg); }
     .pcard .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .pcard .photo svg { width: 100%; height: 100%; color: var(--persona-photo-fg); display: block; }
@@ -75,7 +75,7 @@
     .pcard .links { display: flex; gap: 10px; margin-top: 12px; font-size: 13px; font-weight: 600; color: var(--accent); }
     .pcard .links a:hover { text-decoration: underline; }
 
-    .index { padding: 14px 16px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); font-size: 13px; }
+    .index { padding: 14px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); font-size: 13px; }
     .index h2 { font-size: 13.5px; font-weight: 700; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
     .index .state { padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; }
     .index .state.ok { background: var(--good-soft); color: var(--good); }
@@ -89,18 +89,18 @@
     .k-persona { background: var(--note-d); color: var(--note-d-text); }
     .k-infer { background: var(--infer); color: var(--infer-text); }
     .btn {
-      display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 14px; border: 1px solid var(--line); border-radius: 10px; background: #fff;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface);
       font-size: 13.5px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: background .15s, border-color .15s;
     }
     .btn:hover { border-color: var(--accent); color: var(--accent); }
-    .btn-accent { border-color: var(--accent); background: var(--accent); color: #fff; }
-    .btn-accent:hover { background: #4338ca; color: #fff; }
+    .btn-accent { border-color: var(--accent); background: var(--accent); color: var(--on-accent); }
+    .btn-accent:hover { background: #dadbdf; color: var(--on-accent); }
     .btn:disabled { opacity: .55; cursor: not-allowed; }
     .index .btn { width: 100%; margin-top: 10px; }
     .legend { font-size: 12px; color: var(--text-faint); line-height: 1.6; padding: 0 4px; }
 
     /* 오른쪽: 대화 */
-    .chat { display: flex; flex-direction: column; min-height: 560px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+    .chat { display: flex; flex-direction: column; min-height: 560px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
     .chat-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 18px; border-bottom: 1px solid var(--line); font-size: 14px; }
     .chat-head b { font-weight: 700; }
     .chat-head .btn-link { padding: 0; border: 0; background: none; color: var(--text-sub); font-size: 13px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
@@ -111,7 +111,7 @@
     .msg .av img { width: 100%; height: 100%; object-fit: cover; }
     .msg.user .av { background: var(--accent); }
     .bubble { padding: 10px 14px; border-radius: 14px; background: var(--bg-soft); font-size: 14.5px; line-height: 1.65; white-space: pre-wrap; }
-    .msg.user .bubble { background: var(--accent); color: #fff; border-bottom-right-radius: 4px; }
+    .msg.user .bubble { background: var(--accent); color: var(--on-accent); border-bottom-right-radius: 4px; }
     .msg.assistant .bubble { border-bottom-left-radius: 4px; }
     .bubble .cite { display: inline-block; padding: 0 6px; margin: 0 1px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; vertical-align: 1px; }
     .bubble .cite.k-note { background: var(--note-n); color: var(--note-n-text); }
@@ -121,7 +121,7 @@
     .bubble .infer { display: inline-block; padding: 0 6px; margin: 0 1px; border-radius: 6px; font-size: 12px; font-weight: 700; background: var(--infer); color: var(--infer-text); }
     .msg .meta { margin-top: 6px; font-size: 12px; color: var(--text-faint); }
     .notes { margin-top: 8px; display: grid; gap: 6px; }
-    .note { padding: 8px 10px; border-radius: 10px; background: #fff; border: 1px solid var(--line); font-size: 12.5px; line-height: 1.5; color: var(--text-sub); }
+    .note { padding: 8px 10px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); font-size: 12.5px; line-height: 1.5; color: var(--text-sub); }
     .note b { display: inline-block; margin-right: 6px; padding: 0 6px; border-radius: 6px; font-size: 11.5px; }
     .note .src { color: var(--text-faint); margin-left: 4px; }
     .typing .bubble { color: var(--text-faint); }
@@ -129,19 +129,19 @@
     @keyframes dots { 0% { content: "."; } 33% { content: ".."; } 66% { content: "..."; } }
 
     .starter { padding: 0 18px 10px; display: flex; flex-wrap: wrap; gap: 6px; }
-    .starter button { padding: 6px 11px; border: 1px solid var(--line); border-radius: 999px; background: #fff; font-size: 12.5px; color: var(--text-sub); cursor: pointer; }
+    .starter button { padding: 6px 11px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); font-size: 12.5px; color: var(--text-sub); cursor: pointer; }
     .starter button:hover { border-color: var(--accent); color: var(--accent); }
     .composer { display: flex; gap: 8px; padding: 12px 14px; border-top: 1px solid var(--line); }
     .composer textarea { flex: 1; min-height: 44px; max-height: 160px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; resize: none; font-size: 14.5px; line-height: 1.5; }
     .composer textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
     .composer .btn { align-self: flex-end; }
-    .error { padding: 8px 18px; font-size: 13px; color: #d92d20; }
+    .error { padding: 8px 18px; font-size: 13px; color: #ff6b5e; }
     .error:empty { display: none; }
     .blocked { padding: 40px 24px; text-align: center; color: var(--text-sub); font-size: 14px; }
     .blocked b { display: block; color: var(--text); font-size: 16px; margin-bottom: 6px; }
 
     /* 푸터 (랜딩과 동일) */
-    footer { padding: 28px 0; border-top: 1px solid var(--line); background: #fff; }
+    footer { padding: 28px 0; border-top: 1px solid var(--line); background: var(--surface); }
     footer .container { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; font-size: 14px; color: var(--text-sub); }
     footer .logo { font-size: 18px; color: var(--text); }
 
@@ -163,6 +163,7 @@
       main { padding: 12px 0 20px; }
     }
   </style>
+  <link rel="stylesheet" href="/css/theme.css" />
 </head>
 <body>
 

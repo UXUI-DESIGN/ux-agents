@@ -9,17 +9,17 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
   <style>
     :root {
-      --bg: #ffffff;
-      --bg-soft: #f6f7fb;
-      --text: #14161f;
-      --text-sub: #5b6072;
-      --text-faint: #a3a7b7;
-      --line: #e4e6ee;
-      --accent: #4f46e5;
-      --accent-soft: #eef0ff;
-      --danger: #d92d20;
-      --good: #12805c;
-      --radius: 16px;
+      --bg: #0a0a0a;
+      --bg-soft: #121315;
+      --text: #ffffff;
+      --text-sub: #a4a8b0;
+      --text-faint: #7d8187;
+      --line: #2a2c31;
+      --accent: #ffffff;
+      --accent-soft: #202227;
+      --danger: #ff6b5e;
+      --good: #4cd4a0;
+      --radius: 8px;
       --max: 1160px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -39,7 +39,7 @@
     /* 내비게이션 (랜딩과 동일) */
     .nav {
       position: sticky; top: 0; z-index: 10;
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(10, 10, 10, 0.85);
       backdrop-filter: blur(8px);
       border-bottom: 1px solid var(--line);
     }
@@ -62,13 +62,13 @@
     .page-head { text-align: center; margin-bottom: 48px; }
     .page-head .num {
       display: inline-grid; place-items: center; width: 44px; height: 44px; margin-bottom: 16px;
-      border-radius: 50%; background: var(--accent); color: #fff; font-weight: 800; font-size: 18px;
+      border-radius: 50%; background: var(--accent); color: var(--on-accent); font-weight: 800; font-size: 18px;
     }
     .page-head h1 { font-size: clamp(28px, 4vw, 40px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.3; }
     .page-head p { margin-top: 12px; font-size: 17px; color: var(--text-sub); }
 
     .workspace { display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: 24px; align-items: start; }
-    .panel { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); }
+    .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
 
     /* 입력 영역 */
     .input-panel { position: sticky; top: 88px; padding: 28px 24px; }
@@ -84,7 +84,7 @@
     .hint { margin-top: 6px; font-size: 12.5px; color: var(--text-sub); }
     .text-input {
       display: block; width: 100%; padding: 11px 14px;
-      border: 1px solid var(--line); border-radius: 10px; background: #fff;
+      border: 1px solid var(--line); border-radius: 10px; background: var(--surface);
       font-size: 14.5px; line-height: 1.55; resize: vertical;
       transition: border-color .15s, box-shadow .15s;
     }
@@ -103,18 +103,18 @@
       transition: background .15s, color .15s;
     }
     .segmented label small { display: block; font-size: 11.5px; font-weight: 400; color: var(--text-faint); }
-    .segmented input:checked + label { background: #fff; color: var(--accent); font-weight: 700; box-shadow: 0 1px 3px rgba(20, 22, 31, .08); }
+    .segmented input:checked + label { background: var(--surface); color: var(--accent); font-weight: 700; box-shadow: 0 1px 3px rgba(0, 0, 0, .08); }
     .segmented input:checked + label small { color: var(--text-sub); }
     .segmented input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 1px; }
 
     .btn {
       display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-      padding: 10px 16px; border-radius: 10px; border: 1px solid var(--line); background: #fff;
+      padding: 10px 16px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface);
       font-size: 14px; font-weight: 600; cursor: pointer; transition: background .15s, border-color .15s;
     }
     .btn:hover { border-color: var(--accent); color: var(--accent); }
-    .btn-primary { width: 100%; margin-top: 28px; padding: 14px; border: 0; background: var(--accent); color: #fff; font-size: 16px; }
-    .btn-primary:hover { background: #4338ca; color: #fff; }
+    .btn-primary { width: 100%; margin-top: 28px; padding: 14px; border: 0; background: var(--accent); color: var(--on-accent); font-size: 16px; }
+    .btn-primary:hover { background: #dadbdf; color: var(--on-accent); }
     .btn-primary:disabled { opacity: .6; cursor: progress; }
     .btn-link { margin-top: 10px; width: 100%; border: 0; background: none; color: var(--text-sub); font-size: 13px; font-weight: 500; }
     .btn-link:hover { color: var(--accent); }
@@ -147,8 +147,8 @@
     .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
     .tag { padding: 4px 10px; border-radius: 999px; background: var(--bg-soft); font-size: 12.5px; color: var(--text-sub); }
     .tag b { color: var(--text); font-weight: 600; }
-    .demo-note { margin-top: 14px; padding: 10px 14px; border-radius: 10px; background: #fff8e6; color: #8a5a00; font-size: 13px; }
-    .demo-note.ai { background: var(--accent-soft); color: #3730a3; }
+    .demo-note { margin-top: 14px; padding: 10px 14px; border-radius: 10px; background: #2a1f0c; color: #f5b657; font-size: 13px; }
+    .demo-note.ai { background: var(--accent-soft); color: #c9cbd0; }
     .gen-error { display: none; max-width: 420px; margin: 0 auto; padding: 48px 24px; text-align: center; }
     .gen-error h2 { font-size: 18px; font-weight: 700; }
     .gen-error p { margin-top: 8px; font-size: 14px; color: var(--text-sub); white-space: pre-line; }
@@ -169,7 +169,7 @@
     .rq-list li { display: flex; gap: 12px; padding: 14px 16px; border-radius: 12px; background: var(--bg-soft); font-size: 15px; }
     .rq-list .code { flex: none; font-weight: 800; color: var(--accent); }
     .ai-chip { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-size: 11.5px; font-weight: 600; vertical-align: 1px; }
-    .warn { margin-top: 10px; font-size: 13px; color: #8a5a00; }
+    .warn { margin-top: 10px; font-size: 13px; color: #f5b657; }
 
     .timebar { display: flex; height: 36px; border-radius: 10px; overflow: hidden; gap: 2px; }
     .timebar span { display: grid; place-items: center; min-width: 0; font-size: 11.5px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; }
@@ -187,7 +187,7 @@
     .block + .block { margin-top: 16px; }
     .block-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 16px 20px; background: var(--bg-soft); }
     .block-head h4 { font-size: 16px; font-weight: 700; }
-    .block-head .chip { padding: 2px 9px; border-radius: 999px; background: #fff; border: 1px solid var(--line); font-size: 12px; color: var(--text-sub); }
+    .block-head .chip { padding: 2px 9px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); font-size: 12px; color: var(--text-sub); }
     .block-head .chip.rq { border-color: var(--accent); color: var(--accent); font-weight: 600; }
     .block-head .time { margin-left: auto; font-size: 13px; font-weight: 700; }
     .block-goal { padding: 12px 20px 0; font-size: 13.5px; color: var(--text-sub); }
@@ -199,7 +199,7 @@
     .probes li { position: relative; padding-left: 16px; font-size: 14px; color: var(--text-sub); }
     .probes li::before { content: "↳"; position: absolute; left: 0; color: var(--text-faint); }
     .probes .why { margin-left: 4px; font-size: 12px; color: var(--text-faint); }
-    .avoid { margin: 0 20px 16px; padding: 10px 14px; border-radius: 10px; background: #fff4f3; font-size: 13px; color: #7a271a; }
+    .avoid { margin: 0 20px 16px; padding: 10px 14px; border-radius: 10px; background: #2a1513; font-size: 13px; color: #ff8a80; }
     .avoid b { color: var(--danger); }
     .avoid .ok { color: var(--good); }
     .principles { margin-top: 20px; padding: 16px 18px; border-radius: 12px; background: var(--accent-soft); font-size: 13.5px; }
@@ -222,32 +222,32 @@
     .btn-sm { padding: 5px 10px; font-size: 12.5px; border-radius: 8px; }
     .editable { border-radius: 4px; outline: none; cursor: text; transition: background .15s, box-shadow .15s; }
     .editable:hover { background: var(--accent-soft); }
-    .editable:focus { background: #fff; box-shadow: 0 0 0 2px var(--accent); }
+    .editable:focus { background: var(--surface); box-shadow: 0 0 0 2px var(--accent); }
     .q-main .editable { flex: 1; }
     .edit-hint { margin-top: 10px; font-size: 13px; color: var(--text-sub); }
     .edit-hint b { color: var(--accent); font-weight: 600; }
-    .saved-as { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: #ecfdf3; color: var(--good); font-size: 12px; font-weight: 600; }
+    .saved-as { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: #10261e; color: var(--good); font-size: 12px; font-weight: 600; }
     .saved-as:empty { display: none; }
 
-    .save-dialog { width: min(440px, calc(100vw - 32px)); margin: auto; padding: 0; border: 0; border-radius: var(--radius); box-shadow: 0 20px 60px rgba(20, 22, 31, .2); }
-    .save-dialog::backdrop { background: rgba(20, 22, 31, .4); }
+    .save-dialog { width: min(440px, calc(100vw - 32px)); margin: auto; padding: 0; border: 0; border-radius: var(--radius); box-shadow: 0 20px 60px rgba(0, 0, 0, .2); }
+    .save-dialog::backdrop { background: rgba(0, 0, 0, .4); }
     .save-dialog form { padding: 28px 24px 22px; }
     .save-dialog h2 { font-size: 19px; font-weight: 700; }
     .save-dialog .desc { margin-top: 4px; font-size: 14px; color: var(--text-sub); }
     .save-dialog label { display: block; margin: 20px 0 8px; font-size: 14px; font-weight: 600; }
-    .save-dialog .save-note { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: var(--accent-soft); color: #3730a3; font-size: 13px; }
+    .save-dialog .save-note { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: var(--accent-soft); color: #c9cbd0; font-size: 13px; }
     .save-dialog .save-note:empty { display: none; }
     .save-dialog .row { display: flex; justify-content: flex-end; gap: 8px; margin-top: 22px; }
-    .btn-accent { border-color: var(--accent); background: var(--accent); color: #fff; }
-    .btn-accent:hover { background: #4338ca; color: #fff; }
-    .btn-save { border-color: var(--accent); background: var(--accent); color: #fff; }
-    .btn-save:hover { background: #4338ca; color: #fff; }
+    .btn-accent { border-color: var(--accent); background: var(--accent); color: var(--on-accent); }
+    .btn-accent:hover { background: #dadbdf; color: var(--on-accent); }
+    .btn-save { border-color: var(--accent); background: var(--accent); color: var(--on-accent); }
+    .btn-save:hover { background: #dadbdf; color: var(--on-accent); }
     .btn-save:disabled { opacity: .7; cursor: default; }
     .script .fill { color: var(--accent); font-weight: 600; }
 
     .toast {
       position: fixed; left: 50%; bottom: 32px; z-index: 20; transform: translate(-50%, 20px);
-      padding: 10px 18px; border-radius: 999px; background: var(--text); color: #fff; font-size: 14px;
+      padding: 10px 18px; border-radius: 999px; background: var(--text); color: var(--on-accent); font-size: 14px;
       opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s;
     }
     .toast.show { opacity: 1; transform: translate(-50%, 0); }
@@ -283,13 +283,14 @@
     }
     @media print {
       .nav, footer, .input-panel, .actions, .toc, .btn-sm { display: none !important; }
-      main { padding: 0; background: #fff; }
+      main { padding: 0; background: var(--surface); }
       .page-head { display: none; }
       .workspace { display: block; }
       .panel { border: 0; }
       .block { break-inside: avoid; }
     }
   </style>
+  <link rel="stylesheet" href="/css/theme.css" />
 </head>
 <body>
 
@@ -450,7 +451,7 @@
       60: { rapport: 5, consent: 3, warmup: 5, blocks: [12, 15, 13], closing: 5, buffer: 2 },
       45: { rapport: 3, consent: 2, warmup: 4, blocks: [9, 11, 10], closing: 4, buffer: 2 },
     };
-    const COLORS = { rapport: "#a5b4fc", consent: "#818cf8", warmup: "#6366f1", blocks: ["#4f46e5", "#4338ca", "#3730a3"], closing: "#7c83a6", buffer: "#c4c7d4" };
+    const COLORS = { rapport: "#a5b4fc", consent: "#818cf8", warmup: "#6366f1", blocks: ["#7c3aed", "#8b5cf6", "#a78bfa"], closing: "#7c83a6", buffer: "#3f414b" };
 
     const SUGGESTED_RQ = {
       explore: (t) => [

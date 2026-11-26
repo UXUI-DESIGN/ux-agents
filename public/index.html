@@ -9,14 +9,14 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
   <style>
     :root {
-      --bg: #ffffff;
-      --bg-soft: #f6f7fb;
-      --text: #14161f;
-      --text-sub: #5b6072;
-      --line: #e4e6ee;
-      --accent: #4f46e5;
-      --accent-soft: #eef0ff;
-      --radius: 16px;
+      --bg: #0a0a0a;
+      --bg-soft: #121315;
+      --text: #ffffff;
+      --text-sub: #a4a8b0;
+      --line: #2a2c31;
+      --accent: #ffffff;
+      --accent-soft: #202227;
+      --radius: 8px;
       --max: 1160px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -34,7 +34,7 @@
     /* 1. 내비게이션 (메뉴는 /js/nav.js 가 채운다) */
     .nav {
       position: sticky; top: 0; z-index: 10;
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(10, 10, 10, 0.85);
       backdrop-filter: blur(8px);
       border-bottom: 1px solid var(--line);
     }
@@ -46,7 +46,7 @@
     .logo span { color: var(--accent); }
 
     /* 2. 히어로 */
-    .hero { padding: 110px 0 96px; text-align: center; position: relative; overflow: hidden; isolation: isolate; background: #14161f; color: #fff; }
+    .hero { padding: 110px 0 96px; text-align: center; position: relative; overflow: hidden; isolation: isolate; background: #0a0a0a; color: #fff; }
     /* 배경 영상: 파일 자체가 흐리게 인코딩돼 있고, 여기서 한 번 더 흐린다 (얼굴 식별 방지) */
     .hero-bg {
       position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%;
@@ -70,10 +70,10 @@
     .hero .cta { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 12px 20px; }
     .btn {
       display: inline-block; padding: 16px 36px; border-radius: 12px;
-      background: var(--accent); color: #fff; font-size: 16px; font-weight: 700;
+      background: var(--accent); color: var(--on-accent); font-size: 16px; font-weight: 700;
       transition: transform 0.15s, box-shadow 0.15s;
     }
-    .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(79, 70, 229, 0.3); }
+    .btn:hover { transform: translateY(-2px); box-shadow: none; background: #dadbdf; }
     .hero .more { font-size: 15px; font-weight: 700; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.45), 0 0 18px rgba(0,0,0,0.35); }
     .hero .more::after { content: " ↓"; }
     .hero .count { margin-top: 18px; font-size: 14px; color: rgba(255,255,255,0.85); text-shadow: 0 1px 2px rgba(0,0,0,0.45), 0 0 18px rgba(0,0,0,0.35); }
@@ -94,17 +94,17 @@
     .diamonds .sub { font-size: 12px; font-weight: 600; fill: var(--text-sub); }
     .diamond-legend { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px 24px; margin-bottom: 36px; font-size: 13px; color: var(--text-sub); }
     .diamond-legend span { display: inline-flex; align-items: center; gap: 8px; }
-    .diamond-legend i { width: 28px; height: 14px; border-radius: 3px; border: 1.5px solid var(--accent); background: #fff; }
-    .diamond-legend i.ai { background: #cdd2ff; }
-    .diamond-legend i.dot { width: 10px; height: 10px; border: 0; border-radius: 50%; background: var(--accent); }
-    .diamond-legend i.dot.human { background: var(--text); }
+    .diamond-legend i { width: 28px; height: 14px; border-radius: 3px; border: 1px solid rgba(196, 181, 253, 0.7); background: #121315; }
+    .diamond-legend i.ai { background: rgba(196, 181, 253, 0.16); }
+    .diamond-legend i.dot { width: 10px; height: 10px; border: 0; border-radius: 50%; background: #c4b5fd; }
+    .diamond-legend i.dot.human { background: #fff; }
     .diamond-names { display: grid; grid-template-columns: 1fr 1fr; margin-bottom: 14px; text-align: center; font-size: 14px; color: var(--text-sub); }
     .diamond-names b { color: var(--text); font-weight: 700; }
 
     .stages { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; align-items: stretch; }
     .stage {
       display: flex; flex-direction: column; padding: 24px 20px 20px;
-      background: #fff; border: 1px solid var(--line); border-radius: var(--radius);
+      background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
     }
     .stage-top { display: flex; align-items: center; gap: 10px; }
     .stage-top .no { font-size: 13px; font-weight: 800; color: var(--accent); letter-spacing: 0.04em; }
@@ -125,20 +125,10 @@
     .tool b { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 15px; font-weight: 700; }
     .tool span { display: block; margin-top: 2px; font-size: 13px; color: var(--text-sub); }
     .tool i { font-style: normal; font-size: 13px; font-weight: 700; color: var(--accent); white-space: nowrap; }
-    a.tool:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(20, 22, 31, 0.08); }
+    a.tool:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08); }
     .tool.soon { border-style: dashed; background: var(--bg-soft); }
     .tool.soon b { color: var(--text-sub); }
-    .tool.soon i { padding: 1px 8px; border-radius: 999px; background: #fff; border: 1px solid var(--line); font-size: 11px; font-weight: 600; color: var(--text-sub); }
-
-    /* 4. 일하는 방식 */
-    .ways { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; list-style: none; }
-    .way { padding: 24px 20px; border: 1px solid var(--line); border-radius: var(--radius); background: #fff; }
-    .way .n {
-      display: grid; place-items: center; width: 36px; height: 36px; margin-bottom: 14px;
-      border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-weight: 800; font-size: 15px;
-    }
-    .way h3 { font-size: 17px; font-weight: 700; line-height: 1.4; }
-    .way p { margin-top: 8px; font-size: 14px; color: var(--text-sub); }
+    .tool.soon i { padding: 1px 8px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); font-size: 11px; font-weight: 600; color: var(--text-sub); }
 
     /* 5. 푸터 (내용은 /js/nav.js 가 채운다) */
     footer { padding: 40px 0; border-top: 1px solid var(--line); }
@@ -151,16 +141,17 @@
     /* 반응형 */
     @media (max-width: 1080px) {
       .diamonds, .diamond-names, .diamond-legend { display: none; }
-      .stages, .ways { grid-template-columns: repeat(2, 1fr); }
+      .stages { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 640px) {
       .nav .container { flex-direction: column; align-items: flex-start; height: auto; padding-top: 12px; padding-bottom: 8px; gap: 6px; }
       .nav nav { width: 100%; }
       .hero { padding: 70px 0 62px; }
       section.block { padding: 72px 0; }
-      .stages, .ways { grid-template-columns: 1fr; }
+      .stages { grid-template-columns: 1fr; }
     }
   </style>
+  <link rel="stylesheet" href="/css/theme.css" />
 </head>
 <body>
 
@@ -212,37 +203,6 @@
       </div>
     </section>
 
-    <!-- 4. 일하는 방식 -->
-    <section class="block" id="how">
-      <div class="container">
-        <div class="section-head">
-          <h2>일하는 방식</h2>
-          <p>어느 단계에서든 같은 원칙으로 일합니다.</p>
-        </div>
-        <ol class="ways">
-          <li class="way">
-            <span class="n">1</span>
-            <h3>넓히고 좁히기를 두 번</h3>
-            <p>해결책부터 만들지 않습니다. 문제를 넓게 보고 좁혀 정의한 다음, 해결책을 넓게 펼치고 좁혀 검증합니다.</p>
-          </li>
-          <li class="way">
-            <span class="n">2</span>
-            <h3>결과물이 다음 단계의 입력</h3>
-            <p>인터뷰 기록이 페르소나가 되고, 페르소나가 저니맵과 시나리오로 이어집니다. 앞에서 만든 것을 다시 입력하지 않습니다.</p>
-          </li>
-          <li class="way">
-            <span class="n">3</span>
-            <h3>AI가 초안, 사람이 확정</h3>
-            <p>에이전트가 초안을 만들면 사람이 검수하고 고쳐서 확정합니다. 판단은 디자이너의 몫으로 남깁니다.</p>
-          </li>
-          <li class="way">
-            <span class="n">4</span>
-            <h3>근거에서 출발한 인사이트</h3>
-            <p>인사이트에는 인터뷰에서 나온 근거를 함께 보여 주고, 근거가 없는 추론은 가설로 구분해 표시합니다.</p>
-          </li>
-        </ol>
-      </div>
-    </section>
   </main>
 
   <!-- 5. 푸터 -->
@@ -282,25 +242,25 @@
         const svg = s("svg", { viewBox: `0 0 ${W} ${H}` });
         const defs = s("defs", {});
         const marker = s("marker", { id: "dd-arrow", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 6, markerHeight: 6, orient: "auto-start-reverse" });
-        marker.append(s("path", { d: "M0 0L10 5L0 10z", fill: "#14161f" }));
+        marker.append(s("path", { d: "M0 0L10 5L0 10z", fill: "#dadbdf" }));
         defs.append(marker);
         svg.append(defs);
         const line = (x1, y1, x2, y2, arrow = true) => s("line", Object.assign(
-          { x1, y1, x2, y2, stroke: "#14161f", "stroke-width": 1.4, "stroke-linecap": "round" },
+          { x1, y1, x2, y2, stroke: "#dadbdf", "stroke-width": 1.2, "stroke-linecap": "round" },
           arrow ? { "marker-end": "url(#dd-arrow)" } : {}));
         // 점 a에서 점 b 방향으로 가되 양 끝을 조금 띄운 화살표
         const arrow = (ax, ay, bx, by, padA, padB) => {
           const d = Math.hypot(bx - ax, by - ay), ux = (bx - ax) / d, uy = (by - ay) / d;
           return line(ax + ux * padA, ay + uy * padA, bx - ux * padB, by - uy * padB);
         };
-        const ACCENT = "#4f46e5", INK = "#14161f", GREY = "#9aa0b4";
+        const ACCENT = "#c4b5fd", INK = "#ffffff", GREY = "#7d8187";
         const ends = []; // 끝점은 두 다이아몬드를 다 그린 뒤 맨 위에 올린다
         for (let d = 0; d < 2; d++) {
           // 두 다이아몬드는 가운데 한 점(x = HALF * 2)을 공유한다
           const ox = d * HALF * 2, L = d ? ox : 12, C = ox + HALF, R = d ? W - 12 : ox + HALF * 2;
           svg.append(
-            s("polygon", { points: `${L},${MID} ${C},${MID - OUT} ${R},${MID} ${C},${MID + OUT}`, fill: "#cdd2ff", stroke: ACCENT, "stroke-width": 1.5, "stroke-linejoin": "round" }),
-            s("polygon", { points: `${L},${MID} ${C},${MID - IN} ${R},${MID} ${C},${MID + IN}`, fill: "#fff", stroke: ACCENT, "stroke-width": 1.5, "stroke-linejoin": "round" }));
+            s("polygon", { points: `${L},${MID} ${C},${MID - OUT} ${R},${MID} ${C},${MID + OUT}`, fill: "rgba(196, 181, 253, 0.16)", stroke: ACCENT, "stroke-opacity": 0.7, "stroke-width": 1, "stroke-linejoin": "round" }),
+            s("polygon", { points: `${L},${MID} ${C},${MID - IN} ${R},${MID} ${C},${MID + IN}`, fill: "#121315", stroke: ACCENT, "stroke-opacity": 0.7, "stroke-width": 1, "stroke-linejoin": "round" }));
           // 가운데 세로줄: 넓혀서 찾아낸 선택지들
           const ys = [];
           for (let k = -6; k <= 6; k++) ys.push(MID + k * 22);

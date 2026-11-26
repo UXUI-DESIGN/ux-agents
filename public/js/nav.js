@@ -69,7 +69,7 @@
     .gnb > li.open > .gnb-sub { display: block; }
     .gnb-panel {
       min-width: 250px; padding: 8px; border: 1px solid var(--line); border-radius: 14px;
-      background: #fff; box-shadow: 0 12px 32px rgba(20, 22, 31, 0.12);
+      background: var(--surface); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
     }
     .gnb-desc { padding: 6px 10px 8px; font-size: 12px; color: var(--text-sub); white-space: nowrap; }
     .gnb-panel ul { list-style: none; }
@@ -78,12 +78,12 @@
     .gnb-panel a span { display: block; font-size: 12px; color: var(--text-sub); }
     .gnb-panel a:hover, .gnb-panel a[aria-current="page"] { background: var(--accent-soft); }
     .gnb-panel a:hover b, .gnb-panel a[aria-current="page"] b { color: var(--accent); }
-    .gnb-empty { padding: 9px 10px; border-radius: 10px; background: var(--bg-soft, #f6f7fb); font-size: 13px; color: var(--text-sub); }
+    .gnb-empty { padding: 9px 10px; border-radius: 10px; background: var(--bg-soft, #121315); font-size: 13px; color: var(--text-sub); }
     /* 각 페이지 제목 위의 단계 표시 (예: 발견 · Discover) */
     .page-head .num.stage { width: auto; height: auto; padding: 6px 14px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-size: 13px; font-weight: 700; letter-spacing: 0; }
     .gnb-soon { padding: 9px 10px; cursor: default; }
     .gnb-soon b { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: var(--text-sub); }
-    .gnb-soon em { padding: 1px 7px; border-radius: 999px; background: var(--bg-soft, #f6f7fb); font-size: 11px; font-weight: 600; font-style: normal; color: var(--text-sub); }
+    .gnb-soon em { padding: 1px 7px; border-radius: 999px; background: var(--bg-soft, #121315); font-size: 11px; font-weight: 600; font-style: normal; color: var(--text-sub); }
     .gnb-soon span { display: block; font-size: 12px; color: var(--text-sub); opacity: 0.75; }
     @media (hover: hover) {
       .gnb > li:hover > .gnb-top { background: var(--accent-soft); color: var(--accent); }
@@ -168,7 +168,7 @@
 
   const style = document.createElement("style");
   style.textContent = `
-    body > footer { background: var(--bg-soft, #f6f7fb); }
+    body > footer { background: var(--bg-soft, #121315); }
     .ft { flex: 1 1 100%; min-width: 0; font-size: 13px; line-height: 1.8; color: var(--text-sub); }
     .ft a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
     .ft-brand { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid var(--line); }

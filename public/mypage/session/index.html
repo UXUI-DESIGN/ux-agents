@@ -9,19 +9,19 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
   <style>
     :root {
-      --bg: #ffffff;
-      --bg-soft: #f6f7fb;
-      --text: #14161f;
-      --text-sub: #5b6072;
-      --text-faint: #a3a7b7;
-      --line: #e4e6ee;
-      --accent: #4f46e5;
-      --accent-soft: #eef0ff;
-      --danger: #d92d20;
-      --good: #12805c;
-      --warn-bg: #fff8e6;
-      --warn: #8a5a00;
-      --radius: 16px;
+      --bg: #0a0a0a;
+      --bg-soft: #121315;
+      --text: #ffffff;
+      --text-sub: #a4a8b0;
+      --text-faint: #7d8187;
+      --line: #2a2c31;
+      --accent: #ffffff;
+      --accent-soft: #202227;
+      --danger: #ff6b5e;
+      --good: #4cd4a0;
+      --warn-bg: #2a1f0c;
+      --warn: #f5b657;
+      --radius: 8px;
       --max: 1160px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -41,7 +41,7 @@
     /* 내비게이션 (랜딩과 동일) */
     .nav {
       position: sticky; top: 0; z-index: 10;
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(10, 10, 10, 0.85);
       backdrop-filter: blur(8px);
       border-bottom: 1px solid var(--line);
     }
@@ -64,27 +64,27 @@
     .wrap { max-width: 1080px; margin: 0 auto; }
     .back { display: inline-flex; gap: 6px; font-size: 14px; font-weight: 600; color: var(--text-sub); }
     .back:hover { color: var(--accent); }
-    .card { margin-top: 16px; padding: 24px 26px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); }
+    .card { margin-top: 16px; padding: 24px 26px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
     .card h2 { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; }
     .muted { color: var(--text-sub); }
 
     .btn {
       display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-      padding: 9px 14px; border: 1px solid var(--line); border-radius: 10px; background: #fff;
+      padding: 9px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface);
       font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: background .15s, border-color .15s;
     }
     .btn:hover { border-color: var(--accent); color: var(--accent); }
     .btn:disabled { opacity: .55; cursor: not-allowed; }
-    .btn-accent { border-color: var(--accent); background: var(--accent); color: #fff; }
-    .btn-accent:hover { background: #4338ca; color: #fff; }
-    .btn-danger { border-color: var(--danger); background: var(--danger); color: #fff; }
-    .btn-danger:hover { background: #b42318; border-color: #b42318; color: #fff; }
+    .btn-accent { border-color: var(--accent); background: var(--accent); color: var(--on-accent); }
+    .btn-accent:hover { background: #dadbdf; color: var(--on-accent); }
+    .btn-danger { border-color: var(--danger); background: var(--danger); color: var(--on-accent); }
+    .btn-danger:hover { background: #ff8a80; border-color: #ff8a80; color: var(--on-accent); }
     .btn-sm { padding: 6px 11px; font-size: 13px; border-radius: 8px; }
 
     .chip { display: inline-block; padding: 1px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; background: var(--bg-soft); border: 1px solid var(--line); color: var(--text-sub); white-space: nowrap; }
-    .chip.open, .chip.ing { border-color: #c7d2fe; background: var(--accent-soft); color: var(--accent); }
-    .chip.done { border-color: #abefc6; background: #ecfdf3; color: var(--good); }
-    .chip.stop { border-color: #fedf89; background: var(--warn-bg); color: var(--warn); }
+    .chip.open, .chip.ing { border-color: #3d4147; background: var(--accent-soft); color: var(--accent); }
+    .chip.done { border-color: #1f4a3a; background: #10261e; color: var(--good); }
+    .chip.stop { border-color: #5a4416; background: var(--warn-bg); color: var(--warn); }
     .chip.wd, .chip.closed { color: var(--text-faint); }
 
     /* 세션 정보 */
@@ -127,20 +127,20 @@
     .utter .text { margin-top: 4px; font-size: 15px; white-space: pre-wrap; overflow-wrap: anywhere; }
     .utter.moderator .text { color: var(--text-sub); }
     .pii { display: inline; padding: 0 4px; border: 0; border-radius: 5px; font-size: inherit; cursor: pointer; }
-    .pii.on { background: #fde68a; color: #713f12; font-weight: 700; font-family: ui-monospace, Consolas, monospace; font-size: .86em; }
-    .pii.on.manual { background: #fecaca; color: #7f1d1d; }
+    .pii.on { background: #5a4416; color: #f5b657; font-weight: 700; font-family: ui-monospace, Consolas, monospace; font-size: .86em; }
+    .pii.on.manual { background: #2b1010; color: #ff8a80; }
     .pii.off { background: none; color: inherit; outline: 1.5px dashed #f59e0b; outline-offset: 1px; }
     .notes { display: grid; gap: 6px; }
     .notes label { display: grid; grid-template-columns: 34px 1fr; gap: 6px; align-items: start; font-size: 12.5px; color: var(--text-sub); }
     .notes label span { padding-top: 7px; font-weight: 600; }
     .notes textarea { width: 100%; min-height: 36px; padding: 7px 10px; resize: vertical; border: 1px solid var(--line); border-radius: 8px; background: var(--bg-soft); font-size: 13.5px; line-height: 1.5; }
-    .notes textarea:focus { outline: none; border-color: var(--accent); background: #fff; }
+    .notes textarea:focus { outline: none; border-color: var(--accent); background: var(--surface); }
     .notes .saved { justify-self: end; font-size: 11.5px; color: var(--text-faint); min-height: 1em; }
     .ex-group { margin: 10px 0; border: 1px dashed var(--line); border-radius: 12px; }
     .ex-group > button { display: flex; width: 100%; justify-content: space-between; gap: 10px; padding: 11px 14px; border: 0; background: none; font-size: 13.5px; color: var(--text-sub); cursor: pointer; text-align: left; }
     .ex-group > button b { color: var(--text); }
     .ex-group .ex-body { padding: 0 12px 4px; }
-    .mask-btn { position: absolute; z-index: 30; padding: 6px 12px; border: 0; border-radius: 999px; background: var(--text); color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 6px 20px rgba(20, 22, 31, .25); }
+    .mask-btn { position: absolute; z-index: 30; padding: 6px 12px; border: 0; border-radius: 999px; background: var(--text); color: var(--on-accent); font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 6px 20px rgba(0, 0, 0, .25); }
 
     /* 디브리핑 */
     .db-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; align-items: center; }
@@ -148,29 +148,29 @@
     .draft-banner { display: flex; align-items: center; gap: 12px; margin-top: 16px; padding: 14px 16px; border: 2px dashed #f59e0b; border-radius: 14px; background: var(--warn-bg); color: var(--warn); }
     .draft-banner .big { font-size: 22px; font-weight: 900; letter-spacing: .02em; }
     .draft-banner p { font-size: 13.5px; }
-    .final-banner { margin-top: 16px; padding: 12px 16px; border-radius: 14px; background: #ecfdf3; color: #05603a; font-size: 14px; font-weight: 600; }
+    .final-banner { margin-top: 16px; padding: 12px 16px; border-radius: 14px; background: #10261e; color: #97f7cf; font-size: 14px; font-weight: 600; }
     .db-sources { margin-top: 10px; font-size: 13.5px; color: var(--text-sub); }
     .db-sec { margin-top: 22px; }
     .db-sec h3 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
     .db-sec h3 small { margin-left: 6px; font-weight: 500; color: var(--text-faint); }
-    .db-item { position: relative; padding: 12px 40px 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+    .db-item { position: relative; padding: 12px 40px 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
     .db-item + .db-item { margin-top: 8px; }
-    .db-item.low { border-color: #f59e0b; background: #fffbeb; }
+    .db-item.low { border-color: #f59e0b; background: #2b2510; }
     .db-item textarea, .db-item input[type=text] { width: 100%; padding: 6px 8px; border: 1px solid transparent; border-radius: 8px; background: transparent; font-size: 14.5px; line-height: 1.5; resize: vertical; }
     .db-item textarea:hover, .db-item input[type=text]:hover { border-color: var(--line); }
-    .db-item textarea:focus, .db-item input[type=text]:focus { outline: none; border-color: var(--accent); background: #fff; }
+    .db-item textarea:focus, .db-item input[type=text]:focus { outline: none; border-color: var(--accent); background: var(--surface); }
     .db-item .meta { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; margin-top: 6px; font-size: 12.5px; color: var(--text-sub); }
-    .db-item select { padding: 3px 6px; border: 1px solid var(--line); border-radius: 8px; background: #fff; font: inherit; font-size: 12.5px; }
+    .db-item select { padding: 3px 6px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); font: inherit; font-size: 12.5px; }
     .ref { padding: 1px 7px; border: 1px solid var(--line); border-radius: 999px; background: var(--bg-soft); font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; color: var(--text-sub); cursor: pointer; }
     .ref:hover { border-color: var(--accent); color: var(--accent); }
-    .warn-tag { padding: 1px 8px; border-radius: 999px; background: #fde68a; color: #713f12; font-size: 11.5px; font-weight: 700; }
+    .warn-tag { padding: 1px 8px; border-radius: 999px; background: #5a4416; color: #f5b657; font-size: 11.5px; font-weight: 700; }
     .db-item .del { position: absolute; top: 8px; right: 8px; width: 26px; height: 26px; border: 0; border-radius: 8px; background: none; color: var(--text-faint); font-size: 16px; cursor: pointer; }
-    .db-item .del:hover { background: #fff4f3; color: var(--danger); }
+    .db-item .del:hover { background: #2a1513; color: var(--danger); }
     .db-item.quote textarea { font-size: 15px; }
     .add-row { margin-top: 8px; }
     .db-empty { padding: 28px 16px; text-align: center; font-size: 14.5px; color: var(--text-sub); border: 1px dashed var(--line); border-radius: 12px; margin-top: 14px; }
     .row.flash { animation: flash 1.6s ease-out; }
-    @keyframes flash { 0%, 30% { background: #fef3c7; } 100% { background: transparent; } }
+    @keyframes flash { 0%, 30% { background: #2b2510; } 100% { background: transparent; } }
 
     .gate { padding: 56px 24px; text-align: center; }
     .gate h1 { font-size: 21px; }
@@ -178,8 +178,8 @@
     .gate .btn { margin-top: 18px; }
     .loading { padding: 48px; text-align: center; color: var(--text-sub); }
 
-    dialog { width: min(420px, calc(100vw - 32px)); margin: auto; padding: 0; border: 0; border-radius: var(--radius); box-shadow: 0 20px 60px rgba(20, 22, 31, .2); }
-    dialog::backdrop { background: rgba(20, 22, 31, .4); }
+    dialog { width: min(420px, calc(100vw - 32px)); margin: auto; padding: 0; border: 0; border-radius: var(--radius); box-shadow: 0 20px 60px rgba(0, 0, 0, .2); }
+    dialog::backdrop { background: rgba(0, 0, 0, .4); }
     dialog form { padding: 26px 24px 22px; }
     dialog h2 { font-size: 18px; font-weight: 700; }
     dialog p { margin-top: 6px; font-size: 14.5px; color: var(--text-sub); }
@@ -187,7 +187,7 @@
 
     .toast {
       position: fixed; left: 50%; bottom: 32px; z-index: 40; transform: translate(-50%, 20px);
-      padding: 10px 18px; border-radius: 999px; background: var(--text); color: #fff; font-size: 14px;
+      padding: 10px 18px; border-radius: 999px; background: var(--text); color: var(--on-accent); font-size: 14px;
       opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s;
     }
     .toast.show { opacity: 1; transform: translate(-50%, 0); }
@@ -221,6 +221,7 @@
       main { padding: 28px 0 72px; }
     }
   </style>
+  <link rel="stylesheet" href="/css/theme.css" />
 </head>
 <body data-auth="required">
 

@@ -9,17 +9,17 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
   <style>
     :root {
-      --bg: #ffffff;
-      --bg-soft: #f6f7fb;
-      --text: #14161f;
-      --text-sub: #5b6072;
-      --text-faint: #a3a7b7;
-      --line: #e4e6ee;
-      --accent: #4f46e5;
-      --accent-soft: #eef0ff;
-      --danger: #d92d20;
-      --good: #12805c;
-      --radius: 16px;
+      --bg: #0a0a0a;
+      --bg-soft: #121315;
+      --text: #ffffff;
+      --text-sub: #a4a8b0;
+      --text-faint: #7d8187;
+      --line: #2a2c31;
+      --accent: #ffffff;
+      --accent-soft: #202227;
+      --danger: #ff6b5e;
+      --good: #4cd4a0;
+      --radius: 8px;
       --max: 1160px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -38,7 +38,7 @@
     /* 내비게이션 (랜딩과 동일) */
     .nav {
       position: sticky; top: 0; z-index: 10;
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(10, 10, 10, 0.85);
       backdrop-filter: blur(8px);
       border-bottom: 1px solid var(--line);
     }
@@ -58,7 +58,7 @@
 
     /* 본문 */
     main { flex: 1; padding: 72px 0 100px; background: var(--bg-soft); }
-    .auth-card { max-width: 440px; margin: 0 auto; padding: 36px 32px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); }
+    .auth-card { max-width: 440px; margin: 0 auto; padding: 36px 32px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
     .auth-card h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.03em; }
     .auth-card .sub { margin-top: 6px; font-size: 15px; color: var(--text-sub); }
 
@@ -67,7 +67,7 @@
     .input-wrap { position: relative; }
     .text-input {
       display: block; width: 100%; padding: 11px 14px;
-      border: 1px solid var(--line); border-radius: 10px; background: #fff;
+      border: 1px solid var(--line); border-radius: 10px; background: var(--surface);
       font-size: 15px; transition: border-color .15s, box-shadow .15s;
     }
     .text-input::placeholder { color: var(--text-faint); }
@@ -89,11 +89,11 @@
     .remember small { color: var(--text-faint); }
     .btn-primary {
       display: block; width: 100%; margin-top: 24px; padding: 14px; border: 0; border-radius: 10px;
-      background: var(--accent); color: #fff; font-size: 16px; font-weight: 700; cursor: pointer;
+      background: var(--accent); color: var(--on-accent); font-size: 16px; font-weight: 700; cursor: pointer;
     }
-    .btn-primary:hover { background: #4338ca; }
+    .btn-primary:hover { background: #dadbdf; }
     .btn-primary:disabled { opacity: .6; cursor: progress; }
-    .form-error { display: none; margin-top: 16px; padding: 12px 14px; border-radius: 10px; background: #fff4f3; color: #7a271a; font-size: 14px; }
+    .form-error { display: none; margin-top: 16px; padding: 12px 14px; border-radius: 10px; background: #2a1513; color: #ff8a80; font-size: 14px; }
     .form-error.show { display: block; }
     .switch { margin-top: 20px; text-align: center; font-size: 14px; color: var(--text-sub); }
     .switch a { color: var(--accent); font-weight: 700; }
@@ -115,6 +115,7 @@
       .auth-card { padding: 28px 20px; }
     }
   </style>
+  <link rel="stylesheet" href="/css/theme.css" />
 </head>
 <body>
 

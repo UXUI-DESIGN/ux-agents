@@ -78,8 +78,8 @@
     .nav-auth a:hover, .nav-auth button:hover { background: var(--accent-soft); color: var(--accent); }
     .nav-auth .sep { color: var(--line); }
     .nav-auth .who { max-width: 140px; overflow: hidden; text-overflow: ellipsis; margin-right: 2px; font-weight: 700; color: var(--text); }
-    .nav-auth .primary { background: var(--accent); color: #fff; font-weight: 600; }
-    .nav-auth .primary:hover { background: #4338ca; color: #fff; }
+    .nav-auth .primary { background: var(--accent); color: var(--on-accent); font-weight: 600; }
+    .nav-auth .primary:hover { background: #dadbdf; color: var(--on-accent); }
     /* 좁은 화면: 첫 줄에 로고와 로그인 메뉴, 둘째 줄에 에이전트 메뉴 */
     @media (max-width: 960px) {
       .nav .container { flex-direction: row; flex-wrap: wrap; align-items: center; height: auto; padding-top: 10px; padding-bottom: 6px; row-gap: 4px; }

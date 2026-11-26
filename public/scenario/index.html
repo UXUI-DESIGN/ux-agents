@@ -9,22 +9,22 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
   <style>
     :root {
-      --bg: #ffffff;
-      --bg-soft: #f6f7fb;
-      --text: #14161f;
-      --text-sub: #5b6072;
-      --text-faint: #a3a7b7;
-      --line: #e4e6ee;
-      --accent: #4f46e5;
-      --accent-soft: #eef0ff;
-      --good: #12805c;
-      --good-soft: #e6f6ef;
-      --warn: #9a5b00;
-      --warn-soft: #fff4e0;
-      --danger: #d33a3a;
-      --danger-soft: #fdeeee;
-      --danger-line: #f5c2c2;
-      --radius: 16px;
+      --bg: #0a0a0a;
+      --bg-soft: #121315;
+      --text: #ffffff;
+      --text-sub: #a4a8b0;
+      --text-faint: #7d8187;
+      --line: #2a2c31;
+      --accent: #ffffff;
+      --accent-soft: #202227;
+      --good: #4cd4a0;
+      --good-soft: #10261e;
+      --warn: #f5b657;
+      --warn-soft: #2a1f0c;
+      --danger: #ff6b5e;
+      --danger-soft: #2a1513;
+      --danger-line: #5a2622;
+      --radius: 8px;
       --max: 1160px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -39,7 +39,7 @@
     .container { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
 
     /* 내비게이션 (랜딩과 동일) */
-    .nav { position: sticky; top: 0; z-index: 10; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+    .nav { position: sticky; top: 0; z-index: 10; background: rgba(10, 10, 10, 0.85); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
     .nav .container { display: flex; align-items: center; justify-content: space-between; gap: 24px; height: 64px; }
     .logo { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
     .logo span { color: var(--accent); }
@@ -51,21 +51,21 @@
 
     main { flex: 1; padding: 72px 0 100px; background: var(--bg-soft); }
     .page-head { text-align: center; margin-bottom: 36px; }
-    .page-head .num { display: inline-grid; place-items: center; width: 44px; height: 44px; margin-bottom: 16px; border-radius: 50%; background: var(--accent); color: #fff; font-weight: 800; font-size: 18px; }
+    .page-head .num { display: inline-grid; place-items: center; width: 44px; height: 44px; margin-bottom: 16px; border-radius: 50%; background: var(--accent); color: var(--on-accent); font-weight: 800; font-size: 18px; }
     .page-head h1 { font-size: clamp(28px, 4vw, 40px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.3; }
     .page-head p { margin-top: 12px; font-size: 17px; color: var(--text-sub); }
 
-    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 15px; border: 1px solid var(--line); border-radius: 10px; background: #fff; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: background .15s, border-color .15s; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 9px 15px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: background .15s, border-color .15s; }
     .btn:hover { border-color: var(--accent); color: var(--accent); }
     .btn:disabled { opacity: .5; cursor: not-allowed; border-color: var(--line); color: inherit; }
     .btn-sm { padding: 5px 10px; border-radius: 8px; font-size: 12.5px; }
-    .btn-solid { border-color: var(--accent); background: var(--accent); color: #fff; }
-    .btn-solid:hover { background: #4338ca; color: #fff; }
-    .btn-solid:disabled { background: #c7c9d9; border-color: #c7c9d9; color: #fff; }
+    .btn-solid { border-color: var(--accent); background: var(--accent); color: var(--on-accent); }
+    .btn-solid:hover { background: #dadbdf; color: var(--on-accent); }
+    .btn-solid:disabled { background: #3d4147; border-color: #3d4147; color: #7d8187; }
     .btn-danger:hover { border-color: var(--danger); color: var(--danger); }
     .btn-link { padding: 0; border: 0; background: none; color: var(--accent); font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 
-    .card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
     .card + .card, .card + .stack-gap { margin-top: 20px; }
     .section { padding: 26px 28px; }
     .section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
@@ -99,7 +99,7 @@
     .inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 18px; }
     .field > .label { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; margin-bottom: 8px; font-size: 14px; font-weight: 600; }
     .field > .label small { font-weight: 500; font-size: 12.5px; color: var(--text-sub); }
-    .text-input { display: block; width: 100%; padding: 9px 12px; border: 1px solid var(--line); border-radius: 10px; background: #fff; font-size: 14.5px; line-height: 1.6; }
+    .text-input { display: block; width: 100%; padding: 9px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); font-size: 14.5px; line-height: 1.6; }
     textarea.text-input { resize: vertical; min-height: 84px; }
     .text-input::placeholder { color: var(--text-faint); }
     .text-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
@@ -109,15 +109,15 @@
     .segmented { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; padding: 4px; background: var(--bg-soft); border-radius: 12px; }
     .segmented input { position: absolute; opacity: 0; pointer-events: none; }
     .segmented label { padding: 7px 10px; border-radius: 9px; text-align: center; cursor: pointer; font-size: 14px; font-weight: 500; color: var(--text-sub); white-space: nowrap; }
-    .segmented input:checked + label { background: #fff; color: var(--accent); font-weight: 700; box-shadow: 0 1px 3px rgba(20, 22, 31, .08); }
+    .segmented input:checked + label { background: var(--surface); color: var(--accent); font-weight: 700; box-shadow: 0 1px 3px rgba(0, 0, 0, .08); }
     .segmented input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 1px; }
     .pains { display: grid; gap: 6px; max-height: 240px; overflow-y: auto; }
     .pain-pick { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; padding: 9px 12px; border: 1px solid var(--line); border-radius: 12px; cursor: pointer; font-size: 13.5px; }
     .pain-pick:has(input:checked) { border-color: var(--danger); background: var(--danger-soft); }
     .pain-pick input { margin-top: 4px; accent-color: var(--danger); }
-    .pain-pick .stage { display: inline-block; margin-right: 6px; padding: 0 7px; border-radius: 6px; background: #fff; border: 1px solid var(--line); font-size: 11.5px; font-weight: 700; color: var(--text-sub); }
+    .pain-pick .stage { display: inline-block; margin-right: 6px; padding: 0 7px; border-radius: 6px; background: var(--surface); border: 1px solid var(--line); font-size: 11.5px; font-weight: 700; color: var(--text-sub); }
     .person { display: grid; grid-template-columns: 56px 1fr; gap: 12px; align-items: center; padding: 12px; border: 1px solid var(--line); border-radius: 12px; }
-    .avatar { width: 56px; height: 56px; border-radius: 50%; overflow: hidden; background: #e7e9f3; color: #b9bdd0; display: grid; place-items: center; }
+    .avatar { width: 56px; height: 56px; border-radius: 50%; overflow: hidden; background: #1f2126; color: #4a4e55; display: grid; place-items: center; }
     .avatar img { width: 100%; height: 100%; object-fit: cover; }
     .avatar svg { width: 70%; height: 70%; }
     .person b { font-size: 15px; }
@@ -139,7 +139,7 @@
     .title-input:hover { border-color: var(--line); }
     .title-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
     .lineage { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-    .lineage a, .lineage span.chip { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; padding: 5px 11px; border: 1px solid var(--line); border-radius: 999px; background: #fff; font-size: 13px; }
+    .lineage a, .lineage span.chip { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; padding: 5px 11px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); font-size: 13px; }
     .lineage a:hover { border-color: var(--accent); color: var(--accent); }
     .lineage .k { flex: none; font-size: 11.5px; font-weight: 800; color: var(--text-sub); }
     .lineage .v { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -155,7 +155,7 @@
     /* 시나리오 */
     .scenario-text { min-height: 180px; font-size: 15px; line-height: 1.8; }
     .gatebar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 14px; padding: 12px 14px; border: 1.5px dashed var(--warn); border-radius: 12px; background: var(--warn-soft); font-size: 13.5px; }
-    .gatebar.done { border-style: solid; border-color: #b8e2cf; background: var(--good-soft); }
+    .gatebar.done { border-style: solid; border-color: #355546; background: var(--good-soft); }
     .gatebar .msg { flex: 1 1 260px; color: var(--text); }
     .gatebar .msg b { color: var(--warn); }
     .gatebar.done .msg b { color: var(--good); }
@@ -176,10 +176,10 @@
     .conti td.no { width: 44px; text-align: center; font-weight: 800; color: var(--accent); padding-top: 12px; }
     .conti textarea, .conti input, .conti select { width: 100%; padding: 6px 8px; border: 1px solid transparent; border-radius: 8px; background: transparent; font-size: 13px; line-height: 1.55; resize: vertical; }
     .conti textarea { min-height: 64px; }
-    .conti textarea:hover, .conti input:hover, .conti select:hover { border-color: var(--line); background: #fff; }
-    .conti textarea:focus, .conti input:focus, .conti select:focus { outline: none; border-color: var(--accent); background: #fff; box-shadow: 0 0 0 3px var(--accent-soft); }
+    .conti textarea:hover, .conti input:hover, .conti select:hover { border-color: var(--line); background: var(--surface); }
+    .conti textarea:focus, .conti input:focus, .conti select:focus { outline: none; border-color: var(--accent); background: var(--surface); box-shadow: 0 0 0 3px var(--accent-soft); }
     .conti [disabled] { color: var(--text-sub); cursor: not-allowed; }
-    .conti td.scene { background: #fbfbff; }
+    .conti td.scene { background: #141518; }
     .conti td.scene.bad textarea { border-color: var(--danger); background: var(--danger-soft); }
     .conti .warn { margin-top: 4px; font-size: 11.5px; font-weight: 600; color: var(--danger); }
     .conti .emo { display: flex; align-items: center; gap: 4px; }
@@ -191,7 +191,7 @@
 
     /* 컷 보드 */
     .progress { margin-top: 16px; }
-    .progress .bar { display: flex; height: 10px; overflow: hidden; border-radius: 999px; background: #e9ebf3; }
+    .progress .bar { display: flex; height: 10px; overflow: hidden; border-radius: 999px; background: #1f2126; }
     .progress .bar span { height: 100%; transition: width .4s; }
     .progress .bar .done { background: var(--good); }
     .progress .bar .running { background: var(--accent); background-image: linear-gradient(90deg, rgba(255,255,255,.0) 0, rgba(255,255,255,.45) 50%, rgba(255,255,255,0) 100%); background-size: 200% 100%; animation: shimmer 1.4s linear infinite; }
@@ -205,7 +205,7 @@
     @media (max-width: 1100px) { .cut-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
     @media (max-width: 860px) { .cut-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     @media (max-width: 640px) { .cut-grid { grid-template-columns: 1fr; } }
-    .cut { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 14px; background: #fff; overflow: hidden; transition: box-shadow .15s, opacity .15s, border-color .15s; }
+    .cut { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); overflow: hidden; transition: box-shadow .15s, opacity .15s, border-color .15s; }
     .cut.dragging { opacity: .4; }
     .cut.drop-before { box-shadow: -4px 0 0 var(--accent); }
     .cut.drop-after { box-shadow: 4px 0 0 var(--accent); }
@@ -223,14 +223,14 @@
     .sheet .shot { aspect-ratio: 3 / 2; border-radius: 12px; border: 1px solid var(--line); }
     .shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .shot .ph { display: grid; justify-items: center; gap: 6px; padding: 12px; text-align: center; font-size: 12.5px; color: var(--text-sub); }
-    .shot .ph svg { width: 34px; height: 34px; color: #c4c8d8; }
-    .shot.idle, .shot.queued { background: repeating-linear-gradient(45deg, #f3f4f9 0 10px, #f8f9fc 10px 20px); border-bottom: 1px dashed var(--line); }
-    .shot.running { background: linear-gradient(100deg, #eceefa 20%, #f8f8ff 40%, #eceefa 60%); background-size: 220% 100%; animation: shimmer 1.3s linear infinite; }
+    .shot .ph svg { width: 34px; height: 34px; color: #3d404d; }
+    .shot.idle, .shot.queued { background: repeating-linear-gradient(45deg, #141518 0 10px, #141518 10px 20px); border-bottom: 1px dashed var(--line); }
+    .shot.running { background: linear-gradient(100deg, #1f2126 20%, #141518 40%, #1f2126 60%); background-size: 220% 100%; animation: shimmer 1.3s linear infinite; }
     .shot.running .ph svg { color: var(--accent); animation: pulse 1.2s ease-in-out infinite; }
     .shot.failed { background: var(--danger-soft); }
     .shot.failed .ph { color: var(--danger); }
     .status { position: absolute; top: 8px; left: 8px; }
-    .status .pill { box-shadow: 0 1px 3px rgba(20,22,31,.12); background: #fff; }
+    .status .pill { box-shadow: 0 1px 3px rgba(0, 0, 0,.12); background: var(--surface); }
     .status .pill.ok { background: var(--good-soft); }
     .status .pill.accent { background: var(--accent-soft); }
     .status .pill.danger { background: var(--danger-soft); }
@@ -257,7 +257,7 @@
     .fail-box { margin: 0 10px 10px; padding: 9px 10px; border-radius: 10px; background: var(--danger-soft); font-size: 12.5px; color: var(--danger); }
     .fail-box.retrying { background: var(--warn-soft); color: var(--warn); }
     .fail-box textarea { margin-top: 6px; min-height: 70px; font-size: 12.5px; border-color: var(--danger-line); }
-    .add-cut { display: grid; place-items: center; gap: 4px; min-height: 200px; border: 1.5px dashed #c9cdf5; border-radius: 14px; background: none; color: var(--accent); font-weight: 700; cursor: pointer; }
+    .add-cut { display: grid; place-items: center; gap: 4px; min-height: 200px; border: 1.5px dashed #3d4147; border-radius: 14px; background: none; color: var(--accent); font-weight: 700; cursor: pointer; }
     .add-cut:hover { background: var(--accent-soft); }
     .add-cut small { font-weight: 500; color: var(--text-sub); }
 
@@ -265,8 +265,8 @@
     .empty-result { padding: 48px 28px; text-align: center; color: var(--text-sub); }
     .empty-result b { display: block; margin-bottom: 4px; font-size: 17px; color: var(--text); }
 
-    dialog { width: min(640px, calc(100vw - 32px)); margin: auto; padding: 0; border: 0; border-radius: 16px; box-shadow: 0 20px 60px rgba(20,22,31,.25); }
-    dialog::backdrop { background: rgba(20, 22, 31, .4); }
+    dialog { width: min(640px, calc(100vw - 32px)); margin: auto; padding: 0; border: 0; border-radius: 16px; box-shadow: 0 20px 60px rgba(0, 0, 0,.25); }
+    dialog::backdrop { background: rgba(0, 0, 0, .4); }
     .dlg-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 16px 20px; border-bottom: 1px solid var(--line); }
     .dlg-head h3 { font-size: 16px; }
     .dlg-body { padding: 16px 20px 20px; font-size: 13.5px; }
@@ -296,6 +296,7 @@
       .chain .arrow { display: none; }
     }
   </style>
+  <link rel="stylesheet" href="/css/theme.css" />
 </head>
 <body>
 
@@ -1015,11 +1016,11 @@
         if (!arr?.length) return "";
         const pts = arr.map((v, i) => [xs(arr.length, i), y(v)]);
         return `<path d="${path(pts)}" fill="none" stroke="${color}" stroke-width="${dash ? 2 : 3}" ${dash ? `stroke-dasharray="${dash}"` : ""} stroke-linejoin="round" stroke-linecap="round"><title>${label}</title></path>
-          ${pts.map(([x, py]) => `<circle cx="${x}" cy="${py}" r="${dash ? 2.5 : 4}" fill="#fff" stroke="${color}" stroke-width="2"/>`).join("")}`;
+          ${pts.map(([x, py]) => `<circle cx="${x}" cy="${py}" r="${dash ? 2.5 : 4}" fill="#0a0a0a" stroke="${color}" stroke-width="2"/>`).join("")}`;
       };
       const cutScores = b.cuts.map((c) => c.conti.emotion);
-      const grid = [-2, -1, 0, 1, 2].map((v) => `<line x1="${PADX}" x2="${W - PADX}" y1="${y(v)}" y2="${y(v)}" stroke="${v === 0 ? "#c9ccd9" : "#e4e6ee"}" stroke-width="1"/><text x="0" y="${y(v) + 4}" font-size="10" fill="#a3a7b7">${emoLabel(v)}</text>`).join("");
-      const labels = b.cuts.map((c, i) => `<text x="${xs(b.cuts.length, i)}" y="${H}" font-size="10" text-anchor="middle" fill="#5b6072">${i + 1}</text>`).join("");
+      const grid = [-2, -1, 0, 1, 2].map((v) => `<line x1="${PADX}" x2="${W - PADX}" y1="${y(v)}" y2="${y(v)}" stroke="${v === 0 ? "#3e414b" : "#2a2c31"}" stroke-width="1"/><text x="0" y="${y(v) + 4}" font-size="10" fill="#7d8187">${emoLabel(v)}</text>`).join("");
+      const labels = b.cuts.map((c, i) => `<text x="${xs(b.cuts.length, i)}" y="${H}" font-size="10" text-anchor="middle" fill="#a4a8b0">${i + 1}</text>`).join("");
       const has = { tobe: !!b.curves?.tobe?.length, asis: !!b.curves?.asis?.length };
       const avg = (a) => (a.reduce((s, v) => s + v, 0) / a.length).toFixed(1);
       const endCut = cutScores[cutScores.length - 1];
@@ -1029,9 +1030,9 @@
       if (endCut <= 0) note += " 마지막 컷이 긍정이 아니에요 — 피크엔드 법칙상 마지막 장면의 감정이 경험의 기억을 좌우해요.";
       $("curve").innerHTML = `
         <div class="curve-head"><b>감정 곡선 비교</b>
-          <span class="legend"><span><i style="border-color:var(--accent)"></i>콘티 컷</span>${has.tobe ? `<span><i style="border-color:var(--good);border-top-style:dashed"></i>저니맵 TO-BE</span>` : ""}${has.asis ? `<span><i style="border-color:#9aa0b4;border-top-style:dotted"></i>저니맵 AS-IS</span>` : ""}</span></div>
+          <span class="legend"><span><i style="border-color:var(--accent)"></i>콘티 컷</span>${has.tobe ? `<span><i style="border-color:var(--good);border-top-style:dashed"></i>저니맵 TO-BE</span>` : ""}${has.asis ? `<span><i style="border-color:#7d8187;border-top-style:dotted"></i>저니맵 AS-IS</span>` : ""}</span></div>
         <svg viewBox="0 0 ${W} ${H + 4}" preserveAspectRatio="none" role="img" aria-label="컷 감정 곡선과 저니맵 감정 곡선 비교">
-          ${grid}${has.asis ? line(b.curves.asis.map((s) => s.score), "#9aa0b4", "2 4", "저니맵 AS-IS") : ""}${has.tobe ? line(b.curves.tobe.map((s) => s.score), "#12805c", "6 4", "저니맵 TO-BE") : ""}${line(cutScores, "#4f46e5", "", "콘티 컷")}${labels}
+          ${grid}${has.asis ? line(b.curves.asis.map((s) => s.score), "#7d8187", "2 4", "저니맵 AS-IS") : ""}${has.tobe ? line(b.curves.tobe.map((s) => s.score), "#4cd4a0", "6 4", "저니맵 TO-BE") : ""}${line(cutScores, "#ffffff", "", "콘티 컷")}${labels}
         </svg>
         <p class="note">${esc(note)}</p>`;
     }

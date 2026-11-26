@@ -1,0 +1,69 @@
+/* 공통 다크 테마 — 모든 페이지가 각자의 <style> 뒤에 불러온다.
+   색 토큰(--bg, --text …)은 각 페이지 :root 에 있고, 여기서는 공통 토큰과 타이포 · 모양 규칙만 둔다.
+   기준: 거의 검정인 캔버스, 흰 글자, 헤어라인 테두리, 알약 버튼, 그림자 대신 선. */
+:root {
+  --surface: #191919;       /* 카드 · 입력창 표면 */
+  --on-accent: #0a0a0a;     /* 흰 강조색 위에 올리는 글자 */
+  --hairline: #2a2c31;
+  --twilight: #c4b5fd;      /* 도식 · 포커스에만 쓰는 포인트 색 */
+  --mono: ui-monospace, "SFMono-Regular", "Cascadia Mono", Menlo, Consolas, monospace;
+  color-scheme: dark;
+}
+
+html { background: #0a0a0a; }
+body {
+  font-family: "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  font-weight: 400;
+  letter-spacing: -0.011em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* 제목: 굵기를 덜고 자간을 조여 크기로 위계를 만든다 */
+h1 { font-weight: 500 !important; letter-spacing: -0.045em !important; line-height: 1.16; }
+h2 { font-weight: 500 !important; letter-spacing: -0.035em !important; line-height: 1.22; }
+h3 { font-weight: 600 !important; letter-spacing: -0.022em !important; }
+h4, h5 { font-weight: 600 !important; letter-spacing: -0.015em; }
+b, strong { font-weight: 600; }
+p { text-wrap: pretty; }
+h1, h2, h3 { text-wrap: balance; }
+
+/* 로고 */
+.logo { font-weight: 600 !important; letter-spacing: -0.035em !important; }
+.logo span { color: var(--text-sub) !important; font-weight: 400; }
+
+/* 영문 보조 라벨: 모노 대문자 + 넓은 자간 */
+.eyebrow, .gnb-top small, .stage-top h3 small {
+  font-family: var(--mono) !important;
+  font-weight: 400 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.12em !important;
+}
+.eyebrow { font-size: 12px !important; }
+.gnb-top small, .stage-top h3 small { font-size: 10.5px !important; }
+
+/* 버튼은 전부 알약 모양 */
+.btn, [class*="btn-"], .start-btn, .tool-btn, .mask-btn {
+  border-radius: 9999px !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.01em;
+}
+.icon-btn { border-radius: 9999px !important; }
+
+/* 상단 메뉴 */
+.nav { background: rgba(10, 10, 10, 0.8) !important; backdrop-filter: blur(14px) saturate(140%); }
+.gnb-top { font-weight: 500 !important; }
+.gnb > li.current > .gnb-top { font-weight: 600 !important; }
+.gnb-panel { box-shadow: 0 24px 48px rgba(0, 0, 0, 0.6) !important; border-radius: 12px !important; }
+
+/* 입력 */
+input, textarea, select { font-family: inherit; letter-spacing: inherit; }
+input::placeholder, textarea::placeholder { color: var(--text-faint, #7d8187); }
+
+::selection { background: var(--twilight); color: #0a0a0a; }
+:focus-visible { outline: 2px solid var(--twilight); outline-offset: 2px; }
+
+/* 스크롤바 */
+* { scrollbar-color: #363a3f transparent; }
+.diamonds .sub { text-transform: uppercase; letter-spacing: 0.1em; font-weight: 500; }

@@ -10,38 +10,38 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
   <style>
     :root {
-      --bg: #ffffff;
-      --bg-soft: #f6f7fb;
-      --text: #14161f;
-      --text-sub: #5b6072;
-      --text-faint: #a3a7b7;
-      --line: #e4e6ee;
-      --accent: #4f46e5;
-      --accent-soft: #eef0ff;
-      --radius: 16px;
+      --bg: #0a0a0a;
+      --bg-soft: #121315;
+      --text: #ffffff;
+      --text-sub: #a4a8b0;
+      --text-faint: #7d8187;
+      --line: #2a2c31;
+      --accent: #ffffff;
+      --accent-soft: #202227;
+      --radius: 8px;
       --max: 1160px;
 
       /* ── 페르소나 문서 테마 (나중에 프로젝트 테마로 바꿔 끼운다) ── */
-      --persona-doc-bg: #ffffff;           /* 문서 종이 배경 */
-      --persona-doc-text: #1f2128;
-      --persona-doc-sub: #4b4f5c;
-      --persona-doc-line: #e6e8ee;
+      --persona-doc-bg: #191919;           /* 문서 종이 배경 */
+      --persona-doc-text: #f2f3f5;
+      --persona-doc-sub: #c3c6cc;
+      --persona-doc-line: #2a2c31;
       --persona-heading: #6ab04c;          /* Lifestyle · Behavior · Painpoint · Needs 제목, 라벨 키 */
       --persona-badge-bg: #d9f7a3;         /* priority 배지 (연두색 알약) */
       --persona-badge-text: #2d4a12;
-      --persona-chip-bg: #f1f3f7;          /* 해시태그 칩 */
-      --persona-chip-text: #3b3f4b;
-      --persona-slider-track: #e3e5ec;     /* 슬라이더 선 */
+      --persona-chip-bg: #1a1c20;          /* 해시태그 칩 */
+      --persona-chip-text: #c0c4ce;
+      --persona-slider-track: #2a2c31;     /* 슬라이더 선 */
       --persona-slider-thumb: #8fd460;     /* 슬라이더 손잡이 */
-      --persona-slider-label: #b4b8c6;     /* 낮음·높음 기본 글자 */
-      --persona-slider-label-on: #4f9a2d;  /* 값이 가까운 쪽 라벨 */
-      --persona-panel-bg: #2a2a2e;         /* 왼쪽 세로 패널 */
+      --persona-slider-label: #7d8187;     /* 낮음·높음 기본 글자 */
+      --persona-slider-label-on: #bbe6a8;  /* 값이 가까운 쪽 라벨 */
+      --persona-panel-bg: #101012;         /* 왼쪽 세로 패널 */
       --persona-panel-text: #ffffff;
-      --persona-panel-sub: #c9ccd6;
+      --persona-panel-sub: #b4b8c6;
       --persona-panel-quote: #8fd460;      /* 큰따옴표 */
-      --persona-photo-bg: #3b3b41;         /* 사진 없을 때 플레이스홀더 배경 */
-      --persona-photo-fg: #6a6a72;
-      --persona-point-bullet: #1f2128;     /* Painpoint·Needs 목록 점 */
+      --persona-photo-bg: #d0d2d6;         /* 사진 없을 때 플레이스홀더 배경 */
+      --persona-photo-fg: #8d9198;
+      --persona-point-bullet: #f2f3f5;     /* Painpoint·Needs 목록 점 */
       --persona-doc-radius: 20px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -61,7 +61,7 @@
     /* 내비게이션 (랜딩과 동일) */
     .nav {
       position: sticky; top: 0; z-index: 10;
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(10, 10, 10, 0.85);
       backdrop-filter: blur(8px);
       border-bottom: 1px solid var(--line);
     }
@@ -82,7 +82,7 @@
     .toolbar .actions { display: flex; gap: 8px; }
     .btn {
       display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 999px; cursor: pointer;
-      border: 1px solid var(--line); background: #fff; font-size: 14px; font-weight: 600; color: var(--text);
+      border: 1px solid var(--line); background: var(--surface); font-size: 14px; font-weight: 600; color: var(--text);
     }
     .btn:hover { border-color: var(--accent); color: var(--accent); }
 
@@ -99,7 +99,7 @@
       color: var(--persona-doc-text);
       border: 1px solid var(--persona-doc-line);
       border-radius: var(--persona-doc-radius);
-      box-shadow: 0 12px 40px rgba(20, 22, 31, 0.06);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
       font-size: 12.5px;
       line-height: 1.6;
     }
@@ -189,8 +189,8 @@
     .points p { margin-top: 2px; font-size: 11.5px; line-height: 1.55; color: var(--persona-doc-sub); }
 
     /* ── 인라인 편집 모드 ── */
-    .btn-accent { border-color: var(--accent); background: var(--accent); color: #fff; }
-    .btn-accent:hover { background: #4338ca; color: #fff; }
+    .btn-accent { border-color: var(--accent); background: var(--accent); color: var(--on-accent); }
+    .btn-accent:hover { background: #dadbdf; color: var(--on-accent); }
     .btn[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
     .edit-hint { font-size: 13px; color: var(--text-sub); }
     .doc.editing [data-edit] { cursor: text; border-radius: 4px; outline: 1px dashed transparent; outline-offset: 2px; transition: outline-color .12s, background .12s; }
@@ -212,17 +212,17 @@
     .point-del { display: none; position: absolute; right: 0; top: 2px; width: 16px; height: 16px; border: 0; border-radius: 50%; background: var(--persona-chip-bg); color: var(--text-sub); font-size: 11px; line-height: 16px; cursor: pointer; }
     .doc.editing .points li:hover .point-del { display: block; }
     .sample-badge { display: inline-block; margin-left: 6px; padding: 2px 9px; border-radius: 999px; background: var(--persona-badge-bg); color: var(--persona-badge-text); font-size: 12px; font-weight: 700; }
-    .sample-bar { margin-bottom: 14px; padding: 10px 14px; border-radius: 10px; background: #fff; border: 1px solid var(--line); font-size: 13.5px; color: var(--text-sub); }
+    .sample-bar { margin-bottom: 14px; padding: 10px 14px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); font-size: 13.5px; color: var(--text-sub); }
     .sample-bar b { color: var(--text); }
     .sample-bar a { color: var(--accent); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
-    .evidence { margin-top: 16px; padding: 16px 20px; border: 1px dashed var(--line); border-radius: 12px; background: #fff; font-size: 13.5px; color: var(--text-sub); }
+    .evidence { margin-top: 16px; padding: 16px 20px; border: 1px dashed var(--line); border-radius: 12px; background: var(--surface); font-size: 13.5px; color: var(--text-sub); }
     .evidence h2 { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
     .evidence ul { list-style: none; display: grid; gap: 4px; }
     .evidence b { color: var(--text); font-weight: 600; margin-right: 6px; }
     .evidence p { margin-top: 8px; font-size: 12.5px; color: var(--text-faint); }
     /* ── 사진 만들기 모달 ── */
-    .modal-back { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 16px; background: rgba(20, 22, 31, .45); backdrop-filter: blur(2px); }
-    .modal { width: min(880px, 100%); max-height: calc(100vh - 32px); display: flex; flex-direction: column; background: #fff; border-radius: 18px; box-shadow: 0 24px 64px rgba(20, 22, 31, .25); overflow: hidden; }
+    .modal-back { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 16px; background: rgba(0, 0, 0, .45); backdrop-filter: blur(2px); }
+    .modal { width: min(880px, 100%); max-height: calc(100vh - 32px); display: flex; flex-direction: column; background: var(--surface); border-radius: 18px; box-shadow: 0 24px 64px rgba(0, 0, 0, .25); overflow: hidden; }
     .modal-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px 12px; }
     .modal-head h2 { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; }
     .modal-x { width: 32px; height: 32px; border: 0; border-radius: 50%; background: var(--bg-soft); font-size: 20px; line-height: 1; cursor: pointer; color: var(--text-sub); }
@@ -245,7 +245,7 @@
     .fixed-rules { margin-top: 12px; font-size: 12.5px; color: var(--text-sub); }
     .fixed-rules summary { cursor: pointer; font-weight: 600; color: var(--text); }
     .fixed-rules p { margin-top: 6px; padding: 8px 10px; border-radius: 8px; background: var(--bg-soft); line-height: 1.55; }
-    .error { margin-top: 10px; font-size: 13px; color: #d92d20; }
+    .error { margin-top: 10px; font-size: 13px; color: #ff6b5e; }
     .error:empty { display: none; }
     .preview { position: relative; aspect-ratio: 2 / 3; border-radius: 14px; background: var(--persona-photo-bg); overflow: hidden; display: grid; place-items: center; }
     .preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
@@ -253,8 +253,8 @@
     .preview.loading::after { content: ""; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, .12) 50%, transparent 70%); background-size: 200% 100%; animation: shimmer 1.3s linear infinite; }
     @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
     .preview-note { margin-top: 8px; font-size: 12.5px; color: var(--text-sub); text-align: center; min-height: 1.5em; }
-    .btn-danger-ghost { border-color: transparent; color: #d92d20; }
-    .btn-danger-ghost:hover { border-color: #d92d20; color: #d92d20; }
+    .btn-danger-ghost { border-color: transparent; color: #ff6b5e; }
+    .btn-danger-ghost:hover { border-color: #ff6b5e; color: #ff6b5e; }
     .btn:disabled { opacity: .55; cursor: not-allowed; }
     @media (max-width: 720px) {
       .photo-grid { grid-template-columns: 1fr; }
@@ -263,7 +263,7 @@
 
     .toast {
       position: fixed; left: 50%; bottom: 28px; z-index: 20; transform: translateX(-50%) translateY(10px);
-      padding: 10px 16px; border-radius: 999px; background: var(--text); color: #fff; font-size: 14px;
+      padding: 10px 16px; border-radius: 999px; background: var(--text); color: var(--on-accent); font-size: 14px;
       opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s;
     }
     .toast.show { opacity: 1; transform: translateX(-50%); }
@@ -304,10 +304,10 @@
     /* ── 인쇄: A4 가로 한 장 ── */
     @page { size: A4 landscape; margin: 10mm; }
     @media print {
-      html, body { background: #fff; }
+      html, body { background: var(--surface); }
       .nav, footer, .toolbar, .toast, .evidence, .modal-back, .sample-bar, .chip-add, .point-add, .point-del { display: none !important; }
       .doc.editing [data-edit] { outline: none; }
-      main { padding: 0; background: #fff; }
+      main { padding: 0; background: var(--surface); }
       .container { max-width: none; padding: 0; }
       .doc {
         aspect-ratio: auto; width: 277mm; min-height: 190mm; max-height: 190mm; overflow: hidden;
@@ -324,9 +324,10 @@
       .photo { aspect-ratio: 236 / 260; }
       .section-title, .col h3 { font-size: 10.5pt; }
       .points p, .chip { font-size: 8.5pt; }
-      .scale .thumb { box-shadow: 0 0 0 2px #fff; }
+      .scale .thumb { box-shadow: 0 0 0 2px var(--surface); }
     }
   </style>
+  <link rel="stylesheet" href="/css/theme.css" />
 </head>
 <body>
 
