@@ -46,7 +46,7 @@
     .logo span { color: var(--accent); }
 
     /* 2. 히어로 */
-    .hero { padding: 34px 0 28px; text-align: center; position: relative; overflow: hidden; isolation: isolate; background: #14161f; color: #fff; }
+    .hero { padding: 110px 0 96px; text-align: center; position: relative; overflow: hidden; isolation: isolate; background: #14161f; color: #fff; }
     /* 배경 영상: 파일 자체가 흐리게 인코딩돼 있고, 여기서 한 번 더 흐린다 (얼굴 식별 방지) */
     .hero-bg {
       position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%;
@@ -156,7 +156,7 @@
     @media (max-width: 640px) {
       .nav .container { flex-direction: column; align-items: flex-start; height: auto; padding-top: 12px; padding-bottom: 8px; gap: 6px; }
       .nav nav { width: 100%; }
-      .hero { padding: 40px 0 36px; }
+      .hero { padding: 70px 0 62px; }
       section.block { padding: 72px 0; }
       .stages, .ways { grid-template-columns: 1fr; }
     }
@@ -193,7 +193,7 @@
     <section class="block soft" id="process">
       <div class="container">
         <div class="section-head">
-          <h2>더블 다이아몬드로 이어지는 전체 프로세스</h2>
+          <h2>AI와 함께 협업하는 더블다이아몬드 프로세스</h2>
           <p>문제를 넓게 발견하고 좁혀 정의한 뒤, 해결책을 넓게 발전시키고 좁혀 전달합니다. 각 단계에 그 일을 맡은 AI 에이전트가 있습니다.</p>
         </div>
         <div class="diamonds" id="diamonds" role="img" aria-label="AI와 결합된 더블 다이아몬드: 문제와 해결 두 다이아몬드 모두에서 AI가 탐색 범위를 위아래로 넓혀 준다"></div>
@@ -272,7 +272,7 @@
       // 왼쪽 절반은 넓히기(화살표가 퍼진다), 오른쪽 절반은 좁히기(선택지가 묶여 한 점으로 모인다).
       (() => {
         const NS = "http://www.w3.org/2000/svg";
-        const W = 1112, H = 320, MID = 168, HALF = 278, OUT = 122, IN = 54;
+        const W = 1112, H = 366, MID = 196, HALF = 278, OUT = 146, IN = 65;
         const s = (tag, attrs, text) => {
           const n = document.createElementNS(NS, tag);
           for (const k in attrs) n.setAttribute(k, attrs[k]);
@@ -301,16 +301,16 @@
             s("polygon", { points: `${L},${MID} ${C},${MID - IN} ${R},${MID} ${C},${MID + IN}`, fill: "#fff", stroke: ACCENT, "stroke-width": 1.5, "stroke-linejoin": "round" }));
           // 가운데 세로줄: 넓혀서 찾아낸 선택지들
           const ys = [];
-          for (let k = -6; k <= 6; k++) ys.push(MID + k * 18);
+          for (let k = -6; k <= 6; k++) ys.push(MID + k * 22);
           // 넓히기: 시작점에서 선택지로 퍼지는 화살표
           for (const k of [-5, -3, -2, 0, 2, 3, 5]) {
-            const y = MID + k * 18;
+            const y = MID + k * 22;
             const sx = L + (C - L) * 0.3, sy = MID + (y - MID) * 0.3;
             svg.append(arrow(sx, sy, C, y, 0, 10));
           }
           // 좁히기: 선택지 → 묶음 5개 → 3개 → 한 점
-          const n1 = [-2, -1, 0, 1, 2].map((k) => [C + 104, MID + k * 30]);
-          const n2 = [-1, 0, 1].map((k) => [C + 186, MID + k * 21]);
+          const n1 = [-2, -1, 0, 1, 2].map((k) => [C + 104, MID + k * 36]);
+          const n2 = [-1, 0, 1].map((k) => [C + 186, MID + k * 25]);
           ys.forEach((y, i) => { const [nx, ny] = n1[Math.round(i * 4 / 12)]; svg.append(arrow(C, y, nx, ny, 9, 8)); });
           n1.forEach(([x, y], i) => { const [nx, ny] = n2[Math.round(i * 2 / 4)]; svg.append(arrow(x, y, nx, ny, 8, 8)); });
           n2.forEach(([x, y]) => svg.append(arrow(x, y, R, MID, 8, 10)));
