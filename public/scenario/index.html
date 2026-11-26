@@ -100,7 +100,7 @@
     .style-picks input { position: absolute; opacity: 0; pointer-events: none; }
     .style-picks label { display: block; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); cursor: pointer; transition: border-color .15s, box-shadow .15s; }
     .style-picks label:hover { border-color: var(--text-faint); }
-    .style-picks img { display: block; width: 100%; aspect-ratio: 3 / 2; object-fit: cover; background: var(--bg-soft); }
+    .style-picks img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; background: var(--bg-soft); }
     .style-picks span { display: block; padding: 8px 10px; text-align: center; font-size: 14px; font-weight: 500; color: var(--text-sub); white-space: nowrap; }
     .style-picks input:checked + label { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
     .style-picks input:checked + label span { color: var(--accent); font-weight: 700; }
@@ -344,9 +344,9 @@
             <div class="field">
               <div class="label">그림 스타일 <small>모든 컷에 같은 스타일 문장이 붙어요</small></div>
               <div class="style-picks" role="radiogroup" aria-label="그림 스타일">
-                <input type="radio" name="style" id="stPhoto" value="photo" checked /><label for="stPhoto"><img src="/media/style-photo.svg" alt="실사풍 예시: 조명과 명암이 사실적인 장면" width="300" height="200" /><span>실사풍</span></label>
-                <input type="radio" name="style" id="stFlat" value="flat" /><label for="stFlat"><img src="/media/style-flat.svg" alt="플랫 일러스트 예시: 외곽선 없는 단순한 색면" width="300" height="200" /><span>플랫 일러스트</span></label>
-                <input type="radio" name="style" id="stSketch" value="sketch" /><label for="stSketch"><img src="/media/style-sketch.svg" alt="연필 스케치 예시: 흰 종이 위 회색 연필 선" width="300" height="200" /><span>연필 스케치</span></label>
+                <input type="radio" name="style" id="stPhoto" value="photo" checked /><label for="stPhoto"><img src="/media/style-photo.jpg" alt="실사풍 예시: 소파에서 스마트폰을 보는 사진 같은 장면" width="720" height="480" /><span>실사풍</span></label>
+                <input type="radio" name="style" id="stFlat" value="flat" /><label for="stFlat"><img src="/media/style-flat.jpg" alt="플랫 일러스트 예시: 같은 장면을 단순한 색면으로 그린 그림" width="720" height="480" /><span>플랫 일러스트</span></label>
+                <input type="radio" name="style" id="stSketch" value="sketch" /><label for="stSketch"><img src="/media/style-sketch.jpg" alt="연필 스케치 예시: 같은 장면을 회색 연필 선으로 그린 그림" width="720" height="480" /><span>연필 스케치</span></label>
               </div>
               <p class="hint" id="styleText"></p>
             </div>
