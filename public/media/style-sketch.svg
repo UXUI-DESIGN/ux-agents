@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 200">
+  <defs>
+    <filter id="wob" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="2.6"/></filter>
+    <filter id="paper"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="2"/><feColorMatrix values="0 0 0 0 0.45  0 0 0 0 0.45  0 0 0 0 0.45  0 0 0 0.10 0"/></filter>
+    <pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(38)"><path d="M0 0v5" stroke="#8b8b8b" stroke-width="0.9"/></pattern>
+    <pattern id="hatch2" width="3.2" height="3.2" patternUnits="userSpaceOnUse" patternTransform="rotate(-42)"><path d="M0 0v3.2" stroke="#6f6f6f" stroke-width="0.9"/></pattern>
+  </defs>
+  <rect width="300" height="200" fill="#f6f4ee"/>
+  <g filter="url(#wob)">
+    <g opacity=".75">
+      <rect x="44" y="82" width="180" height="46" rx="16" fill="url(#hatch)"/>
+      <rect x="28" y="108" width="34" height="62" rx="12" fill="url(#hatch)"/>
+      <rect x="206" y="108" width="34" height="62" rx="12" fill="url(#hatch)"/>
+      <path d="M120 136h46q10 0 10 10v34h-16v-26h-40z" fill="url(#hatch2)"/>
+      <path d="M119 76q-2-19 15-19q17 0 16 15q-9 0-15-8q-4 9-16 12z" fill="url(#hatch2)"/>
+      <rect x="52" y="22" width="62" height="46" fill="url(#hatch)"/>
+      <path d="M20 172q130 10 262 0l6 10q-140 8-274 0z" fill="url(#hatch)"/>
+    </g>
+    <path d="M8 169h284" stroke="#6b6b6b" stroke-width="1.4" fill="none"/>
+  <g stroke="#555" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="52" y="22" width="62" height="46" rx="3" fill="none"/>
+    <circle cx="96" cy="38" r="7" fill="none"/>
+    <path d="M83 22v46M52 45h62" fill="none" stroke="#555" stroke-width="1.6"/>
+    <path d="M262 64v104" fill="none" stroke="#555" stroke-width="1.6"/>
+    <path d="M247 40h30l8 26h-46z" fill="none"/>
+    <ellipse cx="262" cy="170" rx="14" ry="3.5" fill="none"/>
+  </g>
+  <g stroke="#555" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="44" y="82" width="180" height="70" rx="16" fill="none"/>
+    <rect x="28" y="108" width="34" height="62" rx="12" fill="none"/>
+    <rect x="206" y="108" width="34" height="62" rx="12" fill="none"/>
+    <rect x="54" y="128" width="160" height="40" rx="10" fill="none"/>
+    <rect x="70" y="98" width="34" height="32" rx="8" fill="none"/>
+    <path d="M118 150q-2-44 6-52q10-8 22 0q8 8 6 52z" fill="none"/>
+    <path d="M120 136h46q10 0 10 10v34h-16v-26h-40z" fill="none"/>
+    <path d="M160 180h18q6 0 6 5h-24z" fill="none"/>
+    <circle cx="134" cy="76" r="15" fill="none"/>
+    <path d="M119 76q-2-19 15-19q17 0 16 15q-9 0-15-8q-4 9-16 12z" fill="none"/>
+    <path d="M144 104q14 6 22 2l3 7q-12 7-28 0z" fill="none"/>
+    <circle cx="169" cy="109" r="4.5" fill="none"/>
+    <rect x="166" y="92" width="10" height="18" rx="2" transform="rotate(14 171 101)" fill="none"/>
+  </g>
+  </g>
+  <rect width="300" height="200" filter="url(#paper)"/>
+</svg>

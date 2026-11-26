@@ -78,25 +78,8 @@
     .pill.accent { background: var(--accent-soft); color: var(--accent); }
     .pill.danger { background: var(--danger-soft); color: var(--danger); }
 
-    /* 일하는 방식 (프롬프트 체이닝) */
-    .how { margin-bottom: 20px; padding: 0; overflow: hidden; }
-    .how summary { display: flex; align-items: center; gap: 10px; padding: 16px 22px; cursor: pointer; list-style: none; font-weight: 700; font-size: 15px; }
-    .how summary::-webkit-details-marker { display: none; }
-    .how summary::after { content: "펼치기"; margin-left: auto; font-size: 12.5px; font-weight: 600; color: var(--accent); }
-    .how[open] summary::after { content: "접기"; }
-    .how .body { padding: 0 22px 22px; font-size: 14px; color: var(--text-sub); }
-    .chain { display: flex; flex-wrap: wrap; align-items: stretch; gap: 6px; margin: 4px 0 16px; }
-    .chain .node { flex: 1 1 120px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-soft); }
-    .chain .node b { display: block; font-size: 13.5px; color: var(--text); }
-    .chain .node small { display: block; font-size: 12px; line-height: 1.5; }
-    .chain .arrow { display: grid; place-items: center; color: var(--text-faint); font-weight: 800; }
-    .chain .gate { flex: 0 0 auto; display: grid; place-items: center; padding: 6px 10px; border: 1.5px dashed var(--warn); border-radius: 12px; background: var(--warn-soft); color: var(--warn); font-size: 12px; font-weight: 800; text-align: center; line-height: 1.35; }
-    .how h3 { margin: 14px 0 4px; font-size: 14px; color: var(--text); }
-    .how ul { padding-left: 18px; }
-    .how li + li { margin-top: 3px; }
-
     /* 입력 */
-    #inputCard, .how { max-width: 880px; margin-left: auto; margin-right: auto; }
+    #inputCard { max-width: 880px; margin-left: auto; margin-right: auto; }
     .inputs { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; margin-top: 18px; }
     .field > .sub-field { margin-top: 10px; }
     .field > .label { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; margin-bottom: 8px; font-size: 14px; font-weight: 600; }
@@ -113,6 +96,16 @@
     .segmented label { padding: 7px 10px; border-radius: 9px; text-align: center; cursor: pointer; font-size: 14px; font-weight: 500; color: var(--text-sub); white-space: nowrap; }
     .segmented input:checked + label { background: var(--surface); color: var(--accent); font-weight: 700; box-shadow: 0 1px 3px rgba(0, 0, 0, .08); }
     .segmented input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .style-picks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    .style-picks input { position: absolute; opacity: 0; pointer-events: none; }
+    .style-picks label { display: block; overflow: hidden; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); cursor: pointer; transition: border-color .15s, box-shadow .15s; }
+    .style-picks label:hover { border-color: var(--text-faint); }
+    .style-picks img { display: block; width: 100%; aspect-ratio: 3 / 2; object-fit: cover; background: var(--bg-soft); }
+    .style-picks span { display: block; padding: 8px 10px; text-align: center; font-size: 14px; font-weight: 500; color: var(--text-sub); white-space: nowrap; }
+    .style-picks input:checked + label { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+    .style-picks input:checked + label span { color: var(--accent); font-weight: 700; }
+    .style-picks input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 2px; }
+    @media (max-width: 480px) { .style-picks { gap: 6px; } .style-picks span { padding: 6px 4px; font-size: 12.5px; } }
     .pains { display: grid; gap: 6px; max-height: 240px; overflow-y: auto; }
     .pain-pick { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; padding: 9px 12px; border: 1px solid var(--line); border-radius: 12px; cursor: pointer; font-size: 13.5px; }
     .pain-pick:has(input:checked) { border-color: var(--danger); background: var(--danger-soft); }
@@ -295,7 +288,6 @@
       .section, .board-head { padding: 20px 16px; }
       .generate .btn-solid { width: 100%; }
       .title-input { font-size: 19px; }
-      .chain .arrow { display: none; }
     }
   </style>
   <link rel="stylesheet" href="/css/theme.css" />
@@ -318,30 +310,6 @@
         <p>저니맵의 페인포인트 하나를 개선한 TO-BE 시나리오를 콘티와 컷 보드로 그려요.</p>
         <button class="try-btn" type="button" id="tryBtn">테스트로 사용해보기<small>로그인 없이 · 예시 저니맵으로 시나리오와 콘티 만들기</small></button>
       </div>
-
-      <!-- 일하는 방식: 프롬프트 체이닝 + 사람이 확인하는 지점 -->
-      <details class="card how" id="how">
-        <summary><span class="step-no">?</span> 이 에이전트가 일하는 방식 — 프롬프트 체이닝과 확인 지점</summary>
-        <div class="body">
-          <div class="chain" aria-label="단계 흐름">
-            <div class="node"><b>저니맵 (정의 단계)</b><small>단계·감정·페인포인트</small></div><span class="arrow">→</span>
-            <div class="node"><b>TO-BE 시나리오</b><small>고른 페인포인트를 푼 이야기</small></div><span class="arrow">→</span>
-            <div class="gate">✋ 확인 1<br>시나리오 확정</div><span class="arrow">→</span>
-            <div class="node"><b>콘티 표</b><small>컷마다 장면·감정·구도·장면 묘사</small></div><span class="arrow">→</span>
-            <div class="gate">✋ 확인 2<br>콘티 확정</div><span class="arrow">→</span>
-            <div class="node"><b>컷 이미지</b><small>스타일 + 장면 묘사 + 구도<br>+ 페르소나 사진 참조</small></div>
-          </div>
-          <h3>프롬프트 체이닝이란</h3>
-          <p>한 번에 “보드를 다 만들어 줘”라고 시키지 않고, 일을 작은 단계로 나눠 <b>앞 단계의 결과를 다음 단계의 입력으로</b> 넘기는 방식이에요. 저니맵 → 시나리오 → 콘티 → 이미지 설명 → 이미지가 사슬처럼 이어지고, 각 단계는 자기 일 하나에만 집중하니 결과가 더 정확하고, 어디서 틀어졌는지도 찾기 쉬워요.</p>
-          <h3>왜 중간에 사람이 확인하나요</h3>
-          <ul>
-            <li><b>잘못이 뒤로 갈수록 커져요.</b> 시나리오가 페인포인트를 비껴가면 콘티 8컷과 이미지 8장이 모두 엇나가요. 앞에서 한 번 고치는 게 가장 싸요.</li>
-            <li><b>이미지는 비싸고 느려요.</b> 컷마다 이미지 호출이 들어가니, 글 단계에서 충분히 다듬고 ‘확정’한 뒤에만 그려요. 그래서 콘티를 확정해야만 보드 생성 버튼이 열려요.</li>
-            <li><b>판단은 리서처의 몫이에요.</b> 어떤 장면이 개선을 가장 잘 보여 주는지, 감정 곡선이 저니맵과 맞는지는 사람이 근거를 보고 정해요.</li>
-            <li><b>지금은 AI 연결 전이에요.</b> 시나리오와 콘티는 저니맵 내용을 규칙대로 이어 붙인 예시이고, 이미지는 확정한 콘티로 Worker 를 거쳐 만들어요.</li>
-          </ul>
-        </div>
-      </details>
 
       <!-- 입력 -->
       <section class="card section" id="inputCard" aria-labelledby="inTitle">
@@ -389,10 +357,10 @@
             </div>
             <div class="field">
               <div class="label">그림 스타일 <small>모든 컷에 같은 스타일 문장이 붙어요</small></div>
-              <div class="segmented" role="radiogroup" aria-label="그림 스타일">
-                <input type="radio" name="style" id="stSketch" value="sketch" checked /><label for="stSketch">연필 스케치</label>
-                <input type="radio" name="style" id="stFlat" value="flat" /><label for="stFlat">플랫 일러스트</label>
-                <input type="radio" name="style" id="stPhoto" value="photo" /><label for="stPhoto">실사풍</label>
+              <div class="style-picks" role="radiogroup" aria-label="그림 스타일">
+                <input type="radio" name="style" id="stPhoto" value="photo" checked /><label for="stPhoto"><img src="/media/style-photo.svg" alt="실사풍 예시: 조명과 명암이 사실적인 장면" width="300" height="200" /><span>실사풍</span></label>
+                <input type="radio" name="style" id="stFlat" value="flat" /><label for="stFlat"><img src="/media/style-flat.svg" alt="플랫 일러스트 예시: 외곽선 없는 단순한 색면" width="300" height="200" /><span>플랫 일러스트</span></label>
+                <input type="radio" name="style" id="stSketch" value="sketch" /><label for="stSketch"><img src="/media/style-sketch.svg" alt="연필 스케치 예시: 흰 종이 위 회색 연필 선" width="300" height="200" /><span>연필 스케치</span></label>
               </div>
               <p class="hint" id="styleText"></p>
             </div>

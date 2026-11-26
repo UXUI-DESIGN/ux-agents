@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 200">
+  <defs>
+    <radialGradient id="pWall" cx="262" cy="70" r="230" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#c79a63"/><stop offset=".35" stop-color="#7d5f43"/><stop offset="1" stop-color="#231c19"/></radialGradient>
+    <linearGradient id="pFloor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a3626"/><stop offset="1" stop-color="#1c1410"/></linearGradient>
+    <linearGradient id="pWin" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#16213f"/><stop offset="1" stop-color="#2d3d63"/></linearGradient>
+    <linearGradient id="pShade" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f1c98a"/><stop offset="1" stop-color="#fff1cf"/></linearGradient>
+    <linearGradient id="pSofaB" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3e4a44"/><stop offset="1" stop-color="#6f7f72"/></linearGradient>
+    <linearGradient id="pSofaA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#75867a"/><stop offset="1" stop-color="#333d38"/></linearGradient>
+    <linearGradient id="pSofaS" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7e9083"/><stop offset="1" stop-color="#3b4640"/></linearGradient>
+    <linearGradient id="pCush" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8a5a3c"/><stop offset="1" stop-color="#c58a5c"/></linearGradient>
+    <linearGradient id="pTop" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8f8a82"/><stop offset="1" stop-color="#e9e2d6"/></linearGradient>
+    <linearGradient id="pPants" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1c2434"/><stop offset="1" stop-color="#3b4a66"/></linearGradient>
+    <radialGradient id="pSkin" cx=".72" cy=".55" r=".8"><stop offset="0" stop-color="#f6d2b4"/><stop offset=".6" stop-color="#d49a78"/><stop offset="1" stop-color="#8a5a44"/></radialGradient>
+    <linearGradient id="pHair" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#17110e"/><stop offset="1" stop-color="#4a3528"/></linearGradient>
+    <radialGradient id="pGlow" cx="262" cy="62" r="80" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#ffe7b0" stop-opacity=".75"/><stop offset="1" stop-color="#ffe7b0" stop-opacity="0"/></radialGradient>
+    <radialGradient id="pPhone" cx="168" cy="98" r="34" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#bcd4ff" stop-opacity=".55"/><stop offset="1" stop-color="#bcd4ff" stop-opacity="0"/></radialGradient>
+    <radialGradient id="pVig" cx=".5" cy=".5" r=".75"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".55"/></radialGradient>
+    <filter id="blurBg" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="2.6"/></filter>
+    <filter id="soft"><feGaussianBlur stdDeviation="0.45"/></filter>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%"><feGaussianBlur stdDeviation="5"/></filter>
+    <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="7"/><feColorMatrix values="0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 0.16 0"/></filter>
+  </defs>
+  <rect width="300" height="200" fill="url(#pWall)"/>
+  <rect y="168" width="300" height="32" fill="url(#pFloor)"/>
+  <ellipse cx="134" cy="174" rx="120" ry="9" fill="#000" opacity=".45" filter="url(#shadow)"/>
+  <g filter="url(#blurBg)">
+    <rect x="52" y="22" width="62" height="46" rx="3" fill="url(#pWin)"/>
+    <circle cx="96" cy="38" r="7" fill="#dfe6f2"/>
+    <path d="M83 22v46M52 45h62" fill="none" stroke="#3a3430" stroke-width="2.5"/>
+    <path d="M262 64v104" fill="none" stroke="#2a2522" stroke-width="3"/>
+    <path d="M247 40h30l8 26h-46z" fill="url(#pShade)"/>
+    <ellipse cx="262" cy="170" rx="14" ry="3.5" fill="#2a2522"/>
+  </g>
+  <g filter="url(#soft)">
+    <rect x="44" y="82" width="180" height="70" rx="16" fill="url(#pSofaB)"/>
+    <rect x="28" y="108" width="34" height="62" rx="12" fill="url(#pSofaA)"/>
+    <rect x="206" y="108" width="34" height="62" rx="12" fill="url(#pSofaA)"/>
+    <rect x="54" y="128" width="160" height="40" rx="10" fill="url(#pSofaS)"/>
+    <rect x="70" y="98" width="34" height="32" rx="8" fill="url(#pCush)"/>
+    <path d="M118 150q-2-44 6-52q10-8 22 0q8 8 6 52z" fill="url(#pTop)"/>
+    <path d="M120 136h46q10 0 10 10v34h-16v-26h-40z" fill="url(#pPants)"/>
+    <path d="M160 180h18q6 0 6 5h-24z" fill="#15120f"/>
+    <circle cx="134" cy="76" r="15" fill="url(#pSkin)"/>
+    <path d="M119 76q-2-19 15-19q17 0 16 15q-9 0-15-8q-4 9-16 12z" fill="url(#pHair)"/>
+    <path d="M144 104q14 6 22 2l3 7q-12 7-28 0z" fill="url(#pTop)"/>
+    <circle cx="169" cy="109" r="4.5" fill="url(#pSkin)"/>
+    <rect x="166" y="92" width="10" height="18" rx="2" transform="rotate(14 171 101)" fill="#0c0c0e"/>
+  </g>
+  <rect width="300" height="200" fill="url(#pGlow)"/>
+  <rect width="300" height="200" fill="url(#pPhone)"/>
+  <rect width="300" height="200" fill="url(#pVig)"/>
+  <rect width="300" height="200" filter="url(#grain)"/>
+</svg>
