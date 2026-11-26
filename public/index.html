@@ -294,8 +294,10 @@
           return line(ax + ux * padA, ay + uy * padA, bx - ux * padB, by - uy * padB);
         };
         const ACCENT = "#4f46e5", INK = "#14161f", GREY = "#9aa0b4";
+        const ends = []; // 끝점은 두 다이아몬드를 다 그린 뒤 맨 위에 올린다
         for (let d = 0; d < 2; d++) {
-          const ox = d * HALF * 2, L = ox + 12, C = ox + HALF, R = ox + HALF * 2 - 12;
+          // 두 다이아몬드는 가운데 한 점(x = HALF * 2)을 공유한다
+          const ox = d * HALF * 2, L = d ? ox : 12, C = ox + HALF, R = d ? W - 12 : ox + HALF * 2;
           svg.append(
             s("polygon", { points: `${L},${MID} ${C},${MID - OUT} ${R},${MID} ${C},${MID + OUT}`, fill: "#cdd2ff", stroke: ACCENT, "stroke-width": 1.5, "stroke-linejoin": "round" }),
             s("polygon", { points: `${L},${MID} ${C},${MID - IN} ${R},${MID} ${C},${MID + IN}`, fill: "#fff", stroke: ACCENT, "stroke-width": 1.5, "stroke-linejoin": "round" }));
@@ -323,8 +325,9 @@
           }
           // 시작점 · 끝점
           if (d === 0) svg.append(s("circle", { cx: L, cy: MID, r: 4, fill: INK }));
-          svg.append(d ? s("rect", { x: R - 7, y: MID - 7, width: 14, height: 14, fill: INK }) : s("circle", { cx: R, cy: MID, r: 7, fill: INK }));
+          ends.push(s("circle", { cx: R, cy: MID, r: 7, fill: INK }));
         }
+        svg.append(...ends);
         // 단계 이름: 아래 카드 네 칸과 같은 세로축에 놓는다
         process.forEach((stage, i) => {
           const x = i * HALF + HALF / 2 + (i % 2 ? 40 : -40);
