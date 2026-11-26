@@ -376,8 +376,6 @@
     .cell[data-edit] { cursor: pointer; transition: background .12s; }
     .cell[data-edit]:hover { background: #1a1c20; }
     .cell[data-edit]:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
-    .cell.is-human { outline: 2px dashed var(--good); outline-offset: -5px; }
-    .cell.is-rewrite { outline: 2px dashed #8b5cf6; outline-offset: -5px; }
     .cell.working { opacity: .5; pointer-events: none; }
     .flash { animation: flash 1.6s ease-out; }
     @keyframes flash { 0%, 30% { background: #2b2510; } 100% { background: transparent; } }
@@ -662,9 +660,6 @@
               <div class="legend" id="legend" hidden>
                 <span><i class="l-pain"></i>페인포인트</span>
                 <span><i class="l-opp"></i>기회 카드</span>
-                <span><i class="l-ai"></i>AI가 씀</span>
-                <span><i class="l-human"></i>사람이 고침</span>
-                <span><i class="l-rewrite"></i>AI 다시 씀</span>
               </div>
             </div>
             <div id="result">
@@ -1193,7 +1188,7 @@
       const ev = j.lens === "as-is" && !asis ? evOf(s, lane) : null;
       const evAttrs = ev ? `data-ev="${ev.type}" data-evn="${ev.refs.length}" data-lvl="${Math.min(4, ev.refs.length)}"` : "";
       const attrs = `${attrs0} ${evAttrs}`;
-      const foot = (refs) => `<div class="cell-foot">${asis ? "" : byTag(by)}${refsHtml(j, refs, tobe, by)}</div>`;
+      const foot = () => "";   // 칸 아래 AI·근거·가설 표기는 보여 주지 않는다 (본문이 먼저 읽히게)
       if (lane === "actions") return `<div class="${cls}" ${attrs}>${list(cell.items)}${foot(cell.refs)}</div>`;
       if (lane === "touchpoints") return `<div class="${cls}" ${attrs}>${tpHtml(cell.items)}${foot(cell.refs)}</div>`;
       if (lane === "thought") return `<div class="${cls}" ${attrs}>${cell.text ? `<q class="quote">${esc(cell.text)}</q>` : `<span class="none">—</span>`}${foot(cell.refs)}</div>`;
@@ -1201,7 +1196,7 @@
       if (lane === "emotion") {
         const e = s.emotion;
         const pt = points([s])[0];
-        return `<div class="${cls}" ${attrs}><span class="emo" style="background:${EMO_BG(pt.score)};color:${EMO_COLOR(pt.score)}">${esc(e.feel)} ${pt.fromVotes ? "평균 " : ""}${fmtEmo(pt.score)}</span>${pt.n ? `<span class="emo-n">참가자 ${pt.n}명</span>` : ""}<p class="emo-note">${esc(e.note)}</p>${pt.quote ? `<blockquote class="evi">“${esc(pt.quote)}”<cite>근거 ${esc(pt.ref || "—")}</cite></blockquote>` : ""}${foot([...new Set([...(e.refs || []), ...(e.votes || []).flatMap((v) => v.refs)])])}</div>`;
+        return `<div class="${cls}" ${attrs}><span class="emo" style="background:${EMO_BG(pt.score)};color:${EMO_COLOR(pt.score)}">${esc(e.feel)} ${fmtEmo(pt.score)}</span><p class="emo-note">${esc(e.note)}</p>${pt.quote ? `<blockquote class="evi">“${esc(pt.quote)}”</blockquote>` : ""}${foot([...new Set([...(e.refs || []), ...(e.votes || []).flatMap((v) => v.refs)])])}</div>`;
       }
       if (lane === "pains") {
         const items = s.pains?.items || [];
@@ -1214,7 +1209,7 @@
       }
       if (lane === "applied") {
         const ids = s.applied || [];
-        return `<div class="${cls} opp" ${attrs}>${ids.length ? ids.map((id) => { const x = painLookup(j, id); return `<div class="opp-card linked" data-opp="${esc(id)}"><div class="top"><span>HMW ${esc(id)}</span><span>← ${esc(x?.stage?.name || "")} ${esc(x?.pain?.id || "")}</span></div><p>${esc(x?.opp.chosen || "")}</p></div>`; }).join("") : `<span class="none">—</span>`}<div class="cell-foot"><span class="hyp">가설</span></div></div>`;
+        return `<div class="${cls} opp" ${attrs}>${ids.length ? ids.map((id) => { const x = painLookup(j, id); return `<div class="opp-card linked" data-opp="${esc(id)}"><div class="top"><span>HMW ${esc(id)}</span><span>← ${esc(x?.stage?.name || "")} ${esc(x?.pain?.id || "")}</span></div><p>${esc(x?.opp.chosen || "")}</p></div>`; }).join("") : `<span class="none">—</span>`}</div>`;
       }
       return "";
     }
@@ -1224,7 +1219,7 @@
       const o = oppOf(j, p.id) || { id: "", drafts: [], chosen: "" };
       const ed = editable();
       const chosen = o.chosen
-        ? `<div class="opp-card chosen" data-opp="${esc(o.id)}"><div class="top"><span>HMW ${esc(o.id)}</span><span>${esc(p.id)}</span></div><p>${esc(o.chosen)}</p><div class="cell-foot">${byTag(o.by)}</div></div>`
+        ? `<div class="opp-card chosen" data-opp="${esc(o.id)}"><div class="top"><span>HMW ${esc(o.id)}</span><span>${esc(p.id)}</span></div><p>${esc(o.chosen)}</p></div>`
         : `<div class="opp-missing">${esc(p.id)}에 기회가 없어요${ed ? " — 직접 쓰거나 AI로 다시 써 주세요" : ""}</div>`;
       const tools = ed ? `<div class="opp-tools"><button type="button" class="btn-link" data-write="${esc(p.id)}">직접 쓰기·고치기</button><button type="button" class="btn-link" data-redraft="${esc(p.id)}" data-lockable>AI로 다시 쓰기</button></div>` : "";
       return `<div class="opp-block" data-pain="${esc(p.id)}">${chosen}${tools}</div>`;
@@ -1239,7 +1234,7 @@
 
     function headHtml(j, s, i) {
       const ed = editable();
-      return `<div class="stage-h cell lane-head ${s.headBy === "human" ? "is-human" : s.headBy === "ai-rewrite" ? "is-rewrite" : ""}" data-stage="${s.id}" data-lane="head" ${ed ? 'data-edit="1" tabindex="0" role="button"' : ""}><span class="no">STAGE ${i + 1} / ${j.map.stages.length}</span><b>${esc(s.name)}</b><small>${esc(s.goal)}</small>${s.headBy && s.headBy !== "ai" ? byTag(s.headBy) : ""}</div>`;
+      return `<div class="stage-h cell lane-head ${s.headBy === "human" ? "is-human" : s.headBy === "ai-rewrite" ? "is-rewrite" : ""}" data-stage="${s.id}" data-lane="head" ${ed ? 'data-edit="1" tabindex="0" role="button"' : ""}><span class="no">STAGE ${i + 1} / ${j.map.stages.length}</span><b>${esc(s.name)}</b><small>${esc(s.goal)}</small></div>`;
     }
 
     // ── 세로 저니맵: 왼쪽 감정 곡선 + 오른쪽 단계 카드 (위에서 아래로 시간 순) ──
@@ -1250,15 +1245,15 @@
       const side = !!(tobe && A && state.view === "side");
       const lanes = tobe ? ["change", "actions", "thought", "emotion", "touchpoints", "applied"] : ["actions", "thought", "emotion", "touchpoints", "pains", "hmw"];
       const compare = new Set(["actions", "thought", "emotion", "touchpoints"]);
-      const pts = points(S), sig = analyze(S), band = !tobe;
+      const pts = points(S), sig = analyze(S), band = false;   // 근거 띠는 그리지 않는다
       tipData.main = { pts, sig, ghost: A ? points(A) : null, band };
       const cards = S.map((s, i) => {
         const roles = keyRoles(sig, i);
         const lanesHtml = lanes.map((lane) => {
           const cls = lane === "pains" ? "pain" : lane === "hmw" || lane === "applied" ? "opp" : "";
-          const head = `<h4 data-lane-h="${lane}">${LANE_LABEL[lane]}<small>${LANE_SUB[lane]}</small></h4>`;
+          const head = `<h4 data-lane-h="${lane}">${LANE_LABEL[lane]}</h4>`;
           if (A && compare.has(lane)) {
-            return `<div class="vlane ${cls}">${head}<div class="vpair ${side ? "side" : ""}"><div><span class="vtag">AS-IS</span>${cellHtml(j, A[i], lane, { asis: true })}</div><div><span class="vtag tobe">TO-BE · 가설</span>${cellHtml(j, s, lane)}</div></div></div>`;
+            return `<div class="vlane ${cls}">${head}<div class="vpair ${side ? "side" : ""}"><div><span class="vtag">AS-IS</span>${cellHtml(j, A[i], lane, { asis: true })}</div><div><span class="vtag tobe">TO-BE</span>${cellHtml(j, s, lane)}</div></div></div>`;
           }
           return `<div class="vlane ${cls}">${head}${cellHtml(j, s, lane)}</div>`;
         }).join("");
@@ -1267,12 +1262,11 @@
           <div class="vlanes ${side ? "one" : ""}">${lanesHtml}</div>
         </section>`;
       }).join("");
-      return `<div class="vmap-head"><span>감정 곡선${A ? " · AS-IS ┅ / TO-BE ━" : band && pts.some((p) => p.n) ? " · 참가자 평균 · 근거 띠" : ""}</span><span>단계 ${S.length}개 · 위에서 아래로 시간 순${editable() ? " · 칸을 누르면 고칠 수 있어요" : ""}</span></div>
+      return `${A ? `<div class="vmap-head"><span>감정 곡선 · AS-IS ┅ / TO-BE ━</span></div>` : ""}
         <div class="vmap">
           <div class="vcurve" id="vcurve" aria-label="감정 곡선"></div>
           <div class="vstages" id="vstages">${cards}</div>
-        </div>
-        <div class="vnotes">${peakEndNote(!!A, band && pts.some((p) => p.n))}</div>`;
+        </div>`;
     }
 
     // 단계 카드 머리의 세로 가운데를 재서 곡선을 그린다. 카드 높이가 바뀌면(창 크기·글꼴·편집) 다시 그린다.
@@ -1285,7 +1279,7 @@
       const ys = [...list.querySelectorAll(".vstage > .stage-h")].map((h) => { const r = h.getBoundingClientRect(); return r.top - base + r.height / 2; });
       if (ys.length !== S.length) return;
       const H = Math.ceil(list.getBoundingClientRect().height), W = box.clientWidth;
-      box.innerHTML = vCurveSvg(points(S), analyze(S), { W, H, ys, ghost: A ? points(A) : null, owner: "main", band: j.lens !== "to-be" });
+      box.innerHTML = vCurveSvg(points(S), analyze(S), { W, H, ys, ghost: A ? points(A) : null, owner: "main", band: false });
     }
     function wireVmap() {
       vObserver?.disconnect();
@@ -1301,7 +1295,7 @@
     function memosHtml(j) {
       const S = j.map.stages, sig = analyze(S), ed = editable();
       const items = [["low", "저점", "왜 여기서 감정이 가장 낮아졌을까요? 이탈 데이터와도 맞는지 적어 주세요."], ["peak", "정점", "무엇이 이 순간을 가장 좋게 만들었을까요?"], ["end", "종점", "이 여정은 어떤 기억으로 끝나나요? 종점 설계에 대한 해석을 적어 주세요."]];
-      return `<div class="memos"><h3>해석 메모 <small>리서처가 직접 써요 · AI는 채우지 않아요</small></h3><div class="memo-grid">${items.map(([k, label, ph]) => {
+      return `<div class="memos"><h3>해석 메모</h3><div class="memo-grid">${items.map(([k, label, ph]) => {
         const s = S[sig[k]];
         return `<label class="memo" style="--kc:${KEY[k].color}"><span class="memo-head"><i></i>${label} · ${esc(s.name)} <b>${esc(s.emotion.feel)} ${fmtEmo(points(S)[sig[k]].score)}</b></span>
           <textarea class="text-input" data-memo="${k}" rows="3" maxlength="600" placeholder="${ph}" ${ed ? "" : "readonly"}>${esc(j.map.memos?.[k] || "")}</textarea></label>`;
@@ -1331,7 +1325,7 @@
           ${ec.suggestions?.length ? `<b class="ec-sub">제안</b><ul>${ec.suggestions.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
         </div>
         <div class="links">
-          <h3>HMW 반영 연결 <small>확정한 기회가 TO-BE 어느 단계에 들어갔는지</small></h3>
+          <h3>HMW 반영 연결</h3>
           <ul class="link-list">${chosen.map((o) => {
             const x = painLookup(j, o.id);
             const at = S.filter((s) => (s.applied || []).includes(o.id));
@@ -1340,22 +1334,21 @@
           ${unlinked.length ? `<p class="warn-line">${unlinked.map((o) => o.id).join(", ")}는 TO-BE에 반영되지 않았어요. 해당 단계의 ‘바뀐 점’을 고치거나 TO-BE를 다시 만들어 보세요.</p>` : ""}
         </div>
         <div class="scenes">
-          <h3>시나리오 보드로 보낼 핵심 장면 <small>발전 단계의 시나리오 보드에서 불러가요 · 모두 가설</small></h3>
+          <h3>시나리오 보드로 보낼 핵심 장면</h3>
           <div class="scene-grid">${(j.map.scenes || []).map((c) => {
             const st = S.find((s) => s.id === c.stage);
             return `<article class="scene cell ${c.by === "human" ? "is-human" : ""}" data-scene="${esc(c.id)}" ${ed ? 'data-edit="1" tabindex="0" role="button"' : ""}>
               <span class="no">${esc(c.id)} · ${esc(st?.name || "")}</span><b>${esc(c.title)}</b><p>${esc(c.description)}</p>
-              <div class="cell-foot">${byTag(c.by)}<span class="hyp">가설</span>${c.hmw.map((h) => `<span class="ref">${esc(h)}</span>`).join("")}</div>
             </article>`;
           }).join("") || `<p class="none">장면이 없어요.</p>`}</div>
-          ${j.status === "confirmed" ? `<a class="btn" href="/scenario/?journey=${encodeURIComponent(j.id)}">시나리오 보드에서 열기 →</a>` : `<p class="hint">TO-BE를 확정하면 시나리오 보드 목록에 ‘확정’으로 표시돼요. 초안 장면도 불러갈 수 있어요.</p>`}
+          ${j.status === "confirmed" ? `<a class="btn" href="/scenario/?journey=${encodeURIComponent(j.id)}">시나리오 보드에서 열기 →</a>` : ""}
         </div>`;
     }
 
     function inputsHtml(j) {
       const inputs = j.meta?.inputs;
       if (!inputs?.length) return "";
-      return `<details class="inputs-card" ${state.justMade ? "open" : ""}><summary><b>AI가 받은 정보</b><span>${j.meta.model ? `${esc(j.meta.model)} · ` : ""}${j.meta.ms ? `${Math.round(j.meta.ms / 1000)}초` : ""}</span></summary>
+      return `<details class="inputs-card"><summary><b>AI가 받은 정보</b><span>${j.meta.model ? `${esc(j.meta.model)} · ` : ""}${j.meta.ms ? `${Math.round(j.meta.ms / 1000)}초` : ""}</span></summary>
         <dl>${inputs.map((x) => `<div><dt>${esc(x.k)}</dt><dd>${esc(x.v)}</dd></div>`).join("")}</dl>
         ${j.meta.warnings?.length ? `<p class="warn-line">${j.meta.warnings.map(esc).join(" ")}</p>` : ""}</details>`;
     }
@@ -1370,13 +1363,12 @@
       $("resultWho").innerHTML = `<span class="pill ${tobe ? "tobe" : "asis"}">${tobe ? "TO-BE" : "AS-IS"}</span>${j.demo ? `<span class="pill demo">예시 · AI 연결 전</span>` : `<span class="pill">버전 ${esc(j.version)}</span>`}<span>${esc([j.persona.role, j.project || j.persona.source].filter(Boolean).join(" · "))}</span>`;
       $("legend").hidden = false;
       $("result").innerHTML = `
-        ${!tobe && draft ? "" : `${versionsHtml(j)}${statusHtml(j)}`}
+        ${!tobe && draft ? "" : versionsHtml(j)}${draft && !j.demo ? "" : statusHtml(j)}
         ${inputsHtml(j)}
         ${tobe && j.parent ? `<div class="view-toggle segmented" role="radiogroup" aria-label="비교 보기"><input type="radio" name="cmp" id="cmpOverlay" value="overlay" ${state.view === "overlay" ? "checked" : ""}/><label for="cmpOverlay">위아래로 겹쳐 보기</label><input type="radio" name="cmp" id="cmpSide" value="side" ${state.view === "side" ? "checked" : ""}/><label for="cmpSide">단계별 나란히</label></div>` : ""}
         ${vmapHtml(j)}
         ${memosHtml(j)}
         ${tobe ? tobeExtrasHtml(j) : signalsHtml(j)}
-        ${!tobe && draft && !j.demo ? `<p class="next-note">검수 순서: 칸을 눌러 고치기 → 페인포인트마다 기회(HMW) 다듬기 → 저점·정점·종점 해석 메모 → TO-BE 만들기.</p>` : ""}
         ${tobeCtaHtml(j)}`;
       wireVmap();
       document.querySelectorAll('input[name="cmp"]').forEach((r) => r.addEventListener("change", () => { state.view = r.value; render(); }));
@@ -1401,7 +1393,8 @@
 
     // 저니맵 맨 아래: 위에서 아래로 다 확인한 뒤 TO-BE 를 만든다 (초안이면 AS-IS 를 확정하면서 만든다)
     function tobeCtaHtml(j) {
-      if (j.demo || j.lens === "to-be") return "";
+      if (j.demo) return "";
+      if (j.lens === "to-be") return j.status === "draft" ? `<div class="tobe-cta"><div><b>다 확인했다면 TO-BE를 확정해요</b><p>확정하면 마이페이지에 저장되고 시나리오 보드에서 불러갈 수 있어요. 확정한 뒤에는 칸을 고칠 수 없어요.</p></div><button class="btn btn-accent-solid" type="button" id="confirmBtn" data-lockable>TO-BE 확정</button></div>` : "";
       const child = j.children?.[j.children.length - 1];
       const draft = j.status === "draft";
       return `<div class="tobe-cta"><div><b>${child ? "TO-BE를 이미 만들었어요" : "다 확인했다면 TO-BE를 만들어요"}</b><p>${draft ? "누르면 지금 AS-IS가 확정돼 마이페이지에 저장되고, 같은 단계 골격 위에 개선된 경험(TO-BE)을 설계해요. 확정한 뒤에는 칸을 고칠 수 없어요." : "확정한 AS-IS의 단계 골격과 고른 기회(HMW)로 개선된 경험을 설계해요."}</p></div>
