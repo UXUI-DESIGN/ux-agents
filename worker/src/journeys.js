@@ -181,7 +181,7 @@ function buildAsIs(out, noteIds) {
     const pains = arr(s.pains, 4).map((x) => {
       const pid = `P${++p}`;
       const drafts = strs(x.hmw, 3, 300);
-      opps.push({ id: `O${opps.length + 1}`, pain: pid, drafts, chosen: "", by: "ai" });
+      opps.push({ id: `O${opps.length + 1}`, pain: pid, drafts, chosen: drafts[0] || "", by: "ai" });   // 첫 초안을 기회로 둔다 (화면은 카드 한 장만 보여 준다)
       return { id: pid, text: str(x.text, 300), refs: refs(x.refs) };
     });
     const e = s.emotion || {};
@@ -451,7 +451,8 @@ async function rewrite(request, env, json, user, row) {
   if (lane === "hmw") {
     const o = map.opps.find((x) => x.pain === pain.id);
     const drafts = strs(out.items, 3, 300);
-    if (o) Object.assign(o, { drafts, by: o.chosen ? o.by : by }); else map.opps.push({ id: `O${Date.now().toString(36)}`, pain: pain.id, drafts, chosen: "", by });
+    // 'AI로 다시 쓰기' — 새 첫 초안이 기회 카드를 바꾼다
+    if (o) Object.assign(o, { drafts, chosen: drafts[0] || o.chosen, by: drafts[0] ? by : o.by }); else map.opps.push({ id: `O${Date.now().toString(36)}`, pain: pain.id, drafts, chosen: drafts[0] || "", by });
   }
   const byId = new Map(retrieved.map((c) => [c.ref_id, c]));
   for (const id of refs) if (!map.evidence[id] && byId.has(id)) { const c = byId.get(id); map.evidence[id] = { text: c.text, code: c.code || "", ref: c.source_ref || "" }; }

@@ -193,8 +193,7 @@
     /* 기회: 카드 */
     .cell.opp { background: #141518; }
     .opp-card {
-      padding: 10px 12px; border: 1px solid #2f3238; border-radius: 10px; background: var(--surface);
-      box-shadow: 0 2px 0 var(--accent-soft), 0 4px 12px -6px rgba(255, 255, 255, .25);
+      padding: 10px 12px; border: 1px solid var(--hairline); border-radius: 10px; background: var(--surface);
     }
     .opp-card + .opp-card { margin-top: 8px; }
     .opp-card .top { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 4px; font-size: 11px; font-weight: 800; color: var(--accent); letter-spacing: .04em; }
@@ -396,21 +395,21 @@
     .change { font-weight: 600; line-height: 1.55; }
 
     .opp-block + .opp-block { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--line); }
-    .opp-card.chosen { border-color: var(--accent); }
-    .opp-missing { padding: 8px 10px; border: 1.5px dashed var(--danger); border-radius: 10px; background: var(--danger-soft); color: var(--danger); font-size: 12.5px; font-weight: 600; }
+    .opp-card.chosen { border-color: #3a3d44; }
+    .opp-missing { padding: 8px 10px; border: 1px dashed rgba(248, 113, 113, .35); border-radius: 10px; background: var(--danger-soft); color: var(--danger); font-size: 12.5px; font-weight: 600; }
     .drafts { display: grid; gap: 6px; margin-top: 8px; }
-    .draft { display: block; width: 100%; padding: 8px 10px; border: 1px dashed #3d4147; border-radius: 9px; background: var(--surface); text-align: left; font-size: 12.5px; line-height: 1.5; cursor: pointer; }
+    .draft { display: block; width: 100%; padding: 8px 10px; border: 1px dashed var(--hairline); border-radius: 9px; background: var(--surface); text-align: left; font-size: 12.5px; line-height: 1.5; cursor: pointer; }
     .draft small { display: block; font-size: 10.5px; font-weight: 800; color: var(--text-faint); }
-    .draft:hover { border-color: var(--accent); }
-    .draft.on { border-style: solid; border-color: var(--accent); background: var(--accent-soft); }
+    .draft:hover { border-color: #4a4e55; }
+    .draft.on { border-style: solid; border-color: #3a3d44; background: var(--accent-soft); }
     .opp-tools { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
-    .hl { outline: 2px solid #f59e0b !important; outline-offset: 1px; }
+    .hl { outline: 1px solid rgba(245, 158, 11, .45) !important; outline-offset: 1px; }
 
     .memos, .links, .scenes { margin-top: 20px; }
     .memos h3, .links h3, .scenes h3 { font-size: 15px; font-weight: 800; }
     .memos h3 small, .links h3 small, .scenes h3 small { margin-left: 6px; font-size: 12.5px; font-weight: 500; color: var(--text-sub); }
     .memo-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; margin-top: 10px; }
-    .memo { display: block; padding: 12px; border: 1px solid var(--line); border-top: 3px solid var(--kc); border-radius: 12px; background: var(--surface); }
+    .memo { display: block; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
     .memo-head { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; font-size: 13px; font-weight: 700; }
     .memo-head i { width: 9px; height: 9px; border-radius: 50%; background: var(--kc); }
     .memo-head b { margin-left: auto; font-size: 12px; color: var(--text-sub); }
@@ -1220,17 +1219,22 @@
       return "";
     }
 
-    // 페인포인트 하나의 HMW: 확정한 기회 + AI 초안 2~3개 (고르거나 고쳐 확정)
+    // 페인포인트 하나의 HMW: 기회 카드 한 장 (AI 초안 목록은 카드와 겹쳐 보이므로 따로 보여 주지 않는다 — 첫 초안이 카드가 된다)
     function oppBlock(j, s, p) {
       const o = oppOf(j, p.id) || { id: "", drafts: [], chosen: "" };
       const ed = editable();
-      const used = j.children?.length ? "" : "";
       const chosen = o.chosen
-        ? `<div class="opp-card chosen" data-opp="${esc(o.id)}"><div class="top"><span>HMW ${esc(o.id)} · 확정</span><span>${esc(p.id)}</span></div><p>${esc(o.chosen)}</p><div class="cell-foot">${byTag(o.by)}</div></div>`
-        : `<div class="opp-missing">${esc(p.id)}에 고른 기회가 없어요${ed ? " — 아래 초안에서 고르거나 직접 써 주세요" : ""}</div>`;
-      const drafts = ed && o.drafts.length ? `<div class="drafts" role="group" aria-label="${esc(p.id)} 기회 초안">${o.drafts.map((d, k) => `<button type="button" class="draft ${d === o.chosen ? "on" : ""}" data-choose="${esc(p.id)}" data-k="${k}" aria-pressed="${d === o.chosen}"><small>AI 초안 ${k + 1}</small>${esc(d)}</button>`).join("")}</div>` : "";
-      const tools = ed ? `<div class="opp-tools"><button type="button" class="btn-link" data-write="${esc(p.id)}">직접 쓰기·고치기</button><button type="button" class="btn-link" data-redraft="${esc(p.id)}" data-lockable>AI 초안 다시 받기</button></div>` : "";
-      return `<div class="opp-block" data-pain="${esc(p.id)}">${chosen}${drafts}${tools}</div>`;
+        ? `<div class="opp-card chosen" data-opp="${esc(o.id)}"><div class="top"><span>HMW ${esc(o.id)}</span><span>${esc(p.id)}</span></div><p>${esc(o.chosen)}</p><div class="cell-foot">${byTag(o.by)}</div></div>`
+        : `<div class="opp-missing">${esc(p.id)}에 기회가 없어요${ed ? " — 직접 쓰거나 AI로 다시 써 주세요" : ""}</div>`;
+      const tools = ed ? `<div class="opp-tools"><button type="button" class="btn-link" data-write="${esc(p.id)}">직접 쓰기·고치기</button><button type="button" class="btn-link" data-redraft="${esc(p.id)}" data-lockable>AI로 다시 쓰기</button></div>` : "";
+      return `<div class="opp-block" data-pain="${esc(p.id)}">${chosen}${tools}</div>`;
+    }
+    // 고른 기회가 없는 페인포인트는 첫 AI 초안을 기회로 채운다 (예전에 만든 초안 저니맵 포함)
+    function fillOpps(j) {
+      if (j.demo || j.lens !== "as-is" || j.status !== "draft") return false;
+      let changed = false;
+      for (const o of j.map.opps || []) if (!o.chosen && o.drafts?.[0]) { o.chosen = o.drafts[0]; o.by = o.by || "ai"; changed = true; }
+      return changed;
     }
 
     function headHtml(j, s, i) {
@@ -1372,7 +1376,7 @@
         ${vmapHtml(j)}
         ${memosHtml(j)}
         ${tobe ? tobeExtrasHtml(j) : signalsHtml(j)}
-        ${!tobe && draft && !j.demo ? `<p class="next-note">검수 순서: 칸을 눌러 고치기 → 페인포인트마다 기회(HMW) 고르기 → 저점·정점·종점 해석 메모 → TO-BE 만들기.</p>` : ""}
+        ${!tobe && draft && !j.demo ? `<p class="next-note">검수 순서: 칸을 눌러 고치기 → 페인포인트마다 기회(HMW) 다듬기 → 저점·정점·종점 해석 메모 → TO-BE 만들기.</p>` : ""}
         ${tobeCtaHtml(j)}`;
       wireVmap();
       document.querySelectorAll('input[name="cmp"]').forEach((r) => r.addEventListener("change", () => { state.view = r.value; render(); }));
@@ -1423,7 +1427,9 @@
     function setJourney(j, { push = true } = {}) {
       state.journey = j;
       if (push && !j.demo) history.replaceState(null, "", `?id=${encodeURIComponent(j.id)}`);
+      const filled = fillOpps(j);
       render();
+      if (filled) persist();
       if (!j.demo) loadVersions(j);
     }
 
