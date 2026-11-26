@@ -220,6 +220,70 @@
     .evidence ul { list-style: none; display: grid; gap: 4px; }
     .evidence b { color: var(--text); font-weight: 600; margin-right: 6px; }
     .evidence p { margin-top: 8px; font-size: 12.5px; color: var(--text-faint); }
+    /* ── 페르소나와 대화 (문서 아래) ── */
+    .pchat {
+      --note-n: #202227; --note-n-text: #c9cbd0; --note-t: #10261e; --note-t-text: #4cd4a0;
+      --note-u: #2a1f0c; --note-u-text: #f5b657; --note-d: #1a1c20; --note-d-text: #c3c6cc;
+      --infer: #2b1010; --infer-text: #f49ab3;
+      margin-top: 24px; border: 1px solid var(--persona-doc-line); border-radius: var(--persona-doc-radius);
+      background: var(--persona-doc-bg); overflow: hidden; scroll-margin-top: 84px;
+    }
+    .pchat-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px 20px; padding: 20px 24px 16px; border-bottom: 1px solid var(--line); }
+    .pchat-head h2 { font-size: 20px; }
+    .pchat-head p { margin-top: 6px; font-size: 13px; color: var(--text-sub); line-height: 1.6; }
+    .pchat-head .btn-link { flex: none; color: var(--text-sub); }
+    .pchat-index { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 12px 24px; border-bottom: 1px solid var(--line); font-size: 13px; color: var(--text-sub); }
+    .pchat-index > b { color: var(--text); font-weight: 600; }
+    .pchat-index .state { padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; }
+    .pchat-index .state.ok { background: #10261e; color: #4cd4a0; }
+    .pchat-index .state.no { background: #2a1f0c; color: #f5b657; }
+    .pchat-index .desc { flex: 1 1 280px; min-width: 0; }
+    .pchat-index .counts { display: flex; flex-wrap: wrap; gap: 5px; }
+    .pchat-index .counts span { padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 600; }
+    .pchat .k-note { background: var(--note-n); color: var(--note-n-text); }
+    .pchat .k-theme { background: var(--note-t); color: var(--note-t-text); }
+    .pchat .k-utterance { background: var(--note-u); color: var(--note-u-text); }
+    .pchat .k-persona { background: var(--note-d); color: var(--note-d-text); }
+    .pchat-msgs { height: 460px; overflow: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 14px; }
+    .pchat .msg { display: flex; gap: 10px; max-width: 80%; }
+    .pchat .msg.user { align-self: flex-end; flex-direction: row-reverse; }
+    .pchat .msg .av { flex: none; width: 32px; height: 32px; border-radius: 50%; background: var(--persona-photo-bg); overflow: hidden; display: grid; place-items: center; color: #fff; font-size: 13px; font-weight: 700; }
+    .pchat .msg .av img { width: 100%; height: 100%; object-fit: cover; }
+    .pchat .msg.user .av { background: var(--accent); color: var(--on-accent); }
+    .pchat .bubble { padding: 10px 14px; border-radius: 14px; background: var(--bg-soft); font-size: 14.5px; line-height: 1.65; white-space: pre-wrap; }
+    .pchat .msg.user .bubble { background: var(--accent); color: var(--on-accent); border-bottom-right-radius: 4px; }
+    .pchat .msg.assistant .bubble { border-bottom-left-radius: 4px; }
+    .pchat .cite { display: inline-block; padding: 0 6px; margin: 0 1px; border: 0; border-radius: 6px; font-size: 12px; font-weight: 700; line-height: 1.6; cursor: pointer; vertical-align: 1px; }
+    .pchat span.cite { cursor: default; }
+    .pchat .infer { display: inline-block; padding: 0 6px; margin: 0 1px; border-radius: 6px; font-size: 12px; font-weight: 700; background: var(--infer); color: var(--infer-text); }
+    .pchat .msg .meta { margin-top: 6px; font-size: 12px; color: var(--text-faint); }
+    .pchat .notes { margin-top: 8px; display: grid; gap: 6px; }
+    .pchat .note { padding: 8px 10px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); font-size: 12.5px; line-height: 1.5; color: var(--text-sub); }
+    .pchat .note b { display: inline-block; margin-right: 6px; padding: 0 6px; border-radius: 6px; font-size: 11.5px; }
+    .pchat .note .src { color: var(--text-faint); margin-left: 4px; }
+    .pchat .typing .bubble { color: var(--text-faint); }
+    .pchat .typing .bubble::after { content: "…"; animation: dots 1.2s steps(3, end) infinite; }
+    @keyframes dots { 0% { content: "."; } 33% { content: ".."; } 66% { content: "..."; } }
+    .pchat-starter { padding: 0 24px 12px; display: flex; flex-wrap: wrap; gap: 6px; }
+    .pchat-starter:empty { display: none; }
+    .pchat-starter button { padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); font-size: 12.5px; color: var(--text-sub); cursor: pointer; }
+    .pchat-starter button:hover { border-color: var(--accent); color: var(--accent); }
+    .pchat-composer { display: flex; gap: 8px; padding: 14px 16px; border-top: 1px solid var(--line); }
+    .pchat-composer textarea { flex: 1; min-width: 0; min-height: 44px; max-height: 160px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg-soft); color: var(--text); font: inherit; font-size: 14.5px; line-height: 1.5; resize: none; }
+    .pchat-composer textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .pchat-composer .btn { align-self: flex-end; padding: 10px 18px; }
+    .pchat-error { padding: 0 24px 10px; font-size: 13px; color: #ff6b5e; }
+    .pchat-error:empty { display: none; }
+    .pchat .blocked { margin: auto; padding: 24px; text-align: center; color: var(--text-sub); font-size: 14px; }
+    .pchat .blocked b { display: block; color: var(--text); font-size: 16px; margin-bottom: 6px; }
+    @media (max-width: 640px) {
+      .pchat-head, .pchat-index { padding-left: 16px; padding-right: 16px; }
+      .pchat-msgs { height: 60vh; padding: 16px; }
+      .pchat .msg { max-width: 94%; }
+      .pchat-starter { padding: 0 16px 12px; }
+      .pchat-error { padding: 0 16px 10px; }
+    }
+
     /* ── 사진 만들기 모달 ── */
     .modal-back { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 16px; background: rgba(0, 0, 0, .45); backdrop-filter: blur(2px); }
     .modal { width: min(880px, 100%); max-height: calc(100vh - 32px); display: flex; flex-direction: column; background: var(--surface); border-radius: 18px; box-shadow: 0 24px 64px rgba(0, 0, 0, .25); overflow: hidden; }
@@ -308,7 +372,7 @@
     @page { size: A4 landscape; margin: 10mm; }
     @media print {
       html, body { background: var(--surface); }
-      .nav, footer, .toolbar, .toast, .evidence, .modal-back, .sample-bar, .chip-add, .point-add, .point-del { display: none !important; }
+      .nav, footer, .toolbar, .toast, .evidence, .pchat, .modal-back, .sample-bar, .chip-add, .point-add, .point-del { display: none !important; }
       .doc.editing [data-edit] { outline: none; }
       main { padding: 0; background: var(--surface); }
       .container { max-width: none; padding: 0; }
@@ -348,7 +412,6 @@
         <div class="crumb"><a href="/persona/index.html">페르소나</a> · <span id="crumbName">불러오는 중…</span></div>
         <div class="actions">
           <span class="edit-hint" id="editHint" hidden>글자를 클릭해 고치고, 슬라이더는 끌어서 옮기세요.</span>
-          <a class="btn" id="chatBtn" hidden>대화하기</a>
           <button type="button" class="btn" id="photoBtn" hidden>사진 만들기</button>
           <button type="button" class="btn" id="editBtn" aria-pressed="false">편집</button>
           <button type="button" class="btn btn-accent" id="saveBtn" hidden>저장</button>
@@ -403,6 +466,30 @@
       </article>
 
       <aside class="evidence" id="evidence" hidden></aside>
+
+      <!-- 페르소나와 대화: 인터뷰 분석에서 나온 페르소나만 (근거 노트를 인용해 답한다) -->
+      <section class="pchat" id="chat" hidden aria-labelledby="chatTitle">
+        <div class="pchat-head">
+          <div>
+            <h2 id="chatTitle">페르소나와 대화</h2>
+            <p>인터뷰 근거 노트를 인용하며 이 페르소나로서 답해요. <span class="cite k-note">N012</span> 같은 표시를 누르면 원문을 볼 수 있고, <span class="infer">추론 중간</span>은 근거 없이 성향으로 추론한 부분이에요.</p>
+          </div>
+          <button type="button" class="btn-link" id="chatClear">대화 지우기</button>
+        </div>
+        <div class="pchat-index">
+          <b>근거 노트</b><span class="state no" id="chatState">확인 중</span>
+          <span class="desc" id="chatDesc"></span>
+          <span class="counts" id="chatCounts"></span>
+          <button type="button" class="btn btn-accent" id="indexBtn" hidden>근거 노트 색인하기</button>
+        </div>
+        <div class="pchat-msgs" id="chatMsgs"></div>
+        <div class="pchat-starter" id="chatStarter"></div>
+        <p class="pchat-error" id="chatError"></p>
+        <form class="pchat-composer" id="chatComposer">
+          <textarea id="chatInput" rows="1" maxlength="2000" placeholder="페르소나에게 물어보세요."></textarea>
+          <button type="submit" class="btn btn-accent" id="chatSend" disabled>보내기</button>
+        </form>
+      </section>
     </div>
   </main>
 
@@ -837,6 +924,165 @@
       box.hidden = !items.length;
     }
 
+    // ── 페르소나와 대화 (문서 아래 섹션) ──
+    //   GET /api/personas/:id/chat → 근거 노트 색인 상태 · POST …/index → 색인 · POST …/chat → 답변
+    //   대화 기록은 브라우저 sessionStorage 에만 둔다
+    function initChat(p, sample) {
+      const KIND = { N: "note", T: "theme", U: "utterance", D: "persona" };
+      const KIND_LABEL = { note: "관찰 노트", theme: "테마", utterance: "원 발화", persona: "페르소나 문서" };
+      const STARTERS = ["요즘 콘텐츠는 주로 언제, 어디서 보세요?", "최근에 가장 불편했던 순간은요?", "주변 사람 추천은 얼마나 믿으세요?", "이 서비스에서 꼭 있었으면 하는 기능은?"];
+      const cid = sample ? SAMPLE_ID : p.id;
+      const api = (path, opt) => UXA.api(`/api/personas/${encodeURIComponent(cid)}${path}`, opt);
+      const HIST_KEY = `uxa.persona.chat.${cid}`;
+      let ready = false, busy = false, hist = [], noteCache = {};
+      try { hist = JSON.parse(sessionStorage.getItem(HIST_KEY) || "[]"); } catch {}
+
+      const name = p.profile?.name || "페르소나";
+      const c = name.charCodeAt(name.length - 1);
+      const wa = c >= 0xac00 && c <= 0xd7a3 && (c - 0xac00) % 28 ? "과" : "와";
+      $("chatTitle").textContent = `${name}${wa} 대화`;
+      $("chatInput").placeholder = `${name}에게 물어보세요. 예) ${STARTERS[0]}`;
+      $("chat").hidden = false;
+      if (location.hash === "#chat") setTimeout(() => $("chat").scrollIntoView({ block: "start" }), 0);
+
+      const counts = (st) => Object.entries(st.counts || {}).map(([k, n]) => `<span class="k-${esc(k)}">${esc(KIND_LABEL[k] || k)} ${n}</span>`).join("");
+      function renderIndex(st) {
+        if (st.autoIndex || sample) {
+          // 샘플: 첫 질문 때 서버가 알아서 색인한다. 버튼 없이 바로 대화
+          ready = true;
+          $("chatState").textContent = st.ready ? "색인됨" : "자동"; $("chatState").className = "state ok";
+          $("chatDesc").textContent = st.ready
+            ? `샘플 인터뷰 분석의 근거 노트 ${st.total}개가 색인되어 있어요.`
+            : "체험용 샘플이에요. 첫 질문을 보내면 근거 노트(가상 인터뷰 4명의 어피니티 노트·테마)를 자동으로 색인하고 답해요.";
+          $("chatCounts").innerHTML = counts(st);
+          $("indexBtn").hidden = true;
+        } else {
+          ready = !!st.ready;
+          $("chatState").textContent = ready ? "색인됨" : st.reason === "no_analysis" ? "불가" : "아직 없음";
+          $("chatState").className = `state ${ready ? "ok" : "no"}`;
+          if (st.reason === "no_analysis") {
+            $("chatDesc").textContent = "이 페르소나는 인터뷰 분석 묶음이 없어 근거 노트를 만들 수 없어요. 인터뷰에서 생성한 페르소나만 대화할 수 있습니다.";
+            $("chatCounts").innerHTML = ""; $("indexBtn").hidden = true;
+          } else if (ready) {
+            $("chatDesc").textContent = `"${st.service || ""}" 인터뷰 분석에서 근거 노트 ${st.total}개를 색인했어요. (${new Date(st.indexed_at * 1000).toLocaleString("ko-KR")})`;
+            $("chatCounts").innerHTML = counts(st);
+            $("indexBtn").hidden = false; $("indexBtn").textContent = "다시 색인"; $("indexBtn").classList.remove("btn-accent");
+          } else {
+            $("chatDesc").textContent = "아직 근거 노트를 색인하지 않았어요. 색인하면 인터뷰 분석 노트·테마·참가자 발화를 벡터로 저장하고 대화에 씁니다. (보통 10~30초)";
+            $("chatCounts").innerHTML = "";
+            $("indexBtn").hidden = false; $("indexBtn").textContent = "근거 노트 색인하기"; $("indexBtn").classList.add("btn-accent");
+          }
+        }
+        updateSend();
+        if (!ready) {
+          $("chatStarter").innerHTML = "";
+          if (!hist.length) $("chatMsgs").innerHTML = `<div class="blocked"><b>${st.reason === "no_analysis" ? "대화할 수 없는 페르소나예요" : "먼저 근거 노트를 색인해 주세요"}</b>${st.reason === "no_analysis" ? "" : "위의 '근거 노트 색인하기'를 누르면 바로 대화를 시작할 수 있어요."}</div>`;
+        } else renderHistory();
+      }
+
+      async function loadStatus() {
+        const { res, data } = await api("/chat");
+        if (res.status === 401) { UXA.clearSession(); location.replace(UXA.loginUrl()); return; }
+        if (!res.ok) { $("chatState").textContent = "오류"; $("chatDesc").textContent = data.error || "대화 상태를 불러오지 못했어요."; return; }
+        renderIndex(data);
+      }
+
+      async function index() {
+        if (busy) return;
+        busy = true; $("indexBtn").disabled = true; $("indexBtn").textContent = "색인 중…"; updateSend();
+        const { res, data } = await api("/index", { method: "POST", body: {} });
+        busy = false; $("indexBtn").disabled = false;
+        if (res.status === 401) { UXA.clearSession(); location.replace(UXA.loginUrl()); return; }
+        if (!res.ok) { $("chatError").textContent = data.error || "색인하지 못했어요."; renderIndex({ ready, reason: ready ? null : "not_indexed" }); return; }
+        $("chatError").textContent = ""; noteCache = {};
+        await loadStatus();
+      }
+
+      function updateSend() { $("chatSend").disabled = !ready || busy || !$("chatInput").value.trim(); }
+      function autoGrow() { const t = $("chatInput"); t.style.height = "auto"; t.style.height = Math.min(160, t.scrollHeight) + "px"; }
+      $("chatInput").addEventListener("input", () => { updateSend(); autoGrow(); });
+      $("chatInput").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); $("chatComposer").requestSubmit(); } });
+
+      function renderStarters() {
+        $("chatStarter").innerHTML = hist.length ? "" : STARTERS.map((q) => `<button type="button">${esc(q)}</button>`).join("");
+        $("chatStarter").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { $("chatInput").value = b.textContent; updateSend(); $("chatInput").focus(); }));
+      }
+      function renderHistory() {
+        $("chatMsgs").innerHTML = "";
+        hist.forEach((m) => appendMsg(m));
+        renderStarters();
+        scrollDown();
+      }
+      // [N012] → 근거 칩, [추론 높음] → 추론 칩
+      function richText(text) {
+        return esc(text)
+          .replace(/\[([NTUD]\d{2,3})\]/g, (m, id) => `<button type="button" class="cite k-${KIND[id[0]]}" data-ref="${id}">${id}</button>`)
+          .replace(/\[추론\s*(높음|중간|낮음|낮은)\]/g, (m, lv) => `<span class="infer">추론 ${lv.replace("낮은", "낮음")}</span>`);
+      }
+      function appendMsg(m, opts = {}) {
+        const el = document.createElement("div");
+        el.className = `msg ${m.role}${opts.typing ? " typing" : ""}`;
+        const photo = persona?.photoUrl;
+        const av = m.role === "user" ? `<span class="av">나</span>` : `<span class="av">${photo ? `<img src="${esc(photo)}" alt="" />` : esc(name[0])}</span>`;
+        el.innerHTML = `${av}<div><div class="bubble">${opts.typing ? "생각 중" : m.role === "assistant" ? richText(m.content) : esc(m.content)}</div>${m.role === "assistant" && !opts.typing ? `<div class="meta">${m.cited?.length ? `근거 ${m.cited.length}개` : "근거 표기 없음"}${m.inference?.length ? ` · 추론 ${m.inference.join("/")}` : ""}${m.ms ? ` · ${(m.ms / 1000).toFixed(1)}초` : ""}</div><div class="notes" hidden></div>` : ""}</div>`;
+        if (m.cited) for (const x of m.cited) noteCache[x.ref_id] = x;
+        el.querySelectorAll(".cite").forEach((b) => b.addEventListener("click", () => toggleNote(el, b.dataset.ref)));
+        $("chatMsgs").appendChild(el);
+        return el;
+      }
+      function toggleNote(msgEl, ref) {
+        const box = msgEl.querySelector(".notes");
+        const existing = box.querySelector(`[data-note="${ref}"]`);
+        if (existing) { existing.remove(); box.hidden = !box.children.length; return; }
+        const x = noteCache[ref];
+        const div = document.createElement("div");
+        div.className = "note"; div.dataset.note = ref;
+        div.innerHTML = x
+          ? `<b class="k-${esc(x.kind)}">${esc(ref)}</b>${esc(x.text)}${x.source_ref ? `<span class="src">(${esc(x.source_ref)})</span>` : ""}`
+          : `<b>${esc(ref)}</b>이 노트의 원문을 찾지 못했어요.`;
+        box.appendChild(div); box.hidden = false;
+      }
+      function scrollDown() { const m = $("chatMsgs"); m.scrollTop = m.scrollHeight; }
+      function saveHist() { try { sessionStorage.setItem(HIST_KEY, JSON.stringify(hist.slice(-40))); } catch {} }
+
+      $("chatComposer").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const q = $("chatInput").value.trim();
+        if (!q || !ready || busy) return;
+        $("chatInput").value = ""; autoGrow(); $("chatError").textContent = "";
+        const userMsg = { role: "user", content: q };
+        hist.push(userMsg); saveHist();
+        $("chatStarter").innerHTML = "";
+        const userEl = appendMsg(userMsg);
+        const typing = appendMsg({ role: "assistant", content: "" }, { typing: true });
+        scrollDown();
+        busy = true; updateSend();
+        const { res, data } = await api("/chat", { method: "POST", body: { messages: hist.slice(-12).map((m) => ({ role: m.role, content: m.content })) } });
+        busy = false; updateSend();
+        typing.remove();
+        if (res.status === 401) { UXA.clearSession(); location.replace(UXA.loginUrl()); return; }
+        if (!res.ok) {
+          hist.pop(); saveHist(); userEl.remove(); renderStarters();
+          $("chatError").textContent = data.error || "답을 받지 못했어요.";
+          if (data.code === "not_indexed") renderIndex({ ready: false, reason: "not_indexed" });
+          $("chatInput").value = q; updateSend();
+          return;
+        }
+        const reply = { role: "assistant", content: data.reply, cited: data.cited || [], inference: data.inference || [], ms: data.ms };
+        hist.push(reply); saveHist();
+        appendMsg(reply); scrollDown();
+        $("chatInput").focus({ preventScroll: true });
+      });
+      $("chatClear").addEventListener("click", () => {
+        if (hist.length && !confirm("이 페르소나와의 대화 기록을 지울까요? (브라우저에만 저장돼 있어요)")) return;
+        hist = []; saveHist();
+        if (ready) renderHistory();
+      });
+      $("indexBtn").addEventListener("click", index);
+
+      loadStatus();
+    }
+
     async function loadPersona() {
       if (!isSample && !UXA.getSession()) { location.replace(UXA.loginUrl()); return null; }
       const { res, data } = await UXA.api(`/api/personas/${encodeURIComponent(personaId)}`);
@@ -858,14 +1104,13 @@
       lastSaved = structuredClone(p);
       render(persona);
       renderEvidence(persona);
-      $("chatBtn").hidden = !persona.analysisId; // 인터뷰 분석에서 나온 페르소나만 대화할 수 있다
-      $("chatBtn").href = `/persona/chat/?id=${encodeURIComponent(isSample ? SAMPLE_ID : persona.id)}`;
+      if (persona.analysisId) initChat(persona, isSample); // 인터뷰 분석에서 나온 페르소나만 대화할 수 있다
       if (isSample) {
         // 샘플: 읽기와 대화만. 편집·사진 만들기는 숨긴다
         $("editBtn").hidden = true; $("photoBtn").hidden = true;
         $("crumbName").insertAdjacentHTML("afterend", ` <span class="sample-badge">샘플 · 로그인 없이 체험</span>`);
         $("sampleBar").hidden = false;
-        if (!UXA.getSession()) $("sampleBar").innerHTML = `이 페르소나는 체험용 샘플이에요. 가상 인터뷰 4명의 어피니티 노트를 바탕으로 만들어졌고, <b>대화하기</b>에서 근거 노트를 인용하며 답해요. 내 인터뷰로 만들려면 <a href="${UXA.loginUrl("/persona/new/")}">로그인</a>하세요.`;
+        if (!UXA.getSession()) $("sampleBar").innerHTML = `이 페르소나는 체험용 샘플이에요. 가상 인터뷰 4명의 어피니티 노트를 바탕으로 만들어졌고, 아래 <b>대화</b>에서 근거 노트를 인용하며 답해요. 내 인터뷰로 만들려면 <a href="${UXA.loginUrl("/persona/new/")}">로그인</a>하세요.`;
       } else {
         $("photoBtn").hidden = false;
         $("photoBtn").textContent = persona.photoUrl ? "사진 바꾸기" : "사진 만들기";
