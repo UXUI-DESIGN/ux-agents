@@ -87,17 +87,18 @@
     .section-head p { margin: 10px auto 0; max-width: 640px; color: var(--text-sub); }
 
     /* 3. 전체 프로세스 — 더블 다이아몬드 */
-    .diamonds { display: grid; grid-template-columns: repeat(4, 1fr); margin-bottom: 12px; }
-    .diamonds .shape {
-      display: flex; flex-direction: column; justify-content: center; height: 132px;
-      font-weight: 800; font-size: 18px; color: var(--accent);
-    }
-    .diamonds .shape small { font-size: 12px; font-weight: 600; opacity: 0.75; }
-    .diamonds .diverge { clip-path: polygon(0 50%, 100% 0, 100% 100%); padding-left: 46%; background: linear-gradient(90deg, #e3e6ff, #d5d9ff); }
-    .diamonds .converge { clip-path: polygon(0 0, 100% 50%, 0 100%); padding-left: 18%; background: linear-gradient(90deg, #d5d9ff, #e3e6ff); }
-    .diamonds .solution.diverge { background: linear-gradient(90deg, #6d66ee, var(--accent)); color: #fff; }
-    .diamonds .solution.converge { background: linear-gradient(90deg, var(--accent), #6d66ee); color: #fff; }
-    .diamond-names { display: grid; grid-template-columns: 1fr 1fr; margin-bottom: 36px; text-align: center; font-size: 14px; color: var(--text-sub); }
+    .diamonds { margin-bottom: 8px; }
+    .diamonds svg { display: block; width: 100%; height: auto; overflow: visible; }
+    .diamonds .lbl { font-size: 18px; font-weight: 800; fill: var(--text); letter-spacing: -0.02em; }
+    .diamonds .lbl .no { fill: var(--accent); font-size: 13px; letter-spacing: 0.04em; }
+    .diamonds .sub { font-size: 12px; font-weight: 600; fill: var(--text-sub); }
+    .diamond-legend { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px 24px; margin-bottom: 36px; font-size: 13px; color: var(--text-sub); }
+    .diamond-legend span { display: inline-flex; align-items: center; gap: 8px; }
+    .diamond-legend i { width: 28px; height: 14px; border-radius: 3px; border: 1.5px solid var(--accent); background: #fff; }
+    .diamond-legend i.ai { background: #cdd2ff; }
+    .diamond-legend i.dot { width: 10px; height: 10px; border: 0; border-radius: 50%; background: var(--accent); }
+    .diamond-legend i.dot.human { background: var(--text); }
+    .diamond-names { display: grid; grid-template-columns: 1fr 1fr; margin-bottom: 14px; text-align: center; font-size: 14px; color: var(--text-sub); }
     .diamond-names b { color: var(--text); font-weight: 700; }
 
     .stages { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; align-items: stretch; }
@@ -111,8 +112,15 @@
     .stage-top h3 small { margin-left: 4px; font-size: 12px; font-weight: 500; color: var(--text-sub); }
     .mode { padding: 3px 10px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-size: 12px; font-weight: 700; white-space: nowrap; }
     .stage .q { margin-top: 14px; font-size: 15px; font-weight: 700; line-height: 1.45; }
-    .stage .desc { margin-top: 4px; font-size: 13px; color: var(--text-sub); }
-    .tools { display: grid; gap: 8px; margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--line); list-style: none; }
+    .stage .desc { margin: 4px 0 18px; padding-bottom: 18px; border-bottom: 1px solid var(--line); font-size: 13px; color: var(--text-sub); }
+    .tools { display: grid; gap: 8px; list-style: none; }
+    .tools li { display: grid; }
+    /* 넓은 화면: 네 카드가 같은 가로 기준선을 공유한다 (제목 · 질문 · 설명 · 구분선 · 메뉴 칸) */
+    @media (min-width: 1081px) {
+      .stages { grid-template-rows: auto auto auto auto; gap: 0 16px; }
+      .stage { display: grid; grid-template-rows: subgrid; grid-row: span 4; }
+      .tools { grid-auto-rows: 94px; align-content: start; }
+    }
     .tool { display: block; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s; }
     .tool b { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 15px; font-weight: 700; }
     .tool span { display: block; margin-top: 2px; font-size: 13px; color: var(--text-sub); }
@@ -142,7 +150,7 @@
 
     /* 반응형 */
     @media (max-width: 1080px) {
-      .diamonds, .diamond-names { display: none; }
+      .diamonds, .diamond-names, .diamond-legend { display: none; }
       .stages, .ways { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 640px) {
@@ -188,10 +196,16 @@
           <h2>더블 다이아몬드로 이어지는 전체 프로세스</h2>
           <p>문제를 넓게 발견하고 좁혀 정의한 뒤, 해결책을 넓게 발전시키고 좁혀 전달합니다. 각 단계에 그 일을 맡은 AI 에이전트가 있습니다.</p>
         </div>
-        <div class="diamonds" id="diamonds" aria-hidden="true"></div>
+        <div class="diamonds" id="diamonds" role="img" aria-label="AI와 결합된 더블 다이아몬드: 문제와 해결 두 다이아몬드 모두에서 AI가 탐색 범위를 위아래로 넓혀 준다"></div>
         <div class="diamond-names" aria-hidden="true">
           <span><b>문제 다이아몬드</b> · 올바른 문제 찾기</span>
           <span><b>해결 다이아몬드</b> · 올바른 해결책 만들기</span>
+        </div>
+        <div class="diamond-legend" aria-hidden="true">
+          <span><i class="ai"></i>AI가 넓혀 주는 탐색 범위</span>
+          <span><i></i>사람만으로 다루던 범위</span>
+          <span><i class="dot"></i>AI가 더 찾아낸 선택지</span>
+          <span><i class="dot human"></i>사람이 찾던 선택지</span>
         </div>
         <div class="stages" id="stages"></div>
         <noscript><p style="text-align:center;color:var(--text-sub)">발견(인터뷰 가이드 · 인터뷰 모더레이터) → 정의(페르소나 · 저니맵) → 발전(시나리오 보드) → 전달</p></noscript>
@@ -253,11 +267,73 @@
         return node;
       };
 
-      // 다이아몬드 그림: 넓히기 · 좁히기가 한 쌍씩 (앞 두 단계 = 문제, 뒤 두 단계 = 해결)
-      process.forEach((stage, i) => {
-        const cls = `shape ${stage.mode === "넓히기" ? "diverge" : "converge"} ${i >= 2 ? "solution" : ""}`;
-        $("diamonds").append(el("div", { className: cls }, stage.ko, el("small", { textContent: stage.mode })));
-      });
+      // 다이아몬드 그림: AI와 결합된 더블 다이아몬드.
+      // 안쪽 흰 마름모 = 사람만으로 다루던 범위, 바깥 색 날개 = AI가 넓혀 주는 범위.
+      // 왼쪽 절반은 넓히기(화살표가 퍼진다), 오른쪽 절반은 좁히기(선택지가 묶여 한 점으로 모인다).
+      (() => {
+        const NS = "http://www.w3.org/2000/svg";
+        const W = 1112, H = 320, MID = 168, HALF = 278, OUT = 122, IN = 54;
+        const s = (tag, attrs, text) => {
+          const n = document.createElementNS(NS, tag);
+          for (const k in attrs) n.setAttribute(k, attrs[k]);
+          if (text != null) n.textContent = text;
+          return n;
+        };
+        const svg = s("svg", { viewBox: `0 0 ${W} ${H}` });
+        const defs = s("defs", {});
+        const marker = s("marker", { id: "dd-arrow", viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 6, markerHeight: 6, orient: "auto-start-reverse" });
+        marker.append(s("path", { d: "M0 0L10 5L0 10z", fill: "#14161f" }));
+        defs.append(marker);
+        svg.append(defs);
+        const line = (x1, y1, x2, y2, arrow = true) => s("line", Object.assign(
+          { x1, y1, x2, y2, stroke: "#14161f", "stroke-width": 1.4, "stroke-linecap": "round" },
+          arrow ? { "marker-end": "url(#dd-arrow)" } : {}));
+        // 점 a에서 점 b 방향으로 가되 양 끝을 조금 띄운 화살표
+        const arrow = (ax, ay, bx, by, padA, padB) => {
+          const d = Math.hypot(bx - ax, by - ay), ux = (bx - ax) / d, uy = (by - ay) / d;
+          return line(ax + ux * padA, ay + uy * padA, bx - ux * padB, by - uy * padB);
+        };
+        const ACCENT = "#4f46e5", INK = "#14161f", GREY = "#9aa0b4";
+        for (let d = 0; d < 2; d++) {
+          const ox = d * HALF * 2, L = ox + 12, C = ox + HALF, R = ox + HALF * 2 - 12;
+          svg.append(
+            s("polygon", { points: `${L},${MID} ${C},${MID - OUT} ${R},${MID} ${C},${MID + OUT}`, fill: "#cdd2ff", stroke: ACCENT, "stroke-width": 1.5, "stroke-linejoin": "round" }),
+            s("polygon", { points: `${L},${MID} ${C},${MID - IN} ${R},${MID} ${C},${MID + IN}`, fill: "#fff", stroke: ACCENT, "stroke-width": 1.5, "stroke-linejoin": "round" }));
+          // 가운데 세로줄: 넓혀서 찾아낸 선택지들
+          const ys = [];
+          for (let k = -6; k <= 6; k++) ys.push(MID + k * 18);
+          // 넓히기: 시작점에서 선택지로 퍼지는 화살표
+          for (const k of [-5, -3, -2, 0, 2, 3, 5]) {
+            const y = MID + k * 18;
+            const sx = L + (C - L) * 0.3, sy = MID + (y - MID) * 0.3;
+            svg.append(arrow(sx, sy, C, y, 0, 10));
+          }
+          // 좁히기: 선택지 → 묶음 5개 → 3개 → 한 점
+          const n1 = [-2, -1, 0, 1, 2].map((k) => [C + 104, MID + k * 30]);
+          const n2 = [-1, 0, 1].map((k) => [C + 186, MID + k * 21]);
+          ys.forEach((y, i) => { const [nx, ny] = n1[Math.round(i * 4 / 12)]; svg.append(arrow(C, y, nx, ny, 9, 8)); });
+          n1.forEach(([x, y], i) => { const [nx, ny] = n2[Math.round(i * 2 / 4)]; svg.append(arrow(x, y, nx, ny, 8, 8)); });
+          n2.forEach(([x, y]) => svg.append(arrow(x, y, R, MID, 8, 10)));
+          for (const [x, y] of [...n1, ...n2]) svg.append(d ? s("rect", { x: x - 4.5, y: y - 4.5, width: 9, height: 9, fill: GREY }) : s("circle", { cx: x, cy: y, r: 5, fill: GREY }));
+          for (const y of ys) {
+            const human = Math.abs(y - MID) < IN;
+            svg.append(d
+              ? s("rect", { x: C - 5, y: y - 5, width: 10, height: 10, fill: human ? INK : ACCENT })
+              : s("circle", { cx: C, cy: y, r: 5.5, fill: human ? INK : ACCENT }));
+          }
+          // 시작점 · 끝점
+          if (d === 0) svg.append(s("circle", { cx: L, cy: MID, r: 4, fill: INK }));
+          svg.append(d ? s("rect", { x: R - 7, y: MID - 7, width: 14, height: 14, fill: INK }) : s("circle", { cx: R, cy: MID, r: 7, fill: INK }));
+        }
+        // 단계 이름: 아래 카드 네 칸과 같은 세로축에 놓는다
+        process.forEach((stage, i) => {
+          const x = i * HALF + HALF / 2 + (i % 2 ? 40 : -40);
+          const t = s("text", { x, y: 22, "text-anchor": "middle", class: "lbl" });
+          t.append(s("tspan", { class: "no" }, String(i + 1).padStart(2, "0") + "  "), stage.ko);
+          svg.append(t, s("text", { x, y: 42, "text-anchor": "middle", class: "sub" }, `${stage.en} · ${stage.mode}`));
+        });
+        $("diamonds").append(svg);
+      })();
 
       // 단계 카드
       process.forEach((stage, i) => {
