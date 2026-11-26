@@ -231,7 +231,14 @@
     .pchat-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px 20px; padding: 20px 24px 16px; border-bottom: 1px solid var(--line); }
     .pchat-head h2 { font-size: 20px; }
     .pchat-head p { margin-top: 6px; font-size: 13px; color: var(--text-sub); line-height: 1.6; }
-    .pchat-head .btn-link { flex: none; color: var(--text-sub); }
+    .pchat-actions { flex: none; display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px 10px; }
+    .pchat-actions .btn { padding: 7px 14px; font-size: 13px; }
+    .pchat-actions .btn:disabled { opacity: .45; cursor: not-allowed; border-color: var(--line); color: var(--text); }
+    .pchat-head .btn-link { color: var(--text-sub); }
+    @media (max-width: 720px) {
+      .pchat-head { flex-direction: column; }
+      .pchat-actions { justify-content: flex-start; }
+    }
     .pchat-index { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 12px 24px; border-bottom: 1px solid var(--line); font-size: 13px; color: var(--text-sub); }
     .pchat-index > b { color: var(--text); font-weight: 600; }
     .pchat-index .state { padding: 2px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; }
@@ -249,10 +256,12 @@
     .pchat .msg.user { align-self: flex-end; flex-direction: row-reverse; }
     .pchat .msg .av { flex: none; width: 32px; height: 32px; border-radius: 50%; background: var(--persona-photo-bg); overflow: hidden; display: grid; place-items: center; color: #fff; font-size: 13px; font-weight: 700; }
     .pchat .msg .av img { width: 100%; height: 100%; object-fit: cover; }
-    .pchat .msg.user .av { background: var(--accent); color: var(--on-accent); }
+    .pchat .msg.user .av { background: #000; color: var(--text); border: 1px solid var(--line); }
     .pchat .bubble { padding: 10px 14px; border-radius: 14px; background: var(--bg-soft); font-size: 14.5px; line-height: 1.65; white-space: pre-wrap; }
-    .pchat .msg.user .bubble { background: var(--accent); color: var(--on-accent); border-bottom-right-radius: 4px; }
-    .pchat .msg.assistant .bubble { border-bottom-left-radius: 4px; }
+    .pchat .msg.user .bubble { background: #000; color: var(--text); border: 1px solid var(--line); border-bottom-right-radius: 4px; }
+    /* 페르소나 말풍선: 문서 상단 태그라인과 같은 연두색 */
+    .pchat .msg.assistant .bubble { background: var(--persona-badge-bg); color: var(--persona-badge-text); border-bottom-left-radius: 4px; }
+    .pchat .msg.typing .bubble { color: var(--persona-badge-text); opacity: .75; }
     .pchat .cite { display: inline-block; padding: 0 6px; margin: 0 1px; border: 0; border-radius: 6px; font-size: 12px; font-weight: 700; line-height: 1.6; cursor: pointer; vertical-align: 1px; }
     .pchat span.cite { cursor: default; }
     .pchat .infer { display: inline-block; padding: 0 6px; margin: 0 1px; border-radius: 6px; font-size: 12px; font-weight: 700; background: var(--infer); color: var(--infer-text); }
@@ -471,10 +480,14 @@
       <section class="pchat" id="chat" hidden aria-labelledby="chatTitle">
         <div class="pchat-head">
           <div>
-            <h2 id="chatTitle">페르소나와 대화</h2>
+            <h2 id="chatTitle">합성 페르소나와 직접 대화하기</h2>
             <p>인터뷰 근거 노트를 인용하며 이 페르소나로서 답해요. <span class="cite k-note">N012</span> 같은 표시를 누르면 원문을 볼 수 있고, <span class="infer">추론 중간</span>은 근거 없이 성향으로 추론한 부분이에요.</p>
           </div>
-          <button type="button" class="btn-link" id="chatClear">대화 지우기</button>
+          <div class="pchat-actions">
+            <button type="button" class="btn" id="chatCopy" disabled>대화 복사하기</button>
+            <button type="button" class="btn" id="chatSave" disabled>대화 저장하기 (.md)</button>
+            <button type="button" class="btn-link" id="chatClear">대화 지우기</button>
+          </div>
         </div>
         <div class="pchat-index">
           <b>근거 노트</b><span class="state no" id="chatState">확인 중</span>
@@ -938,9 +951,6 @@
       try { hist = JSON.parse(sessionStorage.getItem(HIST_KEY) || "[]"); } catch {}
 
       const name = p.profile?.name || "페르소나";
-      const c = name.charCodeAt(name.length - 1);
-      const wa = c >= 0xac00 && c <= 0xd7a3 && (c - 0xac00) % 28 ? "과" : "와";
-      $("chatTitle").textContent = `${name}${wa} 대화`;
       $("chatInput").placeholder = `${name}에게 물어보세요. 예) ${STARTERS[0]}`;
       $("chat").hidden = false;
       if (location.hash === "#chat") setTimeout(() => $("chat").scrollIntoView({ block: "start" }), 0);
@@ -1043,7 +1053,62 @@
         box.appendChild(div); box.hidden = false;
       }
       function scrollDown() { const m = $("chatMsgs"); m.scrollTop = m.scrollHeight; }
-      function saveHist() { try { sessionStorage.setItem(HIST_KEY, JSON.stringify(hist.slice(-40))); } catch {} }
+      function saveHist() { try { sessionStorage.setItem(HIST_KEY, JSON.stringify(hist.slice(-40))); } catch {} updateExport(); }
+
+      // ── 대화 내보내기: 복사 · Markdown 저장 ──
+      function updateExport() { const none = !hist.length; $("chatCopy").disabled = none; $("chatSave").disabled = none; }
+      const pad = (n) => String(n).padStart(2, "0");
+      const stamp = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+      function chatMarkdown() {
+        const pp = persona || p;
+        const now = new Date();
+        const L = [
+          `# 합성 페르소나와 나눈 대화 — ${name}`,
+          "",
+          `- 페르소나: ${name}${pp.profile?.job ? ` (${pp.profile.job}${pp.profile.age ? ` · ${pp.profile.age}세` : ""})` : ""} · ${PRIORITY_LABEL[pp.priority] || PRIORITY_LABEL.primary}`,
+          pp.tagline ? `- 한 줄 요약: ${String(pp.tagline).replace(/\*\*/g, "")}` : null,
+          `- 내보낸 날짜: ${now.toLocaleString("ko-KR")}`,
+          `- 페르소나 문서: ${location.origin}/persona/view/?id=${encodeURIComponent(cid)}`,
+          `- 메시지 ${hist.length}개${sample ? " · 체험용 샘플 페르소나" : ""}`,
+          "",
+          "> 이 대화는 인터뷰 근거 노트를 바탕으로 AI가 페르소나를 연기한 결과예요. `[N012]` 같은 표시는 인용한 근거 노트, `[추론 중간]`은 근거 없이 성향으로 추론한 부분입니다.",
+          "",
+          "---",
+        ].filter((x) => x !== null);
+        for (const m of hist) {
+          L.push("");
+          if (m.role === "user") { L.push(`**나**`, "", m.content); continue; }
+          L.push(`**${name}**`, "", m.content);
+          if (m.cited?.length) {
+            L.push("", "<details><summary>근거 노트 " + m.cited.length + "개</summary>", "");
+            for (const x of m.cited) L.push(`- **${x.ref_id}** ${String(x.text || "").replace(/\s+/g, " ").trim()}${x.source_ref ? ` _(${x.source_ref})_` : ""}`);
+            L.push("", "</details>");
+          }
+          if (m.inference?.length) L.push("", `_추론: ${m.inference.join(" / ")}_`);
+        }
+        L.push("");
+        return { md: L.join("\n"), file: `persona-chat-${name.replace(/[\\/:*?"<>|\s]+/g, "_")}-${stamp(now)}.md` };
+      }
+      $("chatCopy").addEventListener("click", async () => {
+        if (!hist.length) return;
+        const { md } = chatMarkdown();
+        try { await navigator.clipboard.writeText(md); }
+        catch {
+          const t = document.createElement("textarea"); t.value = md; t.style.position = "fixed"; t.style.opacity = "0";
+          document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove();
+        }
+        toast("대화를 복사했어요. (Markdown 형식)");
+      });
+      $("chatSave").addEventListener("click", () => {
+        if (!hist.length) return;
+        const { md, file } = chatMarkdown();
+        const url = URL.createObjectURL(new Blob([md], { type: "text/markdown;charset=utf-8" }));
+        const a = Object.assign(document.createElement("a"), { href: url, download: file });
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        toast(`${file} 로 저장했어요.`);
+      });
+      updateExport();
 
       $("chatComposer").addEventListener("submit", async (e) => {
         e.preventDefault();
