@@ -127,18 +127,6 @@
     .generate .btn-solid { padding: 13px 28px; font-size: 16px; border-radius: 12px; }
     .generate .why { flex-basis: 100%; text-align: center; font-size: 13px; color: var(--text-sub); }
 
-    /* 결과: 보드 머리 */
-    .board-head { padding: 22px 28px; }
-    .board-head .row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .title-input { flex: 1 1 280px; min-width: 0; padding: 4px 8px; margin-left: -8px; border: 1px solid transparent; border-radius: 8px; background: none; font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
-    .title-input:hover { border-color: var(--line); }
-    .title-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
-    .lineage { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-    .lineage a, .lineage span.chip { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; padding: 5px 11px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); font-size: 13px; }
-    .lineage a:hover { border-color: var(--accent); color: var(--accent); }
-    .lineage .k { flex: none; font-size: 11.5px; font-weight: 800; color: var(--text-sub); }
-    .lineage .v { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .lineage .pain .k { color: var(--danger); }
     .save-state { font-size: 12.5px; color: var(--text-sub); }
     .save-state.dirty { color: var(--warn); font-weight: 700; }
 
@@ -147,8 +135,7 @@
     .sheet-text .person { border: 0; padding: 0; margin-bottom: 12px; }
     .sheet-text textarea { min-height: 110px; }
 
-    /* 시나리오 */
-    .scenario-text { min-height: 180px; font-size: 15px; line-height: 1.8; }
+    /* 확인 지점 */
     .gatebar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 14px; padding: 12px 14px; border: 1.5px dashed var(--warn); border-radius: 12px; background: var(--warn-soft); font-size: 13.5px; }
     .gatebar.done { border-style: solid; border-color: #355546; background: var(--good-soft); }
     .gatebar .msg { flex: 1 1 260px; color: var(--text); }
@@ -285,9 +272,8 @@
       .menu a { padding: 8px 12px 8px 0; }
       .menu a[aria-current="page"] { padding-left: 12px; }
       main { padding: 48px 0 72px; }
-      .section, .board-head { padding: 20px 16px; }
+      .section { padding: 20px 16px; }
       .generate .btn-solid { width: 100%; }
-      .title-input { font-size: 19px; }
     }
   </style>
   <link rel="stylesheet" href="/css/theme.css" />
@@ -308,7 +294,7 @@
         <span class="num stage">발전 · Develop</span>
         <h1>시나리오 보드 생성</h1>
         <p>저니맵의 페인포인트 하나를 개선한 TO-BE 시나리오를 콘티와 컷 보드로 그려요.</p>
-        <button class="try-btn" type="button" id="tryBtn">테스트로 사용해보기<small>로그인 없이 · 예시 저니맵으로 시나리오와 콘티 만들기</small></button>
+        <button class="try-btn" type="button" id="tryBtn">테스트로 사용해보기<small>로그인 없이 · 예시 저니맵으로 콘티 만들기</small></button>
       </div>
 
       <!-- 입력 -->
@@ -367,63 +353,18 @@
         </div>
         <div class="generate">
           <button class="btn btn-solid" type="button" id="generateBtn">시나리오 보드 생성</button>
-          <span class="why" id="generateWhy">AI 연결 전이라, 저니맵 내용을 이어 붙인 예시 시나리오와 콘티가 나와요.</span>
+          <span class="why" id="generateWhy">AI 연결 전이라, 저니맵 내용을 이어 붙인 예시 콘티가 나와요.</span>
         </div>
       </section>
 
       <!-- 결과 -->
       <div id="result" hidden>
-        <section class="card board-head" aria-label="보드 정보">
-          <div class="row">
-            <input class="title-input" id="boardTitle" aria-label="보드 제목" maxlength="80" />
-            <span class="pill" id="boardStatus"></span>
-          </div>
-          <div class="lineage" id="lineage" aria-label="이 보드가 나온 곳"></div>
-          <div class="row" style="margin-top:14px">
-            <span class="save-state" id="saveState"></span>
-            <span style="flex:1"></span>
-            <button class="btn btn-sm btn-danger" type="button" id="deleteBtn" hidden>보드 지우기</button>
-            <button class="btn btn-sm" type="button" id="saveBtn">저장</button>
-          </div>
-        </section>
-
-        <!-- 캐릭터 시트 -->
-        <section class="card section" aria-labelledby="sheetTitle">
-          <div class="section-head">
-            <div>
-              <h2 id="sheetTitle"><span class="step-no">2</span>캐릭터 시트</h2>
-              <p class="desc">페르소나 프로필 사진을 참조해 같은 사람으로 그려요. 컷도 같은 사진을 참조해요.</p>
-            </div>
-          </div>
-          <div class="sheet">
-            <div id="sheetShot"></div>
-            <div class="sheet-text">
-              <div id="sheetPerson"></div>
-              <label class="field"><span class="label">인물 설명 <small>페르소나에서 가져왔어요 · 고칠 수 있어요</small></span>
-                <textarea class="text-input" id="sheetDesc" maxlength="600"></textarea>
-              </label>
-            </div>
-          </div>
-        </section>
-
-        <!-- TO-BE 시나리오 -->
-        <section class="card section" aria-labelledby="scTitle">
-          <div class="section-head">
-            <div>
-              <h2 id="scTitle"><span class="step-no">3</span>TO-BE 시나리오</h2>
-              <p class="desc" id="scDesc">고른 페인포인트가 풀린 뒤의 이야기예요. 읽고 고친 뒤 확정해 주세요.</p>
-            </div>
-          </div>
-          <textarea class="text-input scenario-text" id="scenarioText" style="margin-top:14px" maxlength="4000"></textarea>
-          <div class="gatebar" id="scenarioGate"></div>
-        </section>
-
         <!-- 콘티 -->
         <section class="card section" aria-labelledby="ctTitle">
           <div class="section-head">
             <div>
-              <h2 id="ctTitle"><span class="step-no">4</span>장면 콘티</h2>
-              <p class="desc" id="ctDesc">확정한 시나리오를 컷 수만큼 장면으로 나눴어요. 모든 칸을 바로 고칠 수 있어요.</p>
+              <h2 id="ctTitle"><span class="step-no">2</span>장면 콘티</h2>
+              <p class="desc" id="ctDesc">저니맵의 TO-BE 단계를 컷 수만큼 장면으로 나눴어요. 모든 칸을 바로 고칠 수 있어요.</p>
             </div>
             <button class="btn btn-sm" type="button" id="addRowBtn">+ 컷 추가</button>
           </div>
@@ -443,14 +384,36 @@
           <div class="gatebar" id="contiGate"></div>
         </section>
 
+        <!-- 캐릭터 시트 -->
+        <section class="card section" aria-labelledby="sheetTitle">
+          <div class="section-head">
+            <div>
+              <h2 id="sheetTitle"><span class="step-no">3</span>캐릭터 시트</h2>
+              <p class="desc">페르소나 프로필 사진을 참조해 같은 사람으로 그려요. 컷도 같은 사진을 참조해요.</p>
+            </div>
+          </div>
+          <div class="sheet">
+            <div id="sheetShot"></div>
+            <div class="sheet-text">
+              <div id="sheetPerson"></div>
+              <label class="field"><span class="label">인물 설명 <small>페르소나에서 가져왔어요 · 고칠 수 있어요</small></span>
+                <textarea class="text-input" id="sheetDesc" maxlength="600"></textarea>
+              </label>
+            </div>
+          </div>
+        </section>
+
         <!-- 컷 보드 -->
         <section class="card section" aria-labelledby="bdTitle">
           <div class="section-head">
             <div>
-              <h2 id="bdTitle"><span class="step-no">5</span>컷 보드</h2>
+              <h2 id="bdTitle"><span class="step-no">4</span>컷 보드</h2>
               <p class="desc">컷은 완성되는 순서와 상관없이 콘티 순서대로 놓여요. 끌어서 순서를 바꾸고 제목·설명·대사를 바로 고칠 수 있어요.</p>
             </div>
             <div class="board-actions">
+              <span class="save-state" id="saveState"></span>
+              <button class="btn btn-sm btn-danger" type="button" id="deleteBtn" hidden>보드 지우기</button>
+              <button class="btn btn-sm" type="button" id="saveBtn" hidden>변경 저장</button>
               <button class="btn btn-solid" type="button" id="boardGenBtn">보드 생성</button>
             </div>
           </div>
@@ -712,7 +675,7 @@
         },
         journeyId: journey.lens === "example" || journey.lens === "manual" ? null : journey.tobeId || journey.id,
         personaId: persona?.id || null,
-        style, scenario, scenarioConfirmed: false, contiStatus: "draft", status: "draft",
+        style, scenario, scenarioConfirmed: true, contiStatus: "draft", status: "draft",
         sheet: { kind: "sheet", conti: { title: "캐릭터 시트", desc: persona?.desc || "" }, status: "idle", versions: [], image: null },
         cuts: splitConti({ tobe, asisStage, pain, n, nm }).map((conti) => ({ id: null, kind: "cut", conti, status: "idle", versions: [], image: null })),
         curves: { asis: journey.asis.map((s) => ({ name: s.name, score: s.score })), tobe: journey.tobe ? journey.tobe.map((s) => ({ name: s.name, score: s.score })) : null },
@@ -763,47 +726,29 @@
       const b = S.board;
       $("result").hidden = !b;
       if (!b) return;
-      $("boardTitle").value = b.title;
       renderHead();
-      renderSheet();
-      $("scenarioText").value = b.scenario;
-      renderScenarioGate();
       renderConti();
+      renderSheet();
       renderBoard();
     }
 
+    // 저장된 보드에서만 보이는 것: 새 보드 링크 · 보드 지우기 · 변경 저장
     function renderHead() {
       const b = S.board;
-      const st = b.status === "done" ? ["보드 완성", "ok"] : b.status === "generating" ? ["만드는 중", "accent"] : b.status === "partial" ? ["확인 필요", "warn"] : b.contiStatus === "confirmed" ? ["콘티 확정", "accent"] : ["초안", ""];
-      $("boardStatus").className = `pill ${st[1]}`;
-      $("boardStatus").textContent = st[0];
-      const src = b.source || {};
-      const chips = [];
-      if (src.journey) chips.push(src.journey.id
-        ? `<a href="/journey/?id=${encodeURIComponent(src.journey.id)}" title="저니맵 열기"><span class="k">저니맵</span><span class="v">${esc(src.journey.label)}</span></a>`
-        : `<span class="chip"><span class="k">저니맵</span><span class="v">${esc(src.journey.label)}</span></span>`);
-      if (src.pain) {
-        const jid = src.pain.journeyId || (src.journey?.id ?? null);
-        chips.push(jid
-          ? `<a class="pain" href="/journey/?id=${encodeURIComponent(jid)}" title="이 페인포인트가 있는 저니맵 열기"><span class="k">페인포인트 ${esc(src.pain.stage)}</span><span class="v">${esc(src.pain.text)}</span></a>`
-          : `<span class="chip pain"><span class="k">페인포인트</span><span class="v">${esc(src.pain.text)}</span></span>`);
-      }
-      if (src.persona) chips.push(src.persona.id
-        ? `<a href="/persona/view/?id=${encodeURIComponent(src.persona.id)}" title="페르소나 문서 열기"><span class="k">페르소나</span><span class="v">${esc(src.persona.name)} · ${esc(src.persona.role)}</span></a>`
-        : `<span class="chip"><span class="k">인물</span><span class="v">${esc(src.persona.name)}</span></span>`);
-      $("lineage").innerHTML = chips.join("") || `<span class="chip"><span class="v">직접 입력</span></span>`;
       $("deleteBtn").hidden = !b.id;
       $("newBoardLink").hidden = !b.id;
       renderSaveState();
     }
 
+    // 처음 저장은 '콘티 확정하고 저장'이 한다. 그 뒤에 고친 것만 '변경 저장'으로 저장한다
     function renderSaveState() {
       const b = S.board;
+      const changed = !!b.id && (S.dirty || S.saving);
       const el = $("saveState");
-      el.className = `save-state${S.dirty ? " dirty" : ""}`;
-      el.textContent = S.saving ? "저장하는 중…" : !b.id ? (S.loggedIn ? "아직 저장하지 않았어요" : "로그인하면 저장하고 이미지를 만들 수 있어요") : S.dirty ? "저장하지 않은 변경이 있어요" : `저장됨 · ${fmtDate(b.updatedAt)}`;
-      $("saveBtn").disabled = S.saving || (!!b.id && !S.dirty);
-      $("saveBtn").textContent = b.id ? "변경 저장" : "저장";
+      el.className = `save-state${changed ? " dirty" : ""}`;
+      el.textContent = S.saving ? "저장하는 중…" : changed ? "저장하지 않은 변경이 있어요" : "";
+      $("saveBtn").hidden = !changed;
+      $("saveBtn").disabled = S.saving;
     }
 
     // 이미지 자리: 상태별로 대기 / 생성 중 / 완료 / 실패
@@ -856,36 +801,12 @@
       return `<div class="fail-box" style="margin:0 0 6px;width:100%"><b>왜 실패했나요?</b> ${esc(c.error || "알 수 없는 이유로 실패했어요.")}</div>`;
     }
 
-    // ── 시나리오 확인 지점 ──
-    function renderScenarioGate() {
-      const b = S.board;
-      const g = $("scenarioGate");
-      g.className = `gatebar${b.scenarioConfirmed ? " done" : ""}`;
-      g.innerHTML = b.scenarioConfirmed
-        ? `<span class="msg"><b>✓ 시나리오 확정</b> — 이 글을 ${b.cuts.length}컷 콘티로 나눴어요. 시나리오를 다시 고치면 콘티를 다시 나눠야 해요.</span>`
-        : `<span class="msg"><b>✋ 확인 1</b> — 시나리오가 고른 페인포인트를 제대로 푸는지 읽어 보세요. 확정하면 이 글이 콘티의 입력이 돼요.</span>
-           <button class="btn btn-sm btn-solid" type="button" id="scenarioConfirmBtn">시나리오 확정</button>`;
-      $("scDesc").textContent = "고른 페인포인트가 풀린 뒤의 이야기예요. (AI 연결 전 · 저니맵 TO-BE 단계를 이어 붙인 예시)";
-      $("scenarioConfirmBtn")?.addEventListener("click", () => {
-        b.scenarioConfirmed = true;
-        markDirty();
-        renderScenarioGate(); renderConti();
-      });
-    }
-    $("scenarioText").addEventListener("input", () => {
-      const b = S.board;
-      b.scenario = $("scenarioText").value;
-      if (b.scenarioConfirmed && b.contiStatus !== "confirmed") { b.scenarioConfirmed = false; renderScenarioGate(); renderConti(); }
-      markDirty();
-    });
-
     // ── 콘티 표 ──
     const FIELDS = ["title", "situation", "action", "line", "emotion", "place", "camera", "scene"];
     function renderConti() {
       const b = S.board;
       const locked = b.contiStatus === "confirmed";
-      const blocked = !b.scenarioConfirmed;
-      $("ctDesc").textContent = blocked ? "시나리오를 확정하면 이 콘티가 다음 단계의 입력이 돼요. (미리 보기)" : `확정한 시나리오를 ${b.cuts.length}컷으로 나눴어요. 모든 칸을 바로 고칠 수 있어요.`;
+      $("ctDesc").textContent = `저니맵의 TO-BE 단계를 ${b.cuts.length}컷으로 나눴어요. 모든 칸을 바로 고칠 수 있어요.`;
       $("contiBody").innerHTML = b.cuts.map((c, i) => {
         const k = c.conti;
         const bad = appearanceWords(k.scene);
@@ -955,9 +876,9 @@
         return;
       }
       g.className = "gatebar";
-      const why = !b.scenarioConfirmed ? "시나리오를 먼저 확정해 주세요." : probs.length ? "위에서 고칠 곳을 먼저 고쳐 주세요." : !S.loggedIn ? "확정한 콘티는 내 보드로 저장돼요. 로그인이 필요해요." : "확정하면 보드에 저장되고, 이미지 생성이 열려요.";
-      g.innerHTML = `<span class="msg"><b>✋ 확인 2</b> — 컷 순서·감정 곡선·장면 묘사를 확인하세요. ${esc(why)}</span>
-        <button class="btn btn-sm btn-solid" type="button" id="contiConfirmBtn" ${!b.scenarioConfirmed || probs.length ? "disabled" : ""}>${S.loggedIn ? "콘티 확정하고 저장" : "로그인하고 확정하기"}</button>`;
+      const why = probs.length ? "위에서 고칠 곳을 먼저 고쳐 주세요." : !S.loggedIn ? "확정한 콘티는 내 보드로 저장돼요. 로그인이 필요해요." : "확정하면 보드에 저장되고, 이미지 생성이 열려요.";
+      g.innerHTML = `<span class="msg"><b>✋ 확인</b> — 컷 순서·감정 곡선·장면 묘사를 확인하세요. ${esc(why)}</span>
+        <button class="btn btn-sm btn-solid" type="button" id="contiConfirmBtn" ${probs.length ? "disabled" : ""}>${S.loggedIn ? "콘티 확정하고 저장" : "로그인하고 확정하기"}</button>`;
       $("contiConfirmBtn").addEventListener("click", confirmConti);
     }
 
@@ -1112,7 +1033,6 @@
       if (btn) handleCutAction(btn.dataset.act, -1, btn);
     });
     $("sheetDesc").addEventListener("input", () => { S.board.sheet.conti.desc = $("sheetDesc").value; markDirty(); });
-    $("boardTitle").addEventListener("input", () => { S.board.title = $("boardTitle").value; markDirty(); });
 
     const cutAt = (i) => (i === -1 ? S.board.sheet : S.board.cuts[i]);
 
@@ -1205,7 +1125,7 @@
       document.querySelectorAll(".cut").forEach((c) => { c.classList.remove("dragging", "drop-before", "drop-after"); c.setAttribute("draggable", "false"); });
     });
 
-    function renderAllButInputs() { renderHead(); renderScenarioGate(); renderConti(); renderBoard(); }
+    function renderAllButInputs() { renderHead(); renderConti(); renderBoard(); }
     function markDirty() { S.dirty = true; renderSaveState(); const g = $("boardGenBtn"); if (g) { g.disabled = true; g.title = "변경을 먼저 저장해 주세요"; } }
 
     // ════════════════ 4. 저장 · 생성 · 진행 상황 ════════════════
@@ -1218,14 +1138,7 @@
       };
     }
 
-    $("saveBtn").addEventListener("click", () => {
-      if (!S.loggedIn) {
-        try { sessionStorage.setItem("uxa.boardDraft", JSON.stringify(S.board)); } catch {}
-        location.href = UXA.loginUrl("/scenario/?draft=1");
-        return;
-      }
-      save();
-    });
+    $("saveBtn").addEventListener("click", () => save());
 
     async function save() {
       const b = S.board;
@@ -1358,7 +1271,7 @@
         try {
           const d = JSON.parse(sessionStorage.getItem("uxa.boardDraft") || "null");
           sessionStorage.removeItem("uxa.boardDraft");
-          if (d) { S.board = d; S.dirty = true; renderAll(); toast("만들던 보드를 이어서 보여 드려요. 확정하거나 저장해 주세요."); }
+          if (d) { S.board = d; S.dirty = true; renderAll(); toast("만들던 보드를 이어서 보여 드려요. 콘티를 확정해 주세요."); }
         } catch {}
       }
     })();
