@@ -96,7 +96,9 @@
     .how li + li { margin-top: 3px; }
 
     /* 입력 */
-    .inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 18px; }
+    #inputCard, .how { max-width: 880px; margin-left: auto; margin-right: auto; }
+    .inputs { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; margin-top: 18px; }
+    .field > .sub-field { margin-top: 10px; }
     .field > .label { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; margin-bottom: 8px; font-size: 14px; font-weight: 600; }
     .field > .label small { font-weight: 500; font-size: 12.5px; color: var(--text-sub); }
     .text-input { display: block; width: 100%; padding: 9px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); font-size: 14.5px; line-height: 1.6; }
@@ -128,9 +130,9 @@
     .count-row { display: flex; align-items: center; gap: 12px; }
     .count-row input[type="range"] { flex: 1; accent-color: var(--accent); }
     .count-row output { min-width: 44px; padding: 4px 0; border-radius: 8px; background: var(--accent-soft); color: var(--accent); font-weight: 800; text-align: center; }
-    .generate { display: flex; align-items: center; gap: 14px; margin-top: 22px; flex-wrap: wrap; }
+    .generate { display: flex; align-items: center; justify-content: center; gap: 10px 14px; margin-top: 22px; flex-wrap: wrap; }
     .generate .btn-solid { padding: 13px 28px; font-size: 16px; border-radius: 12px; }
-    .generate .why { font-size: 13px; color: var(--text-sub); }
+    .generate .why { flex-basis: 100%; text-align: center; font-size: 13px; color: var(--text-sub); }
 
     /* 결과: 보드 머리 */
     .board-head { padding: 22px 28px; }
@@ -281,7 +283,7 @@
     footer .logo { font-size: 18px; color: var(--text); }
 
     @media (max-width: 860px) {
-      .inputs, .sheet { grid-template-columns: 1fr; }
+      .sheet { grid-template-columns: 1fr; }
     }
     @media (max-width: 640px) {
       .container { padding: 0 16px; }
@@ -351,29 +353,26 @@
           <a class="btn btn-sm" id="newBoardLink" href="/scenario/" hidden>+ 새 보드</a>
         </div>
         <div class="inputs">
-          <div class="stack">
             <div class="field">
               <div class="label">저니맵 <small>정의 단계에서 저장한 것</small></div>
               <div class="segmented" role="radiogroup" aria-label="저니맵 불러오기 방식">
                 <input type="radio" name="jmode" id="jmMine" value="mine" checked /><label for="jmMine">내 저니맵 불러오기</label>
                 <input type="radio" name="jmode" id="jmManual" value="manual" /><label for="jmManual">직접 입력</label>
               </div>
-            </div>
-            <div class="field" id="mineBox">
+              <div class="sub-field" id="mineBox">
               <select class="text-input" id="journeySelect" aria-label="저니맵 고르기"></select>
               <p class="hint" id="journeyHint"></p>
-            </div>
-            <div class="field" id="manualBox" hidden>
+              </div>
+              <div class="sub-field" id="manualBox" hidden>
               <textarea class="text-input" id="manualScenario" placeholder="예: 늦은 밤 OTT 앱에서 쉬면서 볼 콘텐츠 고르기 — 앱 열기 → 추천 넘겨보기 → 예고편·리뷰 비교 → 결정 → 시청"></textarea>
               <p class="hint">저니맵의 시나리오와 단계를 한두 줄로 적어 주세요.</p>
+              </div>
             </div>
             <div class="field">
               <div class="label">개선할 페인포인트 <small id="painCount"></small></div>
               <div class="pains" id="painList" role="radiogroup" aria-label="페인포인트 고르기"></div>
               <textarea class="text-input" id="manualPain" placeholder="예: 예고편과 리뷰를 오가며 비교하느라 정작 볼 시간이 줄어든다" hidden></textarea>
             </div>
-          </div>
-          <div class="stack">
             <div class="field">
               <div class="label">등장 인물 <small>정의 단계의 페르소나</small></div>
               <div id="personaBox"></div>
@@ -397,7 +396,6 @@
               </div>
               <p class="hint" id="styleText"></p>
             </div>
-          </div>
         </div>
         <div class="generate">
           <button class="btn btn-solid" type="button" id="generateBtn">시나리오 보드 생성</button>
