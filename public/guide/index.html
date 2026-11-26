@@ -141,84 +141,89 @@
     @keyframes spin { to { transform: rotate(360deg); } }
 
     .guide { display: none; }
-    .guide-head { padding: 28px 32px 24px; border-bottom: 1px solid var(--line); }
-    .guide-head .top { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; align-items: flex-start; }
-    .guide-head .eyebrow { font-size: 13px; font-weight: 600; color: var(--accent); }
-    .guide-head h2 { margin-top: 2px; font-size: 22px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.4; }
+    .guide-head { padding: 36px 36px 28px; border-bottom: 1px solid var(--line); }
+    .guide-head .top { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px 24px; align-items: flex-end; }
+    .guide-head .eyebrow { font-size: 13px; font-weight: 500; color: var(--text-sub); letter-spacing: 0; }
+    .guide-head h2 { margin-top: 8px; font-size: 28px; line-height: 1.3; }
     .actions { display: flex; gap: 8px; }
-    .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
-    .tag { padding: 4px 10px; border-radius: 999px; background: var(--bg-soft); font-size: 12.5px; color: var(--text-sub); }
-    .tag b { color: var(--text); font-weight: 600; }
-    .demo-note { margin-top: 14px; padding: 10px 14px; border-radius: 10px; background: #2a1f0c; color: #f5b657; font-size: 13px; }
-    .demo-note.ai { background: var(--accent-soft); color: #c9cbd0; }
+    .meta-grid { display: grid; grid-template-columns: 2.2fr 1fr 1fr 1.4fr; margin-top: 28px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .meta-grid div { padding: 14px 16px 14px 0; }
+    .meta-grid div + div { padding-left: 16px; border-left: 1px solid var(--line); }
+    .meta-grid dt { font-size: 12px; color: var(--text-faint); }
+    .meta-grid dd { margin-top: 4px; font-size: 14.5px; font-weight: 500; line-height: 1.5; color: var(--text); }
+    .head-notes { display: grid; gap: 6px; margin-top: 20px; font-size: 13.5px; line-height: 1.65; color: var(--text-sub); }
+    .head-notes p { display: flex; gap: 12px; }
+    .head-notes b { flex: none; width: 68px; font-weight: 500; color: var(--text); }
+    .head-notes .warn-text b { color: #f5b657; }
+
     .gen-error { display: none; max-width: 420px; margin: 0 auto; padding: 48px 24px; text-align: center; }
     .gen-error h2 { font-size: 18px; font-weight: 700; }
     .gen-error p { margin-top: 8px; font-size: 14px; color: var(--text-sub); white-space: pre-line; }
     .gen-error .row { display: flex; justify-content: center; gap: 8px; margin-top: 20px; }
 
-    .toc { display: flex; gap: 4px; padding: 10px 24px; overflow-x: auto; border-bottom: 1px solid var(--line); }
+    .toc { display: flex; gap: 4px; padding: 12px 28px; overflow-x: auto; border-bottom: 1px solid var(--line); }
     .toc a { padding: 6px 12px; border-radius: 999px; font-size: 13px; color: var(--text-sub); white-space: nowrap; }
     .toc a:hover { background: var(--accent-soft); color: var(--accent); }
 
-    .sec { padding: 32px; border-bottom: 1px solid var(--line); scroll-margin-top: 80px; }
+    .sec { padding: 44px 36px; border-bottom: 1px solid var(--line); scroll-margin-top: 80px; }
     .sec:last-child { border-bottom: 0; }
-    .sec-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 18px; }
-    .sec-head .n { font-size: 13px; font-weight: 700; color: var(--accent); }
-    .sec-head h3 { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
-    .sec-head .meta { margin-left: auto; font-size: 12.5px; color: var(--text-faint); }
+    .sec-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; margin-bottom: 24px; }
+    .sec-head .n { font-size: 13px; font-weight: 500; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+    .sec-head h3 { font-size: 20px; }
+    .sec-head .meta { margin-left: auto; font-size: 13px; color: var(--text-faint); }
 
-    .rq-list { list-style: none; display: grid; gap: 10px; }
-    .rq-list li { display: flex; gap: 12px; padding: 14px 16px; border-radius: 12px; background: var(--bg-soft); font-size: 15px; }
-    .rq-list .code { flex: none; font-weight: 800; color: var(--accent); }
+    .rq-list { list-style: none; display: grid; gap: 0; border-top: 1px solid var(--line); }
+    .rq-list li { display: flex; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--line); font-size: 15.5px; line-height: 1.65; }
+    .rq-list .code { flex: none; width: 40px; font-weight: 500; color: var(--text-faint); }
     .ai-chip { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-size: 11.5px; font-weight: 600; vertical-align: 1px; }
     .warn { margin-top: 10px; font-size: 13px; color: #f5b657; }
 
     .timebar { display: flex; height: 36px; border-radius: 10px; overflow: hidden; gap: 2px; }
     .timebar span { display: grid; place-items: center; min-width: 0; font-size: 11.5px; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; }
     .flow { width: 100%; margin-top: 18px; border-collapse: collapse; font-size: 14px; }
-    .flow th, .flow td { padding: 11px 8px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    .flow th, .flow td { padding: 13px 10px 13px 0; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; line-height: 1.6; }
     .flow th { font-size: 12.5px; font-weight: 600; color: var(--text-faint); }
     .flow tr:last-child td { border-bottom: 0; }
     .flow .dot { display: inline-block; width: 10px; height: 10px; margin-right: 8px; border-radius: 3px; vertical-align: 0; }
-    .flow .min { white-space: nowrap; font-weight: 700; }
+    .flow .min { white-space: nowrap; font-weight: 500; }
     .flow .clock { white-space: nowrap; color: var(--text-sub); font-variant-numeric: tabular-nums; }
     .flow td:last-child { color: var(--text-sub); }
-    .pre-note { margin-top: 12px; font-size: 13px; color: var(--text-sub); }
+    .pre-note { margin-top: 16px; font-size: 13.5px; line-height: 1.65; color: var(--text-sub); }
 
-    .block { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
-    .block + .block { margin-top: 16px; }
-    .block-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 16px 20px; background: var(--bg-soft); }
-    .block-head h4 { font-size: 16px; font-weight: 700; }
-    .block-head .chip { padding: 2px 9px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); font-size: 12px; color: var(--text-sub); }
-    .block-head .chip.rq { border-color: var(--accent); color: var(--accent); font-weight: 600; }
-    .block-head .time { margin-left: auto; font-size: 13px; font-weight: 700; }
-    .block-goal { padding: 12px 20px 0; font-size: 13.5px; color: var(--text-sub); }
-    .q { padding: 16px 20px; }
-    .q + .q { border-top: 1px dashed var(--line); }
-    .q-main { display: flex; gap: 10px; font-size: 15.5px; font-weight: 600; line-height: 1.55; }
-    .q-main .qn { flex: none; color: var(--accent); }
-    .probes { list-style: none; margin: 10px 0 0 30px; display: grid; gap: 6px; }
-    .probes li { position: relative; padding-left: 16px; font-size: 14px; color: var(--text-sub); }
+    .block { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+    .block + .block { margin-top: 20px; }
+    .block-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 18px 24px; border-bottom: 1px solid var(--line); }
+    .block-head h4 { font-size: 16px; }
+    .block-head .chip { padding: 2px 9px; border-radius: 999px; border: 1px solid var(--line); font-size: 12px; color: var(--text-sub); }
+    .block-head .chip.rq { color: var(--text); }
+    .block-head .time { margin-left: auto; font-size: 13px; color: var(--text-sub); font-variant-numeric: tabular-nums; }
+    .block-goal { padding: 16px 24px 0; font-size: 13.5px; line-height: 1.65; color: var(--text-sub); }
+    .q { padding: 20px 24px; }
+    .q + .q { border-top: 1px solid var(--line); }
+    .q-main { display: flex; gap: 14px; font-size: 16px; font-weight: 500; line-height: 1.65; }
+    .q-main .qn { flex: none; width: 28px; color: var(--text-faint); font-weight: 400; }
+    .probes { list-style: none; margin: 12px 0 0 42px; display: grid; gap: 8px; }
+    .probes li { position: relative; padding-left: 18px; font-size: 14.5px; line-height: 1.65; color: var(--text-sub); }
     .probes li::before { content: "↳"; position: absolute; left: 0; color: var(--text-faint); }
     .probes .why { margin-left: 4px; font-size: 12px; color: var(--text-faint); }
-    .avoid { margin: 0 20px 16px; padding: 10px 14px; border-radius: 10px; background: #2a1513; font-size: 13px; color: #ff8a80; }
+    .avoid { margin: 0 24px 20px; padding: 12px 16px; border-radius: 8px; background: #2a1513; font-size: 13.5px; line-height: 1.65; color: #ff8a80; }
     .avoid b { color: var(--danger); }
     .avoid .ok { color: var(--good); }
-    .principles { margin-top: 20px; padding: 16px 18px; border-radius: 12px; background: var(--accent-soft); font-size: 13.5px; }
-    .principles strong { display: block; margin-bottom: 6px; color: var(--accent); }
+    .principles { margin-top: 24px; padding: 20px 24px; border: 1px solid var(--line); border-radius: 8px; font-size: 14px; line-height: 1.7; }
+    .principles strong { display: block; margin-bottom: 8px; font-weight: 500; color: var(--text); }
     .principles ul { padding-left: 18px; color: var(--text-sub); }
 
-    .check-group + .check-group { margin-top: 20px; }
-    .check-group h4 { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+    .check-group + .check-group { margin-top: 28px; }
+    .check-group h4 { font-size: 14px; margin-bottom: 10px; }
     .check-group h4 small { margin-left: 6px; font-weight: 500; color: var(--text-faint); }
     .checks { list-style: none; display: grid; gap: 2px; }
-    .checks label { display: flex; gap: 10px; padding: 8px 10px; border-radius: 8px; font-size: 14px; cursor: pointer; }
+    .checks label { display: flex; gap: 12px; padding: 9px 10px; border-radius: 8px; font-size: 14.5px; line-height: 1.6; cursor: pointer; }
     .checks label:hover { background: var(--bg-soft); }
     .checks input { flex: none; width: 16px; height: 16px; margin-top: 3px; accent-color: var(--accent); }
     .checks input:checked + span { color: var(--text-faint); text-decoration: line-through; }
     .checks .new { margin-left: 6px; padding: 0 7px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-size: 11px; font-weight: 600; }
 
-    .script { position: relative; padding: 18px 20px; border-radius: 12px; background: var(--bg-soft); font-size: 14.5px; white-space: pre-line; }
+    .script { position: relative; padding: 20px 24px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg-soft); font-size: 14.5px; line-height: 1.75; white-space: pre-line; }
     .script + .script-label { margin-top: 20px; }
     .script-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 14px; font-weight: 700; }
     .btn-sm { padding: 5px 10px; font-size: 12.5px; border-radius: 8px; }
@@ -226,8 +231,8 @@
     .editable:hover { background: var(--accent-soft); }
     .editable:focus { background: var(--surface); box-shadow: 0 0 0 2px var(--accent); }
     .q-main .editable { flex: 1; }
-    .edit-hint { margin-top: 10px; font-size: 13px; color: var(--text-sub); }
-    .edit-hint b { color: var(--accent); font-weight: 600; }
+
+
     .saved-as { display: inline-block; margin-left: 6px; padding: 1px 8px; border-radius: 999px; background: #10261e; color: var(--good); font-size: 12px; font-weight: 600; }
     .saved-as:empty { display: none; }
 
@@ -267,6 +272,10 @@
       .input-panel { position: static; }
     }
     @media (max-width: 640px) {
+      .meta-grid { grid-template-columns: 1fr 1fr; }
+      .meta-grid div:nth-child(3) { padding-left: 0; border-left: 0; }
+      .meta-grid div:nth-child(n+3) { border-top: 1px solid var(--line); }
+      .guide-head, .sec { padding-left: 20px; padding-right: 20px; }
       .container { padding: 0 16px; }
       .nav .container { flex-direction: column; align-items: flex-start; height: auto; padding-top: 12px; padding-bottom: 8px; gap: 6px; }
       .nav nav { width: 100%; }
@@ -706,7 +715,7 @@
         <header class="guide-head">
           <div class="top">
             <div>
-              <p class="eyebrow">${typeName} · 반구조화 인터뷰 가이드 v1.0<span class="saved-as" id="savedAs"></span></p>
+              <p class="eyebrow">${typeName} · 반구조화 인터뷰 가이드 · v1.0<span class="saved-as" id="savedAs"></span></p>
               <h2>${esc(t)}</h2>
             </div>
             <div class="actions">
@@ -715,16 +724,18 @@
               <button class="btn btn-sm" type="button" onclick="window.print()">인쇄</button>
             </div>
           </div>
-          <div class="tags">
-            <span class="tag">대상 <b>${esc(d.target)}</b></span>
-            <span class="tag">시간 <b>${d.duration}분</b></span>
-            <span class="tag">방식 <b>${d.remote ? "원격(화상)" : "대면"}</b></span>
-            <span class="tag">권장 인원 <b>세그먼트당 4~6명</b></span>
+          <dl class="meta-grid">
+            <div><dt>대상</dt><dd>${esc(d.target)}</dd></div>
+            <div><dt>시간</dt><dd>${d.duration}분</dd></div>
+            <div><dt>방식</dt><dd>${d.remote ? "원격(화상)" : "대면"}</dd></div>
+            <div><dt>권장 인원</dt><dd>세그먼트당 4~6명</dd></div>
+          </dl>
+          <div class="head-notes">
+            ${c.source === "ai"
+              ? `<p><b>AI 초안</b><span>${esc(c.model)}가 사용자 인터뷰 원칙에 맞춰 만들었어요. 유도·이중 질문이 없는지 검수하고, 파일럿 후 v1.1로 다듬어 쓰세요.</span></p>`
+              : `<p class="warn-text"><b>예시</b><span>AI 생성에 실패해 예시 가이드를 보여 드려요. 주제·대상·성격·시간·방식은 입력값이 반영됩니다.</span></p>`}
+            <p><b>바로 고치기</b><span>연구 질문·블록 제목·질문·꼬리 질문을 눌러 고칠 수 있어요. 고친 내용 그대로 저장돼요.</span></p>
           </div>
-          ${c.source === "ai"
-            ? `<p class="demo-note ai">AI(${esc(c.model)})가 사용자 인터뷰 스킬 원칙에 맞춰 만든 초안이에요. 유도·이중 질문이 없는지 직접 검수하고, 파일럿 후 v1.1로 다듬어 쓰세요.</p>`
-            : `<p class="demo-note">AI 생성에 실패해 스킬 형식에 맞춘 예시 가이드를 보여 드려요. 주제·대상·성격·시간·방식은 입력값이 반영됩니다.</p>`}
-          <p class="edit-hint"><b>바로 고치기</b> 연구 질문·블록 제목·질문·꼬리 질문을 눌러 고칠 수 있어요. 고친 내용 그대로 저장돼요.</p>
         </header>
         <nav class="toc" aria-label="가이드 목차">
           <a href="#sec-rq">연구 질문</a><a href="#sec-flow">세션 흐름</a><a href="#sec-q">질문</a><a href="#sec-check">체크리스트</a><a href="#sec-consent">동의 안내</a>

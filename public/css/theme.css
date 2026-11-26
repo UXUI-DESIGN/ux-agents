@@ -34,13 +34,13 @@ h1, h2, h3 { text-wrap: balance; }
 .logo span { color: var(--text-sub) !important; font-weight: 400; }
 
 /* 영문 보조 라벨: 모노 대문자 + 넓은 자간 */
-.eyebrow, .gnb-top small, .stage-top h3 small {
+.hero .eyebrow, .gnb-top small, .stage-top h3 small {
   font-family: var(--mono) !important;
   font-weight: 400 !important;
   text-transform: uppercase;
   letter-spacing: 0.12em !important;
 }
-.eyebrow { font-size: 12px !important; }
+.hero .eyebrow { font-size: 12px !important; }
 .gnb-top small, .stage-top h3 small { font-size: 10.5px !important; }
 
 /* 버튼은 전부 알약 모양 */
