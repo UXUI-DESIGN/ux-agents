@@ -74,9 +74,9 @@
     .listbar .total b { color: var(--text); font-weight: 700; }
 
     /* 프로젝트 묶음 */
-    .project { margin-top: 36px; }
-    .project:first-of-type { margin-top: 0; }
-    .project-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+    /* 샘플 묶음은 #projects 밖에 있어 :first-of-type 으로는 간격이 사라진다 — 앞에 묶음이 있을 때만 띄운다 */
+    .project + .project, #projects:not(:empty) + .project { margin-top: 44px; }
+    .project-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; margin-bottom: 14px; }
     .project-head h2 { font-size: 19px; font-weight: 800; letter-spacing: -0.02em; }
     .project-head .meta { font-size: 13px; color: var(--text-sub); }
     .project-head .meta span + span::before { content: "·"; margin: 0 6px; color: var(--text-faint); }
@@ -114,7 +114,9 @@
     .card-body { padding: 14px 16px 16px; }
     .card-body .tagline { font-size: 14px; line-height: 1.55; color: var(--text-sub); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .card-body .tagline strong { color: var(--text); font-weight: 700; }
-    .card-foot { display: flex; justify-content: space-between; margin-top: 12px; font-size: 12px; color: var(--text-faint); }
+    .card-foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 10px; margin-top: 12px; font-size: 12px; color: var(--text-faint); }
+    .card-foot span { white-space: nowrap; }
+    .card-foot span:last-child { margin-left: auto; }
 
     /* 새 페르소나 만들기 카드 */
     .card.add {
