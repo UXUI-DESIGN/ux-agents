@@ -23,7 +23,7 @@ export const COLLECT_OPTIONS = {
   usage_frequency: "사용 빈도",
 };
 
-const DURATIONS = [30, 45, 60];
+const DURATIONS = [15, 30, 45, 60];
 const MAX_BODY_CHARS = 200000;
 const NOT_FOUND = { error: "세션을 찾을 수 없어요.", code: "not_found" };
 
@@ -65,7 +65,7 @@ async function createSession(request, env, json, user) {
   if (!name) return json({ error: "세션 이름을 적어 주세요.", field: "name" }, 400);
   if (!purpose) return json({ error: "참가자에게 보여줄 인터뷰 목적을 적어 주세요.", field: "purpose" }, 400);
   if (!consent) return json({ error: "동의서 문구를 적어 주세요.", field: "consent" }, 400);
-  if (!DURATIONS.includes(duration)) return json({ error: "세션 시간은 30·45·60분 중에서 골라 주세요.", field: "duration" }, 400);
+  if (!DURATIONS.includes(duration)) return json({ error: "세션 시간은 15·30·45·60분 중에서 골라 주세요.", field: "duration" }, 400);
   if (expected !== null && !(Number.isInteger(expected) && expected >= 1 && expected <= 500)) {
     return json({ error: "예상 참가자 수는 1~500 사이 숫자로 적어 주세요.", field: "expected" }, 400);
   }

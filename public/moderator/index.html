@@ -149,28 +149,18 @@
     .text-input::placeholder { color: var(--text-faint); }
     .text-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
     .text-input.invalid { border-color: var(--danger); }
-    .text-input.short { max-width: 160px; }
     .hint { margin-top: 6px; font-size: 12.5px; color: var(--text-sub); }
     .error { margin-top: 6px; font-size: 13px; color: var(--danger); }
     .error:empty { display: none; }
-    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
 
-    .segmented { display: inline-grid; grid-auto-flow: column; gap: 4px; padding: 4px; background: var(--bg-soft); border-radius: 12px; }
+    /* 인터뷰 가이드와 같은 한 줄 꽉 찬 선택지 */
+    .segmented { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; padding: 4px; background: var(--bg-soft); border-radius: 12px; }
     .segmented input { position: absolute; opacity: 0; pointer-events: none; }
-    .segmented label { padding: 8px 18px; border-radius: 9px; text-align: center; cursor: pointer; font-size: 14px; font-weight: 500; color: var(--text-sub); }
+    .segmented label { padding: 9px 8px; border-radius: 9px; text-align: center; cursor: pointer; font-size: 14px; font-weight: 500; color: var(--text-sub); transition: background .15s, color .15s; }
+    .segmented label small { display: block; font-size: 11.5px; font-weight: 400; color: var(--text-faint); }
     .segmented input:checked + label { background: var(--surface); color: var(--accent); font-weight: 700; box-shadow: 0 1px 3px rgba(0, 0, 0, .08); }
+    .segmented input:checked + label small { color: var(--text-sub); }
     .segmented input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 1px; }
-
-    .collect-mode { display: grid; gap: 8px; margin-top: 14px; }
-    .radio-row { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; cursor: pointer; font-size: 14.5px; }
-    .radio-row:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
-    .radio-row input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--accent); }
-    .radio-row small { display: block; font-size: 13px; color: var(--text-sub); }
-    .collect-items { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 0 28px; }
-    .check-chip { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); font-size: 14px; cursor: pointer; }
-    .check-chip:has(input:checked) { border-color: var(--accent); color: var(--accent); font-weight: 600; }
-    .check-chip input { accent-color: var(--accent); }
-    .privacy-note { margin-top: 12px; padding: 10px 14px; border-radius: 10px; background: #2a1f0c; color: #f5b657; font-size: 13px; }
 
     .submit-area { padding: 24px 32px 32px; border-top: 1px solid var(--line); }
     .form-error { display: none; margin-bottom: 14px; padding: 12px 14px; border-radius: 10px; background: #2a1513; color: #ff8a80; font-size: 14px; }
@@ -211,8 +201,6 @@
       .menu a[aria-current="page"] { padding-left: 12px; }
       main { padding: 48px 0 72px; }
       .step, .submit-area { padding-left: 18px; padding-right: 18px; }
-      .two { grid-template-columns: 1fr; }
-      .collect-items { margin-left: 0; }
       .preview-head { flex-direction: column; align-items: flex-start; gap: 2px; }
       .link-box { flex-direction: column; }
       .done { padding: 32px 18px; }
@@ -319,44 +307,20 @@
                 placeholder="예) 가계부 앱을 쓰다 그만두게 된 경험을 듣고 배우기 위한 인터뷰예요. 정답은 없으니 겪은 그대로 편하게 이야기해 주세요."></textarea>
               <p class="error" id="purposeError"></p>
             </div>
-            <div class="two">
-              <div class="field">
-                <span class="label" id="durationLabel">세션 시간</span>
-                <div class="segmented" role="radiogroup" aria-labelledby="durationLabel">
-                  <input type="radio" name="duration" id="d30" value="30" /><label for="d30">30분</label>
-                  <input type="radio" name="duration" id="d45" value="45" /><label for="d45">45분</label>
-                  <input type="radio" name="duration" id="d60" value="60" checked /><label for="d60">60분</label>
-                </div>
-                <p class="hint" id="durationHint">고른 가이드의 세션 시간으로 맞춰 둬요.</p>
+            <div class="field">
+              <span class="label" id="durationLabel">세션 시간</span>
+              <div class="segmented" role="radiogroup" aria-labelledby="durationLabel">
+                <input type="radio" name="duration" id="d15" value="15" checked /><label for="d15">15분<small>핵심 질문만 빠르게</small></label>
+                <input type="radio" name="duration" id="d30" value="30" /><label for="d30">30분<small>주제 하나를 짧게</small></label>
+                <input type="radio" name="duration" id="d45" value="45" /><label for="d45">45분<small>블록별로 적당히 깊게</small></label>
+                <input type="radio" name="duration" id="d60" value="60" /><label for="d60">60분<small>경험을 충분히 깊게</small></label>
               </div>
-              <div class="field">
-                <label for="expected">예상 참가자 수 <span class="opt">선택</span></label>
-                <input class="text-input short" id="expected" type="number" min="1" max="500" inputmode="numeric" placeholder="예) 6" />
-                <p class="hint">세그먼트당 4~6명이면 대개 충분해요.</p>
-                <p class="error" id="expectedError"></p>
-              </div>
+              <p class="hint" id="durationHint">가이드를 불러오면 그 가이드의 세션 시간으로 맞춰 둬요.</p>
             </div>
           </section>
 
           <section class="step" aria-labelledby="s3">
-            <div class="step-head"><span class="n">3</span><h2 id="s3">참가자에게 받을 것</h2></div>
-            <p class="step-desc">인터뷰 전에 참가자에게 물어볼 기본 정보예요. 꼭 필요할 때만 고르세요.</p>
-            <div class="collect-mode">
-              <label class="radio-row">
-                <input type="radio" name="collectMode" value="none" checked />
-                <span>없음 <small>참가자는 바로 동의서와 인터뷰로 넘어가요.</small></span>
-              </label>
-              <label class="radio-row">
-                <input type="radio" name="collectMode" value="some" />
-                <span>필요한 항목만 받기 <small>개인을 알아볼 수 없는 항목만 고를 수 있어요.</small></span>
-              </label>
-            </div>
-            <div class="collect-items" id="collectItems" hidden></div>
-            <p class="privacy-note">이름·연락처처럼 개인을 알아볼 수 있는 정보는 받지 않아요. 참가자는 익명 코드로만 기록돼요.</p>
-          </section>
-
-          <section class="step" aria-labelledby="s4">
-            <div class="step-head"><span class="n">4</span><h2 id="s4">동의서 문구</h2></div>
+            <div class="step-head"><span class="n">3</span><h2 id="s3">동의서 문구</h2></div>
             <p class="step-desc">참가자가 인터뷰를 시작하기 전에 보는 문구예요. 사용자 인터뷰 스킬의 요약형 동의서로 채워 뒀어요. [기간]·[리워드]는 꼭 고쳐 주세요.</p>
             <div class="field">
               <textarea class="text-input" id="consent" rows="11" aria-label="동의서 문구" maxlength="5000"></textarea>
@@ -405,8 +369,6 @@
     const $ = (id) => document.getElementById(id);
     const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
     const TYPE_NAME = { explore: "탐색형", validate: "검증형" };
-    // Worker(sessions.js)의 COLLECT_OPTIONS와 같다. 개인을 특정하지 않는 항목만
-    const COLLECT_OPTIONS = { age_group: "연령대", occupation: "직군", region: "거주 지역(시·도)", usage_period: "서비스 사용 기간", usage_frequency: "사용 빈도" };
 
     let guides = [];
     let selected = null; // { id, title, input, content }
@@ -438,8 +400,6 @@
     }
 
     async function init() {
-      $("collectItems").innerHTML = Object.entries(COLLECT_OPTIONS)
-        .map(([k, v]) => `<label class="check-chip"><input type="checkbox" name="collect" value="${k}" />${esc(v)}</label>`).join("");
       $("consent").value = consentText("");
       try {
         const { res, data } = await UXA.api("/api/guides");
@@ -504,7 +464,7 @@
     function renderPreview(g) {
       const c = g.content, d = g.input;
       $("pvTitle").textContent = g.title;
-      $("pvMeta").textContent = `${TYPE_NAME[d.type] || ""} · ${d.duration || 60}분 · ${d.remote ? "원격" : "대면"}`;
+      $("pvMeta").textContent = `${TYPE_NAME[d.type] || ""} · ${d.duration || 15}분 · ${d.remote ? "원격" : "대면"}`;
       const qList = (qs) => `<ol>${qs.map((q) => `<li>${esc(q.q)}${q.p?.length ? `<ul>${q.p.map(([t]) => `<li>${esc(t)}</li>`).join("")}</ul>` : ""}</li>`).join("")}</ol>`;
       $("pvBody").innerHTML = `
         <h4>연구 질문</h4>
@@ -521,7 +481,7 @@
       if (!dirty.name) $("name").value = `${g.title} — 1차`;
       if (!dirty.purpose) $("purpose").value = purposeText(topic);
       if (!dirty.consent) $("consent").value = consentText(topic);
-      const gd = Number(g.input.duration), dur = [30, 45, 60].includes(gd) ? gd : gd === 15 ? 30 : 60; // 15분 가이드는 세션 최소 시간(30분)으로
+      const gd = Number(g.input.duration), dur = [15, 30, 45, 60].includes(gd) ? gd : 15; // 가이드에서 정한 세션 시간 그대로
       document.querySelector(`input[name=duration][value="${dur}"]`).checked = true;
       $("durationHint").textContent = `가이드의 세션 시간(${dur}분)으로 맞춰 뒀어요.`;
     }
@@ -543,15 +503,11 @@
     $("toPick").addEventListener("click", () => setSource("guide"));
     $("guideText").addEventListener("input", () => { $("guideText").classList.remove("invalid"); $("guideError").textContent = ""; });
 
-    // ── 2·3·4. 설정 ──
+    // ── 2·3. 설정 ──
     ["name", "purpose", "consent"].forEach((id) => $(id).addEventListener("input", () => {
       dirty[id] = true;
       $(id).classList.remove("invalid");
       $(id + "Error").textContent = "";
-    }));
-    $("expected").addEventListener("input", () => { $("expected").classList.remove("invalid"); $("expectedError").textContent = ""; });
-    document.querySelectorAll("input[name=collectMode]").forEach((r) => r.addEventListener("change", () => {
-      $("collectItems").hidden = document.querySelector("input[name=collectMode]:checked").value !== "some";
     }));
     $("resetConsent").addEventListener("click", () => {
       $("consent").value = consentText(source === "guide" && selected ? selected.input.topic || selected.title : "");
@@ -575,9 +531,6 @@
         purpose: $("purpose").value.trim(),
         consent: $("consent").value.trim(),
         duration: Number(document.querySelector("input[name=duration]:checked").value),
-        expected: $("expected").value === "" ? null : Number($("expected").value),
-        collect: document.querySelector("input[name=collectMode]:checked").value === "some"
-          ? [...document.querySelectorAll("input[name=collect]:checked")].map((c) => c.value) : [],
       };
       if (source === "paste") body.guideText = $("guideText").value.trim();
       else body.guideId = selected?.id;
@@ -588,7 +541,6 @@
       }
       if (!body.name) problems.push(fail("name", "세션 이름을 적어 주세요."));
       if (!body.purpose) problems.push(fail("purpose", "참가자에게 보여줄 인터뷰 목적을 적어 주세요."));
-      if (body.expected !== null && !(Number.isInteger(body.expected) && body.expected >= 1 && body.expected <= 500)) problems.push(fail("expected", "1~500 사이 숫자로 적어 주세요."));
       if (!body.consent) problems.push(fail("consent", "동의서 문구를 적어 주세요."));
       if (problems.length) {
         problems[0].scrollIntoView({ behavior: "smooth", block: "center" });
@@ -681,16 +633,11 @@ Q3. 온라인으로 사지 않기로 했을 때는 대신 어떻게 하셨나요
 
       el("tryBtn").addEventListener("click", () => {
         demo = true;
-        if (!el("collectItems").innerHTML) {
-          el("collectItems").innerHTML = Object.entries(COLLECT_OPTIONS)
-            .map(([k, v]) => `<label class="check-chip"><input type="checkbox" name="collect" value="${k}" />${esc(v)}</label>`).join("");
-        }
         source = "paste";
         renderPicker();
         el("guideText").value = DEMO_GUIDE;
         el("name").value = "1인 가구 온라인 장보기 — 1차";
         el("purpose").value = purposeText("1인 가구의 온라인 장보기");
-        el("expected").value = "5";
         el("consent").value = consentText("1인 가구의 온라인 장보기");
         showOnly("sessionForm");
         el("demoCard").hidden = false;
