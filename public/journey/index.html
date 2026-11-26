@@ -129,8 +129,6 @@
     .chip { padding: 4px 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); font-size: 12.5px; color: var(--text-sub); cursor: pointer; }
     .chip:hover { border-color: var(--accent); color: var(--accent); }
 
-    .lens { display: flex; align-items: center; gap: 8px; margin-top: 14px; font-size: 13px; color: var(--text-sub); }
-    .lens b { padding: 2px 9px; border-radius: 6px; background: var(--text); color: var(--on-accent); font-size: 12px; letter-spacing: .02em; }
 
     .generate { display: flex; align-items: center; gap: 14px; margin-top: 22px; }
     .generate .btn-primary { width: auto; flex: none; padding: 13px 28px; }
@@ -349,6 +347,10 @@
     .status.done { background: var(--good-soft); border: 1px solid #1f4a3a; }
     .status.done .big { color: var(--good); }
     .status .saved { margin-left: 4px; color: var(--text-faint); }
+    .tobe-cta { display: flex; align-items: center; gap: 12px 16px; flex-wrap: wrap; margin-top: 22px; padding: 18px 20px; border-radius: 14px; border: 1px solid var(--hairline); background: var(--surface); }
+    .tobe-cta > div { flex: 1; min-width: 220px; }
+    .tobe-cta b { font-size: 15px; }
+    .tobe-cta p { margin: 4px 0 0; font-size: 13px; color: var(--text-sub); }
 
     .inputs-card { margin-top: 12px; border: 1px solid var(--line); border-radius: 12px; background: #141518; font-size: 13.5px; }
     .inputs-card summary { display: flex; justify-content: space-between; gap: 10px; padding: 11px 14px; cursor: pointer; list-style: none; }
@@ -600,7 +602,7 @@
         <span class="num stage">정의 · Define</span>
         <h1>저니맵 생성</h1>
         <p>페르소나의 단계별 행동·생각·감정을 펼쳐 놓고, 페인포인트와 개선 기회를 찾습니다.</p>
-        <button class="try-btn" type="button" id="tryBtn">테스트로 사용해보기<small>로그인 없이 · 예시 페르소나와 시나리오로 저니맵 보기</small></button>
+        <button class="try-btn" type="button" id="tryBtn">테스트로 사용해보기<small>로그인 없이 · 샘플 페르소나 ‘세은’으로 저니맵 보기</small></button>
       </div>
 
       <div class="wrap">
@@ -634,7 +636,7 @@
                   <textarea class="text-input" id="mDesc" maxlength="300" placeholder="목표와 특징 예) 퇴근 후 쉬면서 지인이 추천한 콘텐츠를 보고 감상을 나누고 싶다. 추천 알고리즘은 잘 믿지 않는다." aria-label="목표와 특징"></textarea>
                 </div>
               </div>
-              <div class="field">
+              <div class="field" id="scenarioField" hidden>
                 <div class="label"><label for="scenario">시나리오 <span class="req">*</span></label><span class="count">1개</span></div>
                 <textarea class="text-input" id="scenario" maxlength="200" rows="4" placeholder="어떤 상황에서 무엇을 이루려는 여정인가요? 예) 퇴근 후 지인이 추천한 드라마를 찾아 보고, 감상을 나누기까지"></textarea>
                 <div class="chips" aria-label="시나리오 예시">
@@ -642,7 +644,6 @@
                   <button type="button" class="chip" data-scn="주말에 혼자 볼 영화를 30분 안에 고르기">주말 영화 고르기</button>
                   <button type="button" class="chip" data-scn="새 OTT 서비스에 가입해 첫 콘텐츠를 보기까지">첫 가입·온보딩</button>
                 </div>
-                <p class="lens"><b>AS-IS</b> 지금의 경험을 진단해요. TO-BE(개선안)는 AS-IS를 확정한 뒤 ‘TO-BE 만들기’로 같은 골격에 그려요.</p>
               </div>
             </div>
             <div class="generate">
@@ -724,7 +725,7 @@
       <p class="dlg-note">페인만 나열하고 기회를 잇지 않으면 ‘액션 없는 보고서’가 돼요. 페인포인트마다 기회를 하나 이상 고르는 것을 권해요.</p>
       <ul class="warn-list" id="warnList"></ul>
       <div class="dlg-actions">
-        <button class="btn" type="button" id="warnForce">그래도 확정</button>
+        <button class="btn" type="button" id="warnForce">그래도 TO-BE 만들기</button>
         <span class="grow"></span>
         <button class="btn btn-accent-solid" type="button" id="warnBack">돌아가서 고르기</button>
       </div>
@@ -844,7 +845,7 @@
 
     function updateGenerate() {
       const p = currentPersona();
-      const s = $("scenario").value.trim();
+      const s = mode === "manual" ? $("scenario").value.trim() : "auto";   // 불러온 페르소나는 문서에서 시나리오를 잡는다
       $("genBtn").disabled = busy || (loggedIn() && (!p || !s));
       $("genBtn").textContent = loggedIn() ? "AI로 저니맵 생성" : "로그인하고 AI로 만들기";
       $("demoBtn").hidden = loggedIn();
@@ -852,6 +853,7 @@
       $("genWhy").textContent = !loggedIn() ? "AI 생성은 로그인 후 쓸 수 있어요. 예시는 바로 볼 수 있어요."
         : !p ? (mode === "manual" ? "페르소나 이름을 적어 주세요." : "페르소나를 한 명 골라 주세요.")
         : !s ? "시나리오를 하나 적어 주세요."
+        : mode === "load" ? `${p.name}의 페르소나 문서(이용 동기·Painpoint)를 바탕으로 대표 여정을 만들어요.`
         : `${p.name} × ‘${s.length > 24 ? s.slice(0, 24) + "…" : s}’ 저니맵을 만들어요.`;
     }
 
@@ -868,7 +870,6 @@
           <span class="avatar">${p.photoUrl ? `<img src="${esc(p.photoUrl)}" alt="" />` : SILHOUETTE}</span>
           <span><b>${esc(p.name)}</b>${p.sample ? `<span class="tag">샘플</span>` : ""}<span class="sub">${esc([p.job, p.age ? p.age + "세" : "", p.project].filter(Boolean).join(" · "))}</span></span>
         </label>`).join("");
-      if (pick.sample && !$("scenario").value) $("scenario").value = EXAMPLE_SCENARIO;
       updateGenerate();
     }
 
@@ -1373,7 +1374,8 @@
         ${vmapHtml(j)}
         ${memosHtml(j)}
         ${tobe ? tobeExtrasHtml(j) : signalsHtml(j)}
-        ${!tobe && j.status === "confirmed" ? `<p class="next-note">다음: 이 AS-IS를 바탕으로 ‘TO-BE 만들기’를 눌러 같은 단계 골격에 개선된 경험을 설계해요.</p>` : !tobe ? `<p class="next-note">검수 순서: 칸을 눌러 고치기 → 페인포인트마다 기회(HMW) 고르기 → 저점·정점·종점 해석 메모 → 확정.</p>` : ""}`;
+        ${!tobe && draft && !j.demo ? `<p class="next-note">검수 순서: 칸을 눌러 고치기 → 페인포인트마다 기회(HMW) 고르기 → 저점·정점·종점 해석 메모 → TO-BE 만들기.</p>` : ""}
+        ${tobeCtaHtml(j)}`;
       wireVmap();
       document.querySelectorAll('input[name="cmp"]').forEach((r) => r.addEventListener("change", () => { state.view = r.value; render(); }));
       const evOn = state.evidence && !tobe;
@@ -1390,12 +1392,19 @@
       const tobe = j.lens === "to-be";
       const save = state.saving ? "저장 중…" : state.savedAt ? `저장됨 ${state.savedAt}` : "";
       if (j.status === "draft") {
-        return `<div class="status draft"><span class="big">초안</span><div><b>${tobe ? "TO-BE 초안 · 모든 칸은 검증 전 가설이에요" : "리서처 검수 전이에요"}</b><p>${tobe ? "칸을 눌러 고치고, 핵심 장면을 다듬은 뒤 확정하세요." : "칸을 눌러 고치고, 페인포인트마다 기회를 고른 뒤 확정하세요."} <span class="saved" id="savedAt">${esc(save)}</span></p></div>
-          <button class="btn btn-accent-solid" type="button" id="confirmBtn" data-lockable>${tobe ? "TO-BE 확정" : "확정하고 저장"}</button></div>`;
+        return `<div class="status draft"><span class="big">초안</span><div><b>${tobe ? "TO-BE 초안 · 모든 칸은 검증 전 가설이에요" : "리서처 검수 전이에요 · 고친 내용은 자동으로 저장돼요"}</b><p>${tobe ? "칸을 눌러 고치고, 핵심 장면을 다듬은 뒤 확정하세요." : "위에서 아래로 훑으며 칸을 고치고 페인포인트마다 기회를 고른 뒤, 맨 아래 ‘TO-BE 만들기’를 눌러 주세요."} <span class="saved" id="savedAt">${esc(save)}</span></p></div>
+          ${tobe ? `<button class="btn btn-accent-solid" type="button" id="confirmBtn" data-lockable>TO-BE 확정</button>` : ""}</div>`;
       }
+      return `<div class="status done"><span class="big">확정</span><div><b>${fmtDate(j.confirmedAt)} 확정 · 내 프로젝트에 저장됐어요</b><p>${j.project ? `프로젝트 ‘${esc(j.project)}’ · ` : ""}<a href="/mypage/#journeys">마이페이지에서 보기</a></p></div></div>`;
+    }
+
+    // 저니맵 맨 아래: 위에서 아래로 다 확인한 뒤 TO-BE 를 만든다 (초안이면 AS-IS 를 확정하면서 만든다)
+    function tobeCtaHtml(j) {
+      if (j.demo || j.lens === "to-be") return "";
       const child = j.children?.[j.children.length - 1];
-      return `<div class="status done"><span class="big">확정</span><div><b>${fmtDate(j.confirmedAt)} 확정 · 내 프로젝트에 저장됐어요</b><p>${j.project ? `프로젝트 ‘${esc(j.project)}’ · ` : ""}<a href="/mypage/#journeys">마이페이지에서 보기</a></p></div>
-        ${tobe ? "" : child ? `<a class="btn btn-accent-solid" href="?id=${encodeURIComponent(child.id)}">TO-BE 열기</a><button class="btn" type="button" id="tobeBtn" data-lockable>TO-BE 다시 만들기</button>` : `<button class="btn btn-accent-solid" type="button" id="tobeBtn" data-lockable>TO-BE 만들기</button>`}</div>`;
+      const draft = j.status === "draft";
+      return `<div class="tobe-cta"><div><b>${child ? "TO-BE를 이미 만들었어요" : "다 확인했다면 TO-BE를 만들어요"}</b><p>${draft ? "누르면 지금 AS-IS가 확정돼 마이페이지에 저장되고, 같은 단계 골격 위에 개선된 경험(TO-BE)을 설계해요. 확정한 뒤에는 칸을 고칠 수 없어요." : "확정한 AS-IS의 단계 골격과 고른 기회(HMW)로 개선된 경험을 설계해요."}</p></div>
+        ${child ? `<a class="btn btn-accent-solid" href="?id=${encodeURIComponent(child.id)}">TO-BE 열기</a><button class="btn" type="button" id="tobeBtn" data-lockable>TO-BE 다시 만들기</button>` : `<button class="btn btn-accent-solid" type="button" id="tobeBtn" data-lockable>TO-BE 만들기</button>`}</div>`;
     }
 
     function versionsHtml(j) {
@@ -1545,8 +1554,9 @@
       lock(false);
       if (res.status === 409 && data.code === "missing_opps") return openWarn(data.missing);
       if (!res.ok) { toast(data.error || "확정하지 못했어요."); return; }
-      toast("확정했어요. 마이페이지 목록에 저장됐어요.");
       setJourney(data.journey);
+      if (j.lens === "as-is") return makeToBe();   // AS-IS 는 'TO-BE 만들기'로만 확정한다 — 확정하자마자 TO-BE 를 만든다
+      toast("확정했어요. 마이페이지 목록에 저장됐어요.");
     }
     function openWarn(missing) {
       $("warnList").innerHTML = missing.map((m) => `<li><span class="id">${esc(m.id)}</span><b>${esc(m.stage)}</b> ${esc(m.text)}</li>`).join("");
@@ -1584,10 +1594,10 @@
     async function generate() {
       if (!loggedIn()) { location.href = UXA.loginUrl("/journey/"); return; }
       const p = currentPersona();
-      const scenario = $("scenario").value.trim();
-      if (!p || !scenario || busy) return;
+      const scenario = mode === "manual" ? $("scenario").value.trim() : "";
+      if (!p || (mode === "manual" && !scenario) || busy) return;
       startLog("AI 생성");
-      log("입력 확인", `페르소나 1명(<b>${esc(p.name)}</b>) × 시나리오 1개 — 범위 원칙을 지켰어요.`, "done");
+      log("입력 확인", scenario ? `페르소나 1명(<b>${esc(p.name)}</b>) × 시나리오 1개 — 범위 원칙을 지켰어요.` : `페르소나 1명(<b>${esc(p.name)}</b>) — 시나리오는 페르소나 문서의 이용 동기에서 잡아요.`, "done");
       log("페르소나·근거 노트 준비", p.id ? "Worker가 페르소나 문서와 같은 프로젝트의 근거 노트(관찰 노트·테마)를 모아요." : "직접 입력한 페르소나라 근거 노트 없이 진행해요. 모든 칸이 가설이 돼요.", "done");
       log("AI 생성 요청", `스킬 <code>journey-mapping.md</code> 규칙으로 저니맵 전체를 한 번에 채워요.`);
       lock(true, "AI가 저니맵을 채우는 중…");
@@ -1616,12 +1626,23 @@
       $("resultTitle").scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
-    function showDemo() {
-      const p = currentPersona() || { name: "세은", role: "음악강사 · 32세", source: "샘플 페르소나" };
+    function showDemo(p) {
+      p = p || currentPersona() || SAMPLE_FALLBACK;
       startLog("예시");
-      log("예시 보기", "AI를 부르지 않고 미리 만들어 둔 예시 여정을 보여 줘요.", "done");
+      log("예시 보기", `샘플 페르소나 <b>${esc(p.name)}</b> 기준으로 미리 만들어 둔 예시 여정을 보여 줘요. AI는 부르지 않아요.`, "done");
       endLog();
-      setJourney(exampleJourney(p, $("scenario").value.trim() || EXAMPLE_SCENARIO), { push: false });
+      setJourney(exampleJourney(p, (mode === "manual" && $("scenario").value.trim()) || EXAMPLE_SCENARIO), { push: false });
+    }
+
+    // 테스트로 사용해보기: 언제나 샘플 페르소나 '세은'으로 예시 저니맵을 보여 준다
+    const SAMPLE_FALLBACK = { name: "세은", role: "음악강사 · 32세", source: "샘플 페르소나" };
+    function trySample() {
+      document.getElementById("pmLoad").checked = true; mode = "load";
+      $("loadPane").hidden = false; $("manualPane").hidden = true; $("scenarioField").hidden = true;
+      const s = personas.find((x) => x.sample);
+      if (s) renderPicker(s.id);
+      showDemo(s ? currentPersona() : SAMPLE_FALLBACK);
+      $("resultTitle").scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
     // ── 결과 영역 이벤트 (위임) ──
@@ -1629,7 +1650,7 @@
       const j = state.journey;
       if (!j) return;
       if (e.target.closest("#confirmBtn")) return confirmJourney(false);
-      if (e.target.closest("#tobeBtn")) return makeToBe();
+      if (e.target.closest("#tobeBtn")) return j.status === "draft" ? confirmJourney(false) : makeToBe();
       if (state.evidence && j.lens === "as-is") {
         const c = e.target.closest("[data-ev]");
         if (c && c.dataset.ev !== "skip") return showEvidence(c.dataset.stage, c.dataset.lane);
@@ -1682,6 +1703,7 @@
       mode = r.value;
       $("loadPane").hidden = mode !== "load";
       $("manualPane").hidden = mode !== "manual";
+      $("scenarioField").hidden = mode !== "manual";
       if (mode === "manual") $("mName").focus();
       updateGenerate();
     }));
@@ -1706,7 +1728,7 @@
       $("scenario").value = j.scenario;
       if (!j.personaId) {
         document.getElementById("pmManual").checked = true; mode = "manual";
-        $("loadPane").hidden = true; $("manualPane").hidden = false;
+        $("loadPane").hidden = true; $("manualPane").hidden = false; $("scenarioField").hidden = false;
         $("mName").value = j.persona.name; $("mRole").value = j.persona.role || ""; $("mDesc").value = j.persona.desc || "";
       } else renderPicker(j.personaId);
       setJourney(j, { push: false });
@@ -1718,13 +1740,8 @@
     if (openId) openSaved(openId);
   </script>
   <script>
-    // 테스트로 사용해보기: 예시 시나리오를 채우고 미리 만들어 둔 예시 여정을 보여 준다
-    document.getElementById("tryBtn").addEventListener("click", () => {
-      const sc = document.getElementById("scenario");
-      if (!sc.value.trim()) sc.value = EXAMPLE_SCENARIO;
-      document.getElementById("demoBtn").click();
-      document.getElementById("resultTitle").scrollIntoView({ behavior: "smooth", block: "start" });
-    });
+    // 테스트로 사용해보기: 샘플 페르소나 '세은'을 골라 미리 만들어 둔 예시 여정을 보여 준다
+    document.getElementById("tryBtn").addEventListener("click", trySample);
   </script>
 </body>
 </html>

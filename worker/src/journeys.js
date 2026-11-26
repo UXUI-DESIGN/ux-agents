@@ -97,11 +97,14 @@ async function scenes(env, json, user) {
 async function generate(request, env, json, user) {
   const body = await readBody(request);
   if (!body) return json({ error: "JSON 본문이 필요해요." }, 400);
-  const scenario = str(body.scenario, 300);
-  if (!scenario) return json({ error: "시나리오를 하나 적어 주세요." }, 400);
+  // 불러온 페르소나는 시나리오를 따로 받지 않는다 — 페르소나 문서(이용 동기·Painpoint)에서 대표 여정을 잡는다
+  const given = str(body.scenario, 300);
+  if (!given && !body.persona?.id) return json({ error: "시나리오를 하나 적어 주세요." }, 400);
 
   const src = await personaSource(env, user, body.persona || {});
   if (src.error) return json({ error: src.error }, 400);
+  const scenario = given || `${src.project || "서비스"} 이용 여정`;
+  const scenarioText = given || `${scenario} — 따로 정한 시나리오가 없다. 페르소나 문서의 '이용 동기'에서 출발해 Painpoint 가 드러나는 대표적인 이용 여정 하나를 범위로 삼는다.`;
   if (!env.OPENAI_API_KEY) return json({ error: "AI를 부르지 못했어요. 잠시 후 다시 시도해 주세요." }, 502);
 
   const started = Date.now();
@@ -110,7 +113,7 @@ async function generate(request, env, json, user) {
     out = await callOpenAI(env, {
       name: "journey_map", schema: GENERATE_SCHEMA, max: GENERATE_TOKENS,
       instructions: GENERATE_RULES,
-      input: `## 페르소나\n${src.personaText}\n\n## 시나리오 (이 지도의 범위)\n${scenario}\n\n## 근거 노트\n${src.notesText || "(근거 노트 없음 — 모든 칸은 페르소나 문서에서 추론한 가설이다. refs 는 빈 배열로 둔다)"}`,
+      input: `## 페르소나\n${src.personaText}\n\n## 시나리오 (이 지도의 범위)\n${scenarioText}\n\n## 근거 노트\n${src.notesText || "(근거 노트 없음 — 모든 칸은 페르소나 문서에서 추론한 가설이다. refs 는 빈 배열로 둔다)"}`,
     });
   } catch (err) {
     console.error("journey generate failed", String(err?.message || err));
